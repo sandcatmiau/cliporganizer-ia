@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClipOrganizer AI - Automatización Móvil Real</title>
+    <style>
+        :root {
+            --bg-color: #0f172a; --card-bg: #1e293b; --accent: #2563eb; --text: #f8fafc; --text-muted: #94a3b8;
+        }
+        body {
+            margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px;
+        }
+        header { text-align: center; margin-bottom: 20px; }
+        .container { width: 100%; max-width: 600px; }
+        
+        /* Caja contenedora estable */
+        .drop-box {
+            position: relative;
+            background: var(--card-bg); border: 3px dashed #3b82f6; border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer;
+            overflow: hidden;
+        }
+        
+        /* Capa transparente interactiva sobre toda la caja */
+        .file-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer; z-index: 10;
+        }
+
+        .results-container { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-top: 20px; }
+        .folders-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .folder { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 15px; text-align: center; }
+        .main-btn {
+            background: var(--accent); color: white; border: none; padding: 12px 24px; font-size: 1rem; font-weight: bold; border-radius: 6px; width: 100%; cursor: pointer;
+        }
+        .main-btn:disabled { background: #475569; cursor: not-allowed; }
+        .help-box {
+            background: rgba(37, 99, 235, 0.1); border: 1px solid var(--accent); border-radius: 8px; padding: 15px; margin-top: 20px; font-size: 0.9rem; line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎬 ClipOrganizer AI</h1>
+        <p>Automatización Móvil Nativa para CapCut, TikTok y Premiere</p>
+    </header>
+
+    <main class="container">
+        <div id="drop-zone" class="drop-box">
+            <!-- El input transparente está ARRIBA de todo para asegurar el clic móvil -->
+            <input type="file" id="file-input" class="file-overlay" multiple accept="video/*">
+            <div id="drop-zone-content">
+                <div style="font-size: 3rem; margin-bottom: 10px;">📥</div>
+                <h3>Sube tus clips en bruto aquí</h3>
+                <p>Genera el borrador directo para inyectar tu metraje ordenado en CapCut móvil</p>
+            </div>
+        </div>
+
+        <section id="results-zone" class="results-container">
+            <h2>📁 Análisis del Proyecto</h2>
+            <div class="folders-grid">
+                <div class="folder" id="folder-ready">
+                    <div style="font-size: 2rem;">🎬</div>
+                    <h4>Secuencia Principal</h4>
+                    <p class="count">0 clips listos</p>
+                </div>
+                <div class="folder" id="folder-extra">
+                    <div style="font-size: 2rem;">📦</div>
+                    <h4>Clips Extra / Borradores</h4>
+                    <p class="count">0 organizados</p>
+                </div>
+                <div class="folder" id="folder-audios">
+                    <div style="font-size: 2rem;">🎵</div>
+                    <h4>Pistas Sincronizadas</h4>
+                    <p class="count">0 pistas sincronizadas</p>
+                </div>
+                <div class="folder" id="folder-trashed">
+                    <div style="font-size: 2rem;">🗑️</div>
+                    <h4>Trashed (Descartes)</h4>
+                    <p class="count">0 aislados</p>
+                </div>
+            </div>
+            <button id="download-btn" class="main-btn" disabled>Abrir Proyecto en CapCut</button>
+
+            <div class="help-box">
+                <strong>🚀 ¡Vinculación Local Inteligente Habilitada!</strong><br>
+                1. Presiona el botón azul para descargar el archivo del borrador (<code style="color: #60a5fa;">draft_content.json</code>).<br>
+                2. Colócalo dentro de la carpeta de borradores de tu proyecto de CapCut.<br>
+                3. Al abrir CapCut, pulsa el aviso flotante de <strong>"Vincular medios perdidos"</strong>.<br>
+                4. Elige el primer video de tu carpeta y ¡PUM! Toda la secuencia se sincronizará sola.
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const dropZoneContent = document.getElementById('drop-zone-content');
+        const fileInput = document.getElementById('file-input');
+        const downloadBtn = document.getElementById('download-btn');
+
+        let archivosOrdenados = []; let archivosTrashed = []; let archivosExtra = [];
+
+        // Escucha el evento de cambio nativo sin romper el flujo del DOM
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) { 
+                generarEstructuraMovil(e.target.files); 
+            }
+        });
+
+        function generarEstructuraMovil(listaArchivos) {
+            // Ponemos la caja en estado de carga de forma visual amigable sin ocultarla
+            dropZoneContent.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 10px; animation: spin 1s linear infinite;">⚡</div>
+                <h3>Sincronizando pistas...</h3>
+                <p>Alíneando metraje cronológico</p>
+            `;
+            
+            archivosOrdenados = []; 
+            archivosTrashed = []; 
+            archivosExtra = [];
+
+            // Conversión y ordenamiento cronológico por fecha de modificación
+            const archivos = Array.from(listaArchivos).sort((a, b) => a.lastModified - b.lastModified);
+            const puntoCorteBorradores = Math.max(1, Math.floor(archivos.length * 0.8));
+
+            for (let i = 0; i < archivos.length; i++) {
+                const archivo = archivos[i];
+                if (archivo.size < 5000000) { 
+                    archivosTrashed.push(archivo);
+                } else if (i >= puntoCorteBorradores) {
+                    archivosExtra.push(archivo);
+                } else {
+                    archivosOrdenados.push(archivo);
+                }
+            }
+
+            // Restauramos el texto original de la caja indicando éxito
+            dropZoneContent.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 10px;">✅</div>
+                <h3>¡Clips Procesados Correctamente!</h3>
+                <p>Puedes volver a hacer clic aquí si deseas cambiar los videos</p>
+            `;
+
+            // Actualizamos los contadores numéricos en pantalla
+            document.querySelector('#folder-ready .count').innerText = `${archivosOrdenados.length} clips listos`;
+            document.querySelector('#folder-extra .count').innerText = `${archivosExtra.length} organizados`;
+            document.querySelector('#folder-audios .count').innerText = `${archivosOrdenados.length} pistas sincronizadas`;
+            document.querySelector('#folder-trashed .count').innerText = `${archivosTrashed.length} aislados`;
+            
+            // Activación garantizada del botón de descarga quitando cualquier bloqueo
+            downloadBtn.removeAttribute('disabled');
+            downloadBtn.disabled = false;
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            downloadBtn.innerText = "⚡ Descargando Borrador...";
+            downloadBtn.disabled = true;
+            
+            const capcutDraftData = {
+                platform: "mobile",
+                project_name: "Proyecto_ClipOrganizer_Automatico",
+                create_time: Date.now(),
+                materials: {
+                    videos: archivosOrdenados.map((file, idx) => ({
+                        id: `mat_video_${idx}`,
+                        type: "video",
+                        file_name: file.name,
+                        path: file.name, 
+                        local_material_id: "", 
+                        material_name: file.name,
+                        local_id: ""
+                    }))
+                },
+                tracks: [
+                    {
+                        type: "video",
+                        id: "track_video_principal",
+                        segments: archivosOrdenados.map((file, idx) => ({
+                            id: `segment_vid_${idx}`,
+                            material_id: `mat_video_${idx}`,
+                            target_timerange: { start: idx * 5000000, duration: 5000000 },
+                            source_timerange: { start: 0, duration: 5000000 }
+                        }))
+                    },
+                    {
+                        type: "audio",
+                        id: "track_audio_sincronizado",
+                        segments: archivosOrdenados.map((file, idx) => ({
+                            id: `segment_aud_${idx}`,
+                            material_id: `mat_video_${idx}`, 
+                            target_timerange: { start: idx * 5000000, duration: 5000000 },
+                            source_timerange: { start: 0, duration: 5000000 }
+                        }))
+                    }
+                ]
+            };
+
+            // Descarga binaria estable por Blob
+            const jsonString = JSON.stringify(capcutDraftData, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const blobUrl = URL.createObjectURL(blob);
+
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.href = blobUrl;
+            downloadAnchor.download = "draft_content.json";
+            
+            document.body.appendChild(downloadAnchor);
+  
