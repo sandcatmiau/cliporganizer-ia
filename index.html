@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ClipOrganizer AI — Organización Inteligente Local</title>
+
+<script src="https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/mediainfo.min.js"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #0d0d0f;
+        color: #f2f2f2;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .container {
+        width: min(1100px, 94%);
+        margin: auto;
+        padding: 30px 0 60px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 8px;
+        font-size: 30px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #aaa;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+
+    .drop-zone {
+        border: 2px dashed #555;
+        border-radius: 18px;
+        padding: 45px 20px;
+        text-align: center;
+        cursor: pointer;
+        background: #151518;
+        transition: .2s;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+        border-color: #fff;
+        background: #1b1b1f;
+    }
+
+    .drop-zone strong {
+        display: block;
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    .drop-zone span {
+        color: #999;
+    }
+
+    #fileInput {
+        display: none;
+    }
+
+    .loading {
+        display: none;
+        margin-top: 25px;
+        padding: 18px;
+        border-radius: 12px;
+        background: #17171a;
+        text-align: center;
+        color: #ccc;
+    }
+
+    .loading.active {
+        display: block;
+    }
+
+    .progress {
+        margin-top: 12px;
+        height: 8px;
+        background: #29292d;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #fff;
+        transition: width .2s;
+    }
+
+    .results {
+        display: none;
+        margin-top: 30px;
+    }
+
+    .results.active {
+        display: block;
+    }
+
+    .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .badge {
+        background: #18181c;
+        border: 1px solid #29292e;
+        border-radius: 10px;
+        padding: 10px 14px;
+        color: #ccc;
+    }
+
+    .badge strong {
+        color: #fff;
+    }
+
+    .folder {
+        background: #141417;
+        border: 1px solid #29292e;
+        border-radius: 15px;
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+    .folder h2 {
+        margin-top: 0;
+        font-size: 19px;
+    }
+
+    .folder p {
+        color: #999;
+        margin-bottom: 15px;
+    }
+
+    button {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 16px;
+        background: #fff;
+        color: #111;
+        cursor: pointer;
+        font-weight: bold;
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+
+    button:hover {
+        opacity: .88;
+    }
+
+    button:disabled {
+        opacity: .35;
+        cursor: not-allowed;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #29292e;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 900px;
+    }
+
+    th,
+    td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #252529;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th {
+        background: #19191d;
+        color: #ddd;
+        font-size: 13px;
+        position: sticky;
+        top: 0;
+    }
+
+    td {
+        color: #cfcfd3;
+        font-size: 13px;
+    }
+
+    tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .status-good {
+        color: #9be89b;
+        font-weight: bold;
+    }
+
+    .status-none {
+        color: #aaa;
+        font-weight: bold;
+    }
+
+    .source {
+        font-size: 12px;
+        color: #bbb;
+    }
+
+    .confidence-high {
+        color: #9be89b;
+    }
+
+    .confidence-medium {
+        color: #e5d78d;
+    }
+
+    .confidence-low {
+        color: #e5a07b;
+    }
+
+    .filename {
+        max-width: 220px;
+        word-break: break-word;
+    }
+
+    .diagnostics {
+        margin-top: 25px;
+    }
+
+    .diagnostic-card {
+        background: #111114;
+        border: 1px solid #29292e;
+        border-radius: 14px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .diagnostic-header {
+        padding: 15px;
+        background: #18181c;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .diagnostic-header strong {
+        word-break: break-word;
+    }
+
+    .diagnostic-body {
+        display: none;
+        padding: 15px;
+    }
+
+    .diagnostic-body.open {
+        display: block;
+    }
+
+    .diagnostic-section {
+        margin-bottom: 18px;
+    }
+
+    .diagnostic-section h3 {
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: #ddd;
+    }
+
+    .metadata-list {
+        background: #0b0b0d;
+        border-radius: 10px;
+        padding: 10px;
+        overflow-x: auto;
+    }
+
+    .metadata-row {
+        display: grid;
+        grid-template-columns: minmax(170px, 1fr) minmax(200px, 2fr);
+        gap: 10px;
+        padding: 7px 4px;
+        border-bottom: 1px solid #202024;
+        font-size: 12px;
+    }
+
+    .metadata-row:last-child {
+        border-bottom: 0;
+    }
+
+    .metadata-key {
+        color: #999;
+        word-break: break-word;
+    }
+
+    .metadata-value {
+        color: #ddd;
+        word-break: break-word;
+    }
+
+    .warning-box {
+        background: #211e16;
+        border: 1px solid #554a2b;
+        color: #d9ce9a;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .success-box {
+        background: #152016;
+        border: 1px solid #304c32;
+        color: #a9dbaa;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .info-box {
+        background: #15191e;
+        border: 1px solid #29343f;
+        color: #aebdca;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .empty {
+        color: #777;
+        padding: 10px 0;
+    }
+
+    .footer-note {
+        color: #777;
+        font-size: 12px;
+        text-align: center;
+        margin-top: 35px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 700px) {
+        h1 {
+            font-size: 24px;
+        }
+
+        .container {
+            padding-top: 20px;
+        }
+
+        .drop-zone {
+            padding: 35px 15px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎬 ClipOrganizer AI</h1>
+
+    <div class="subtitle">
+        Organización inteligente local de tus clips<br>
+        <strong>Ordena por la fecha real de grabación cuando el archivo la conserva.</strong>
+    </div>
+
+    <label class="drop-zone" id="dropZone">
+        <strong>📂 Selecciona tus videos</strong>
+        <span>También puedes arrastrarlos y soltarlos aquí</span>
+        <input
+            type="file"
+            id="fileInput"
+            multiple
+            accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm"
+        >
+    </label>
+
+    <div class="loading" id="loading">
+        <div id="loadingText">Analizando metadatos...</div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <section class="results" id="results">
+
+        <div class="summary">
+            <div class="badge">
+                🎬 Clips: <strong id="totalClips">0</strong>
+            </div>
+
+            <div class="badge">
+                🟢 Fecha original: <strong id="datedClips">0</strong>
+            </div>
+
+            <div class="badge">
+                ⚪ Sin fecha original: <strong id="undatedClips">0</strong>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>ℹ️ Cómo funciona el orden:</strong><br><br>
+
+            Los clips que contienen una fecha original de grabación en sus
+            metadatos se ordenan por esa fecha y hora.
+            Los archivos que no conservan esa información aparecen después.
+            <br><br>
+
+            La <strong>fecha del archivo</strong> se muestra separadamente
+            y no se considera fecha de grabación.
+        </div>
+
+        <br>
+
+        <div class="folder">
+            <h2>📁 Listo para Editar</h2>
+
+            <p>
+                Clips con fecha original encontrada y clips sin fecha original.
+                Los números respetan el orden cronológico cuando existe metadata.
+            </p>
+
+            <button id="downloadVideos">
+                ⬇️ Descargar videos numerados
+            </button>
+        </div>
+
+        <div class="folder">
+            <h2>📁 Clips Extra / Borradores</h2>
+
+            <p>
+                Esta sección queda reservada para la futura clasificación
+                inteligente de tomas alternativas.
+            </p>
+        </div>
+
+        <div class="folder">
+            <h2>🎧 Audio Separado</h2>
+
+            <p>
+                La extracción de audio real mediante FFmpeg se incorporará
+                en la siguiente etapa.
+            </p>
+
+            <button disabled>
+                🎧 Descargar audio sincronizado
+            </button>
+        </div>
+
+        <div class="folder">
+            <h2>🗑️ Trashed</h2>
+
+            <p>
+                Los descartes serán determinados posteriormente por el análisis
+                inteligente. No se eliminarán automáticamente.
+            </p>
+        </div>
+
+        <div class="folder">
+
+            <h2>📊 Orden detectado</h2>
+
+            <div class="table-wrapper">
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Archivo</th>
+                            <th>Fecha original</th>
+                            <th>Estado</th>
+                            <th>Fuente</th>
+                            <th>Confianza</th>
+                            <th>Fecha del archivo</th>
+                            <th>Duración</th>
+                            <th>Dispositivo</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="resultsBody"></tbody>
+
+                </table>
+            </div>
+
+        </div>
+
+        <div class="folder diagnostics">
+
+            <h2>🔬 Diagnóstico de metadatos</h2>
+
+            <p>
+                Aquí puedes comprobar exactamente qué información encontró
+                ClipOrganizer dentro de cada archivo.
+            </p>
+
+            <div id="diagnosticsContainer"></div>
+
+        </div>
+
+    </section>
+
+    <div class="footer-note">
+        ClipOrganizer AI procesa los metadatos directamente en tu navegador.
+        Los videos no se suben a un servidor mediante este código.
+    </div>
+
+</div>
+
+<script>
+
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+
+const loading = document.getElementById("loading");
+const loadingText = document.getElementById("loadingText");
+const progressBar = document.getElementById("progressBar");
+
+const results = document.getElementById("results");
+const resultsBody = document.getElementById("resultsBody");
+const diagnosticsContainer = document.getElementById("diagnosticsContainer");
+
+const totalClips = document.getElementById("totalClips");
+const datedClips = document.getElementById("datedClips");
+const undatedClips = document.getElementById("undatedClips");
+
+const downloadVideosButton =
+    document.getElementById("downloadVideos");
+
+let analyzedClips = [];
+
+
+/* =========================================================
+   SELECCIÓN DE ARCHIVOS
+========================================================= */
+
+dropZone.addEventListener("click", () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener("change", () => {
+
+    const files = Array.from(fileInput.files || []);
+
+    if (files.length) {
+        procesarArchivos(files);
+    }
+});
+
+
+dropZone.addEventListener("dragover", (event) => {
+
+    event.preventDefault();
+
+    dropZone.classList.add("dragover");
+});
+
+
+dropZone.addEventListener("dragleave", () => {
+
+    dropZone.classList.remove("dragover");
+});
+
+
+dropZone.addEventListener("drop", (event) => {
+
+    event.preventDefault();
+
+    dropZone.classList.remove("dragover");
+
+    const files = Array.from(event.dataTransfer.files || []);
+
+    if (files.length) {
+        procesarArchivos(files);
+    }
+});
+
+
+/* =========================================================
+   FUNCIONES DE FECHA
+========================================================= */
+
+function parseDateValue(value) {
+
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    if (typeof value !== "string") {
+        return null;
+    }
+
+    const text = value.trim();
+
+    if (!text) {
+        return null;
+    }
+
+    /*
+     * Evitamos interpretar valores que claramente no son fechas.
+     */
+
+    if (
+        !/\d{4}/.test(text) &&
+        !/\d{2}[\/\-]\d{2}[\/\-]\d{4}/.test(text)
+    ) {
+        return null;
+    }
+
+    let normalized = text;
+
+    /*
+     * Fechas típicas de QuickTime:
+     *
+     * 2026-08-15 09:01:15
+     * 2026-08-15T09:01:15
+     * 2026-08-15T09:01:15-05:00
+     */
+
+    normalized = normalized.replace(
+        /^(\d{4}-\d{2}-\d{2})\s+/,
+        "$1T"
+    );
+
+    const date = new Date(normalized);
+
+    if (!isNaN(date.getTime())) {
+        return date;
+    }
+
+    /*
+     * Intento adicional para fechas tipo:
+     *
+     * 15/08/2026 09:01:15
+     */
+
+    const match = text.match(
+        /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/
+    );
+
+    if (match) {
+
+        const day = Number(match[1]);
+        const month = Number(match[2]) - 1;
+        const year = Number(match[3]);
+
+        const hour = Number(match[4] || 0);
+        const minute = Number(match[5] || 0);
+        const second = Number(match[6] || 0);
+
+        const result = new Date(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second
+        );
+
+        if (!isNaN(result.getTime())) {
+            return result;
+        }
+    }
+
+    return null;
+}
+
+
+/* =========================================================
+   NORMALIZACIÓN DE NOMBRES
+========================================================= */
+
+function normalizeKey(key) {
+
+    return String(key || "")
+        .toLowerCase()
+        .replace(/[\s_\-.:]/g, "");
+}
+
+
+/* =========================================================
+   RECORRER TODO EL JSON DE MEDIAINFO
+========================================================= */
+
+function collectDateFields(obj, path = "", result = []) {
+
+    if (obj === null || obj === undefined) {
+        return result;
+    }
+
+    if (typeof obj !== "object") {
+        return result;
+    }
+
+    if (Array.isArray(obj)) {
+
+        obj.forEach((item, index) => {
+
+            collectDateFields(
+                item,
+                `${path}[${index}]`,
+                result
+            );
+
+        });
+
+        return result;
+    }
+
+    for (const [key, value] of Object.entries(obj)) {
+
+        const currentPath =
+            path ? `${path}.${key}` : key;
+
+        const normalized = normalizeKey(key);
+
+        const looksLikeDate =
+            normalized.includes("date") ||
+            normalized.includes("creation") ||
+            normalized.includes("created") ||
+            normalized.includes("recorded") ||
+            normalized.includes("recording") ||
+            normalized.includes("production") ||
+            normalized.includes("encoded") ||
+            normalized.includes("tagged") ||
+            normalized.includes("modified");
+
+        if (
+            looksLikeDate &&
+            typeof value === "string"
+        ) {
+
+            const parsed = parseDateValue(value);
+
+            if (parsed) {
+
+                result.push({
+                    key,
+                    path: currentPath,
+                    value,
+                    date: parsed
+                });
+
+            }
+        }
+
+        if (typeof value === "object") {
+
+            collectDateFields(
+                value,
+                currentPath,
+                result
+            );
+
+        }
+    }
+
+    return result;
+}
+
+
+/* =========================================================
+   ELEGIR LA MEJOR FECHA
+========================================================= */
+
+function scoreDateField(item) {
+
+    const key = normalizeKey(item.key);
+    const path = normalizeKey(item.path);
+
+    /*
+     * PRIORIDAD MÁXIMA
+     * QuickTime / Apple creation date
+     */
+
+    if (
+        key.includes("quicktime") &&
+        key.includes("creation")
+    ) {
+        return 110;
+    }
+
+    if (
+        key.includes("creationdate") &&
+        (
+            path.includes("quicktime") ||
+            path.includes("apple")
+        )
+    ) {
+        return 110;
+    }
+
+    /*
+     * Apple QuickTime creation date
+     */
+
+    if (
+        key.includes("comapplequicktimecreationdate") ||
+        key.includes("quicktimecreationdate")
+    ) {
+        return 110;
+    }
+
+    /*
+     * Recording / recorded
+     */
+
+    if (
+        key.includes("recorded") ||
+        key.includes("recording")
+    ) {
+        return 100;
+    }
+
+    /*
+     * CreationDate general
+     */
+
+    if (key === "creationdate") {
+        return 95;
+    }
+
+    /*
+     * Created dentro del video track
+     */
+
+    if (
+        key.includes("created") &&
+        (
+            path.includes("video") ||
+            path.includes("track")
+        )
+    ) {
+        return 80;
+    }
+
+    /*
+     * Creation general
+     */
+
+    if (
+        key.includes("creation") ||
+        key.includes("created")
+    ) {
+        return 70;
+    }
+
+    /*
+     * Production
+     */
+
+    if (key.includes("production")) {
+        return 60;
+    }
+
+    /*
+     * Encoded
+     *
+     * Es menos confiable como fecha de grabación.
+     */
+
+    if (key.includes("encoded")) {
+        return 30;
+    }
+
+    /*
+     * Modified / tagged
+     *
+     * NO se considera fecha original confiable.
+     */
+
+    if (
+        key.includes("modified") ||
+        key.includes("tagged")
+    ) {
+        return 10;
+    }
+
+    return 0;
+}
+
+
+function chooseBestOriginalDate(dateFields) {
+
+    if (!dateFields.length) {
+        return null;
+    }
+
+    const candidates = dateFields
+        .map(item => ({
+            ...item,
+            score: scoreDateField(item)
+        }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+    if (!candidates.length) {
+        return null;
+    }
+
+    /*
+     * IMPORTANTE:
+     *
+     * No aceptamos fechas de modified/tagged como fecha original.
+     */
+
+    if (candidates[0].score < 30) {
+        return null;
+    }
+
+    return candidates[0];
+}
+
+
+/* =========================================================
+   DETECCIÓN DE DISPOSITIVO
+========================================================= */
+
+function detectDevice(data) {
+
+    const text = JSON.stringify(data).toLowerCase();
+
+    /*
+     * Apple
+     */
+
+    if (text.includes("iphone")) {
+        return "iPhone";
+    }
+
+    if (text.includes("ipad")) {
+        return "iPad";
+    }
+
+    if (text.includes("ipod")) {
+        return "iPod";
+    }
+
+    /*
+     * Samsung
+     */
+
+    if (text.includes("samsung")) {
+
+        const match = JSON.stringify(data)
+            .match(/SM-[A-Z0-9]+/i);
+
+        if (match) {
+            return "Samsung " + match[0];
+        }
+
+        return "Samsung";
+    }
+
+    /*
+     * Google Pixel
+     */
+
+    if (text.includes("pixel")) {
+        return "Google Pixel";
+    }
+
+    /*
+     * Xiaomi
+     */
+
+    if (text.includes("xiaomi")) {
+        return "Xiaomi";
+    }
+
+    /*
+     * Huawei
+     */
+
+    if (text.includes("huawei")) {
+        return "Huawei";
+    }
+
+    /*
+     * Canon
+     */
+
+    if (text.includes("canon")) {
+        return "Canon";
+    }
+
+    /*
+     * Sony
+     */
+
+    if (text.includes("sony")) {
+        return "Sony";
+    }
+
+    /*
+     * Nikon
+     */
+
+    if (text.includes("nikon")) {
+        return "Nikon";
+    }
+
+    /*
+     * GoPro
+     */
+
+    if (text.includes("gopro")) {
+        return "GoPro";
+    }
+
+    return "No identificado";
+}
+
+
+/* =========================================================
+   FORMATO DE FECHA
+========================================================= */
+
+function formatDate(date) {
+
+    if (!date) {
+        return "—";
+    }
+
+    return new Intl.DateTimeFormat(
+        "es-CO",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        }
+    ).format(date);
+}
+
+
+/* =========================================================
+   DURACIÓN
+========================================================= */
+
+function getVideoDuration(file) {
+
+    return new Promise(resolve => {
+
+        const video = document.createElement("video");
+
+        const url = URL.createObjectURL(file);
+
+        video.preload = "metadata";
+
+        video.onloadedmetadata = () => {
+
+            const duration = video.duration;
+
+            URL.revokeObjectURL(url);
+
+            if (
+                !isFinite(duration) ||
+                duration <= 0
+            ) {
+                resolve(null);
+                return;
+            }
+
+            resolve(duration);
+        };
+
+        video.onerror = () => {
+
+            URL.revokeObjectURL(url);
+
+            resolve(null);
+        };
+
+        video.src = url;
+    });
+}
+
+
+function formatDuration(seconds) {
+
+    if (
+        seconds === null ||
+        seconds === undefined ||
+        !isFinite(seconds)
+    ) {
+        return "—";
+    }
+
+    const total = Math.round(seconds);
+
+    const minutes = Math.floor(total / 60);
+    const secs = total % 60;
+
+    return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
+
+/* =========================================================
+   MEDIAINFO
+========================================================= */
+
+async function analyzeMediaInfo(file) {
+
+    let mediaInfo;
+
+    try {
+
+        mediaInfo = await MediaInfo.mediaInfoFactory({
+
+            format: "object",
+
+            full: true,
+
+            chunkSize: 1024 * 1024,
+
+            locateFile: () =>
+                "https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/MediaInfoModule.wasm"
+
+        });
+
+        const getSize = () => file.size;
+
+        const readChunk = async (chunkSize, offset) => {
+
+            const blob = file.slice(
+                offset,
+                offset + chunkSize
+            );
+
+            return new Uint8Array(
+                await blob.arrayBuffer()
+            );
+        };
+
+        const result = await mediaInfo.analyzeData(
+            getSize,
+            readChunk
+        );
+
+        if (mediaInfo.close) {
+            mediaInfo.close();
+        }
+
+        return result;
+
+    } catch (error) {
+
+        console.error(
+            "Error MediaInfo:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+/* =========================================================
+   ANALIZAR UN ARCHIVO
+========================================================= */
+
+async function analyzeFile(file) {
+
+    const mediaInfo = await analyzeMediaInfo(file);
+
+    const dateFields = mediaInfo
+        ? collectDateFields(mediaInfo)
+        : [];
+
+    const bestDate =
+        chooseBestOriginalDate(dateFields);
+
+    const duration =
+        await getVideoDuration(file);
+
+    const device =
+        mediaInfo
+            ? detectDevice(mediaInfo)
+            : "No identificado";
+
+
+    /*
+     * AQUÍ ESTÁ EL CAMBIO FUNDAMENTAL:
+     *
+     * Si no existe una fecha original confiable,
+     * originalDate queda NULL.
+     *
+     * lastModified solamente se guarda como
+     * fecha del archivo.
+     */
+
+    const originalDate =
+        bestDate
+            ? bestDate.date
+            : null;
+
+    const fileDate =
+        file.lastModified
+            ? new Date(file.lastModified)
+            : null;
+
+
+    let confidence = "—";
+
+    if (bestDate) {
+
+        if (bestDate.score >= 95) {
+            confidence = "Alta";
+        }
+        else if (bestDate.score >= 70) {
+            confidence = "Media";
+        }
+        else {
+            confidence = "Baja";
+        }
+    }
+
+
+    return {
+
+        file,
+
+        name: file.name,
+
+        size: file.size,
+
+        originalDate,
+
+        originalDateSource:
+            bestDate
+                ? bestDate.path
+                : null,
+
+        originalDateRaw:
+            bestDate
+                ? bestDate.value
+                : null,
+
+        confidence,
+
+        fileDate,
+
+        duration,
+
+        device,
+
+        mediaInfo,
+
+        dateFields
+
+    };
+}
+
+
+/* =========================================================
+   PROCESAMIENTO PRINCIPAL
+========================================================= */
+
+async function procesarArchivos(files) {
+
+    const videoFiles = files.filter(file => {
+
+        const type = file.type || "";
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+        const videoExtensions = [
+            "mp4",
+            "mov",
+            "m4v",
+            "avi",
+            "mkv",
+            "webm"
+        ];
+
+        return (
+            type.startsWith("video/") ||
+            videoExtensions.includes(extension)
+        );
+    });
+
+
+    if (!videoFiles.length) {
+
+        alert(
+            "No se encontraron archivos de video compatibles."
+        );
+
+        return;
+    }
+
+
+    loading.classList.add("active");
+
+    results.classList.remove("active");
+
+    progressBar.style.width = "0%";
+
+    analyzedClips = [];
+
+
+    for (
+        let i = 0;
+        i < videoFiles.length;
+        i++
+    ) {
+
+        const file = videoFiles[i];
+
+        loadingText.textContent =
+            `Analizando ${i + 1} de ${videoFiles.length}: ${file.name}`;
+
+        const progress =
+            (i / videoFiles.length) * 100;
+
+        progressBar.style.width =
+            `${progress}%`;
+
+
+        try {
+
+            const result =
+                await analyzeFile(file);
+
+            analyzedClips.push(result);
+
+        } catch (error) {
+
+            console.error(
+                "Error analizando:",
+                file.name,
+                error
+            );
+
+            analyzedClips.push({
+
+                file,
+
+                name: file.name,
+
+                size: file.size,
+
+                originalDate: null,
+
+                originalDateSource: null,
+
+                originalDateRaw: null,
+
+                confidence: "—",
+
+                fileDate:
+                    file.lastModified
+                        ? new Date(file.lastModified)
+                        : null,
+
+                duration: null,
+
+                device: "No identificado",
+
+                mediaInfo: null,
+
+                dateFields: []
+
+            });
+        }
+    }
+
+
+    progressBar.style.width = "100%";
+
+    loadingText.textContent =
+        "Análisis completado ✓";
+
+
+    /*
+     * ORDENAMIENTO
+     *
+     * 1. Los que tienen fecha original primero.
+     * 2. Entre ellos: fecha/hora real ascendente.
+     * 3. Los que no tienen fecha original después.
+     * 4. Los sin fecha mantienen el orden en que fueron seleccionados.
+     */
+
+    analyzedClips.sort((a, b) => {
+
+        const aHasDate =
+            !!a.originalDate;
+
+        const bHasDate =
+            !!b.originalDate;
+
+
+        if (aHasDate && !bHasDate) {
+            return -1;
+        }
+
+        if (!aHasDate && bHasDate) {
+            return 1;
+        }
+
+
+        if (aHasDate && bHasDate) {
+
+            const difference =
+                a.originalDate.getTime() -
+                b.originalDate.getTime();
+
+            if (difference !== 0) {
+                return difference;
+            }
+        }
+
+
+        return 0;
+    });
+
+
+    renderResults();
+
+    setTimeout(() => {
+
+        loading.classList.remove("active");
+
+        results.classList.add("active");
+
+    }, 400);
+}
+
+
+/* =========================================================
+   RENDER TABLA
+========================================================= */
+
+function renderResults() {
+
+    resultsBody.innerHTML = "";
+
+    diagnosticsContainer.innerHTML = "";
+
+
+    const withDate =
+        analyzedClips.filter(
+            clip => clip.originalDate
+        ).length;
+
+    const withoutDate =
+        analyzedClips.length - withDate;
+
+
+    totalClips.textContent =
+        analyzedClips.length;
+
+    datedClips.textContent =
+        withDate;
+
+    undatedClips.textContent =
+        withoutDate;
+
+
+    analyzedClips.forEach((clip, index) => {
+
+        const row =
+            document.createElement("tr");
+
+
+        const originalDateHTML =
+            clip.originalDate
+
+                ? `
+                    <span class="status-good">
+                        ${formatDate(clip.originalDate)}
+                    </span>
+                  `
+
+                : `
+                    <span class="status-none">
+                        No disponible
+                    </span>
+                  `;
+
+
+        const statusHTML =
+            clip.originalDate
+
+                ? `
+                    <span class="status-good">
+                        🟢 Encontrada
+                    </span>
+                  `
+
+                : `
+                    <span class="status-none">
+                        ⚪ No disponible
+                    </span>
+                  `;
+
+
+        const sourceHTML =
+            clip.originalDate
+
+                ? `
+                    <span class="source">
+                        ${escapeHTML(
+                            clip.originalDateSource
+                        )}
+                    </span>
+                  `
+
+                : `
+                    <span class="source">
+                        —
+                    </span>
+                  `;
+
+
+        let confidenceClass = "";
+
+        if (clip.confidence === "Alta") {
+            confidenceClass =
+                "confidence-high";
+        }
+        else if (clip.confidence === "Media") {
+            confidenceClass =
+                "confidence-medium";
+        }
+        else if (clip.confidence === "Baja") {
+            confidenceClass =
+                "confidence-low";
+        }
+
+
+        const fileDateHTML =
+            clip.fileDate
+                ? formatDate(clip.fileDate)
+                : "—";
+
+
+        row.innerHTML = `
+
+            <td>
+                <strong>${index + 1}</strong>
+            </td>
+
+            <td class="filename">
+                ${escapeHTML(clip.name)}
+            </td>
+
+            <td>
+                ${originalDateHTML}
+            </td>
+
+            <td>
+                ${statusHTML}
+            </td>
+
+            <td>
+                ${sourceHTML}
+            </td>
+
+            <td class="${confidenceClass}">
+                ${clip.confidence}
+            </td>
+
+            <td>
+                <span class="source">
+                    📁 ${fileDateHTML}
+                </span>
+            </td>
+
+            <td>
+                ${formatDuration(clip.duration)}
+            </td>
+
+            <td>
+                ${escapeHTML(clip.device)}
+            </td>
+
+        `;
+
+
+        resultsBody.appendChild(row);
+
+        renderDiagnosticCard(
+            clip,
+            index + 1
+        );
+
+    });
+}
+
+
+/* =========================================================
+   TARJETAS DE DIAGNÓSTICO
+========================================================= */
+
+function renderDiagnosticCard(clip, number) {
+
+    const card =
+        document.createElement("div");
+
+    card.className =
+        "diagnostic-card";
+
+
+    const hasOriginalDate =
+        !!clip.originalDate;
+
+
+    const status =
+        hasOriginalDate
+
+            ? `🟢 Fecha original encontrada`
+
+            : `⚪ Fecha original no disponible`;
+
+
+    const header =
+        document.createElement("div");
+
+    header.className =
+        "diagnostic-header";
+
+
+    header.innerHTML = `
+
+        <strong>
+            #${number} — ${escapeHTML(clip.name)}
+        </strong>
+
+        <span>
+            ${status}
+        </span>
+
+    `;
+
+
+    const body =
+        document.createElement("div");
+
+    body.className =
+        "diagnostic-body";
+
+
+    let statusBox = "";
+
+
+    if (hasOriginalDate) {
+
+        statusBox = `
+
+            <div class="success-box">
+
+                <strong>
+                    🟢 Fecha original encontrada
+                </strong>
+
+                <br><br>
+
+                <strong>Fecha utilizada para ordenar:</strong><br>
+                ${formatDate(clip.originalDate)}
+
+                <br><br>
+
+                <strong>Campo:</strong><br>
+                ${escapeHTML(
+                    clip.originalDateSource
+                )}
+
+                <br><br>
+
+                <strong>Valor original:</strong><br>
+                ${escapeHTML(
+                    clip.originalDateRaw
+                )}
+
+            </div>
+
+        `;
+
+    } else {
+
+        statusBox = `
+
+            <div class="warning-box">
+
+                <strong>
+                    ⚪ No se encontró una fecha original confiable.
+                </strong>
+
+                <br><br>
+
+                ClipOrganizer <strong>NO utilizará la fecha del archivo
+                como fecha de grabación.</strong>
+
+                <br><br>
+
+                La fecha mostrada abajo corresponde únicamente a
+                <strong>lastModified</strong>, es decir, la fecha que
+                el sistema operativo proporciona para el archivo.
+
+                <br><br>
+
+                Esta fecha puede corresponder a una transferencia,
+                copia, descarga, exportación o modificación posterior.
+
+            </div>
+
+        `;
+    }
+
+
+    let dateMetadataHTML = "";
+
+
+    if (clip.dateFields.length) {
+
+        dateMetadataHTML =
+            clip.dateFields
+                .map(item => {
+
+                    return `
+
+                        <div class="metadata-row">
+
+                            <div class="metadata-key">
+                                ${escapeHTML(item.path)}
+                            </div>
+
+                            <div class="metadata-value">
+                                ${escapeHTML(item.value)}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                })
+                .join("");
+
+    } else {
+
+        dateMetadataHTML = `
+            <div class="empty">
+                No se encontraron campos de fecha reconocibles.
+            </div>
+        `;
+    }
+
+
+    const fileInfoHTML = `
+
+        <div class="metadata-row">
+
+            <div class="metadata-key">
+                Nombre
+            </div>
+
+            <div class="metadata-value">
+                ${escapeHTML(clip.name)}
+            </div>
+
+        </div>
+
+        <div class="metadata-row">
+
+            <div class="metadata-key">
+                Tamaño
+            </div>
+
+            <div class="metadata-value">
+                ${formatBytes(clip.size)}
+            </div>
+
+        </div>
+
+        <div class="metadata-row">
+
+            <div class="metadata-key">
+                Fecha del archivo
+            </div>
+
+            <div class="metadata-value">
+                ${
+                    clip.fileDate
+                        ? formatDate(clip.fileDate)
+                        : "No disponible"
+                }
+            </div>
+
+        </div>
+
+        <div class="metadata-row">
+
+            <div class="metadata-key">
+                Dispositivo detectado
+            </div>
+
+            <div class="metadata-value">
+                ${escapeHTML(clip.device)}
+            </div>
+
+        </div>
+
+        <div class="metadata-row">
+
+            <div class="metadata-key">
+                Duración
+            </div>
+
+            <div class="metadata-value">
+                ${formatDuration(clip.duration)}
+            </div>
+
+        </div>
+
+    `;
+
+
+    body.innerHTML = `
+
+        ${statusBox}
+
+        <div class="diagnostic-section">
+
+            <h3>
+                📅 Campos de fecha encontrados
+            </h3>
+
+            <div class="metadata-list">
+                ${dateMetadataHTML}
+            </div>
+
+        </div>
+
+        <div class="diagnostic-section">
+
+            <h3>
+                📁 Información del archivo
+            </h3>
+
+            <div class="metadata-list">
+                ${fileInfoHTML}
+            </div>
+
+        </div>
+
+    `;
+
+
+    header.addEventListener(
+        "click",
+        () => {
+
+            body.classList.toggle("open");
+
+        }
+    );
+
+
+    card.appendChild(header);
+
+    card.appendChild(body);
+
+    diagnosticsContainer.appendChild(card);
+}
+
+
+/* =========================================================
+   DESCARGAR VIDEOS NUMERADOS
+========================================================= */
+
+downloadVideosButton.addEventListener(
+    "click",
+    async () => {
+
+        if (!analyzedClips.length) {
+            return;
+        }
+
+
+        downloadVideosButton.disabled = true;
+
+        downloadVideosButton.textContent =
+            "⏳ Preparando descargas...";
+
+
+        for (
+            let i = 0;
+            i < analyzedClips.length;
+            i++
+        ) {
+
+            const clip =
+                analyzedClips[i];
+
+            const originalName =
+                clip.name;
+
+            const extension =
+                originalName.includes(".")
+                    ? "." +
+                      originalName
+                        .split(".")
+                        .pop()
+                    : ".mp4";
+
+
+            /*
+             * Nombre limpio y compatible
+             */
+
+            const safeName =
+                `Clip_${String(i + 1).padStart(2, "0")}${extension}`;
+
+
+            const url =
+                URL.createObjectURL(
+                    clip.file
+                );
+
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+
+            link.download =
+                safeName;
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            link.remove();
+
+            setTimeout(() => {
+
+                URL.revokeObjectURL(url);
+
+            }, 2000);
+
+
+            await sleep(350);
+        }
+
+
+        downloadVideosButton.disabled = false;
+
+        downloadVideosButton.textContent =
+            "⬇️ Descargar videos numerados";
+    }
+);
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function sleep(ms) {
+
+    return new Promise(
+        resolve => setTimeout(resolve, ms)
+    );
+}
+
+
+function formatBytes(bytes) {
+
+    if (!bytes) {
+        return "0 B";
+    }
+
+    const units = [
+        "B",
+        "KB",
+        "MB",
+        "GB"
+    ];
+
+    const index =
+        Math.floor(
+            Math.log(bytes) /
+            Math.log(1024)
+        );
+
+    const value =
+        bytes /
+        Math.pow(1024, index);
+
+    return (
+        value.toFixed(2) +
+        " " +
+        units[index]
+    );
+}
+
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+</script>
+
+</body>
+</html>
