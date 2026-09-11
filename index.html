@@ -1,0 +1,3916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ClipOrganizer AI — Organización Inteligente Local</title>
+
+<script src="https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/mediainfo.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at top, #182238 0%, #090d16 48%, #05070b 100%);
+    color: #f3f5f7;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+}
+
+.container {
+    width: min(1150px, 94%);
+    margin: 0 auto;
+    padding: 35px 0 60px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(28px, 5vw, 42px);
+}
+
+.subtitle {
+    color: #aeb8c9;
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+.badges {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.badge {
+    background: #111827;
+    border: 1px solid #263247;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 12px;
+    color: #bfc9da;
+}
+
+.badge.local {
+    border-color: #285b45;
+    color: #78e6a9;
+}
+
+.card {
+    background: rgba(14, 19, 31, 0.92);
+    border: 1px solid #202b3e;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 15px 45px rgba(0,0,0,.25);
+}
+
+.drop-zone {
+    border: 2px dashed #394862;
+    border-radius: 16px;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: #7b8cff;
+    background: rgba(123, 140, 255, .06);
+}
+
+.drop-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.drop-zone h2 {
+    margin: 0 0 8px;
+}
+
+.drop-zone p {
+    margin: 0;
+    color: #929db0;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+button {
+    border: 0;
+    border-radius: 11px;
+    padding: 12px 17px;
+    background: #6675ff;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.secondary {
+    background: #202a3c;
+}
+
+.danger {
+    background: #47202a;
+}
+
+.loading {
+    display: none;
+}
+
+.loading.active {
+    display: block;
+}
+
+.progress {
+    height: 8px;
+    background: #161e2c;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #7382ff;
+    transition: width .2s;
+}
+
+.status {
+    color: #aeb8c9;
+    font-size: 14px;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.stat {
+    background: #101725;
+    border: 1px solid #202c40;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.stat-number {
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.stat-label {
+    color: #8793a8;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #202c40;
+    border-radius: 13px;
+}
+
+table {
+    width: 100%;
+    min-width: 1180px;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #202738;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background: #121a29;
+    color: #b9c5d8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+td {
+    font-size: 13px;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+.filename {
+    font-weight: 700;
+    max-width: 260px;
+    word-break: break-word;
+}
+
+.date-main {
+    font-weight: 700;
+}
+
+.source {
+    color: #aeb8c9;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.confidence,
+.quality-badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.high {
+    background: rgba(44, 184, 105, .14);
+    color: #69e69c;
+}
+
+.medium {
+    background: rgba(240, 180, 60, .14);
+    color: #f4c768;
+}
+
+.low {
+    background: rgba(238, 88, 88, .14);
+    color: #ff8d8d;
+}
+
+.good {
+    background: rgba(44, 184, 105, .14);
+    color: #69e69c;
+}
+
+.review {
+    background: rgba(240, 180, 60, .14);
+    color: #f4c768;
+}
+
+.bad {
+    background: rgba(238, 88, 88, .14);
+    color: #ff8d8d;
+}
+
+.device {
+    color: #bbc6d7;
+}
+
+.muted {
+    color: #69758a;
+}
+
+.diagnostic {
+    margin-top: 16px;
+    border: 1px solid #263247;
+    border-radius: 13px;
+    overflow: hidden;
+}
+
+.diagnostic summary {
+    cursor: pointer;
+    padding: 13px 15px;
+    background: #111927;
+    color: #c7d0df;
+    font-weight: 700;
+}
+
+.diagnostic-content {
+    padding: 15px;
+    background: #0b111c;
+}
+
+.diag-section {
+    margin-bottom: 18px;
+}
+
+.diag-section:last-child {
+    margin-bottom: 0;
+}
+
+.diag-title {
+    color: #8d9bb0;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.diag-row {
+    display: grid;
+    grid-template-columns: minmax(190px, 1fr) minmax(180px, 2fr);
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid #192333;
+    font-size: 12px;
+}
+
+.diag-row:last-child {
+    border-bottom: 0;
+}
+
+.diag-key {
+    color: #7f8da3;
+    word-break: break-word;
+}
+
+.diag-value {
+    color: #d5dbe5;
+    word-break: break-word;
+}
+
+.warning {
+    background: rgba(240, 180, 60, .08);
+    border: 1px solid rgba(240, 180, 60, .22);
+    color: #eec76e;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.success {
+    background: rgba(44, 184, 105, .08);
+    border: 1px solid rgba(44, 184, 105, .22);
+    color: #72e7a1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.error {
+    background: rgba(238, 88, 88, .08);
+    border: 1px solid rgba(238, 88, 88, .22);
+    color: #ff9292;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.folder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.folder {
+    background: #101725;
+    border: 1px solid #202c40;
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.folder-icon {
+    font-size: 28px;
+}
+
+.folder-title {
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+.folder-count {
+    color: #8793a8;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.small-note {
+    color: #6f7d92;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.quality-note {
+    margin: 15px 0;
+    padding: 13px 15px;
+    border-radius: 11px;
+    background: rgba(102,117,255,.07);
+    border: 1px solid rgba(102,117,255,.18);
+    color: #aeb8c9;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+footer {
+    text-align: center;
+    color: #58657a;
+    font-size: 12px;
+    margin-top: 35px;
+}
+
+@media (max-width: 650px) {
+
+    .container {
+        width: 92%;
+        padding-top: 22px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .drop-zone {
+        min-height: 190px;
+    }
+
+    .diag-row {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+
+<div class="logo">🎬</div>
+
+<h1>ClipOrganizer AI</h1>
+
+<div class="subtitle">
+    Organización inteligente de clips basada en la fecha real del archivo
+</div>
+
+<div class="badges">
+
+<span class="badge local">
+    🔒 Procesamiento local
+</span>
+
+<span class="badge">
+    📱 iPhone
+</span>
+
+<span class="badge">
+    🤖 Android
+</span>
+
+<span class="badge">
+    📷 Cámaras
+</span>
+
+<span class="badge">
+    🎥 MP4 / MOV
+</span>
+
+<span class="badge">
+    🤖 Detector de tomas
+</span>
+
+</div>
+
+</header>
+
+
+<section class="card">
+
+<label
+    for="fileInput"
+    class="drop-zone"
+    id="dropZone"
+>
+
+<div>
+
+<div class="drop-icon">
+    📂
+</div>
+
+<h2>
+    Selecciona tus videos
+</h2>
+
+<p>
+    O arrástralos aquí
+</p>
+
+<p
+    class="small-note"
+    style="margin-top:10px;"
+>
+    ClipOrganizer encontrará la fecha ORIGINAL
+    de grabación y realizará una primera revisión
+    técnica de cada toma.
+</p>
+
+</div>
+
+</label>
+
+<input
+    type="file"
+    id="fileInput"
+    multiple
+    accept="video/mp4,video/quicktime,.mp4,.mov,.m4v,.avi,.mkv,.webm"
+>
+
+</section>
+
+
+<section
+    class="card loading"
+    id="loadingCard"
+>
+
+<div
+    class="status"
+    id="loadingStatus"
+>
+    Preparando análisis...
+</div>
+
+<div class="progress">
+
+<div
+    class="progress-bar"
+    id="progressBar"
+></div>
+
+</div>
+
+</section>
+
+
+<section
+    class="card"
+    id="resultsCard"
+    style="display:none;"
+>
+
+<h2>
+    📊 Diagnóstico de los clips
+</h2>
+
+<p class="small-note">
+
+La tabla se ordena por la fecha original de grabación
+cuando existe. Los clips sin fecha original aparecen
+después, respetando el orden de selección.
+
+La fecha de modificación del archivo se conserva
+únicamente para diagnóstico.
+
+</p>
+
+
+<div class="quality-note">
+
+🤖 <strong>Fase 2 — Primera capa de calidad:</strong>
+ClipOrganizer revisa señales técnicas evidentes
+como duración anormal, cuadros prácticamente negros
+y problemas básicos de lectura.
+
+Si no existe evidencia suficiente para declarar una
+toma mala, se marcará como <strong>🟠 Revisar</strong>.
+Los clips muy cortos se conservan como
+<strong>🟠 Revisar</strong> cuando todavía podrían
+contener contenido útil.
+
+</div>
+
+
+<div class="summary">
+
+<div class="stat">
+
+<div
+    class="stat-number"
+    id="totalCount"
+>
+0
+</div>
+
+<div class="stat-label">
+    Clips analizados
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div
+    class="stat-number"
+    id="highCount"
+>
+0
+</div>
+
+<div class="stat-label">
+    Fechas confiables
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div
+    class="stat-number"
+    id="fallbackCount"
+>
+0
+</div>
+
+<div class="stat-label">
+    Sin fecha original
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div
+    class="stat-number"
+    id="goodCount"
+>
+0
+</div>
+
+<div class="stat-label">
+    Tomas buenas
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div
+    class="stat-number"
+    id="reviewCount"
+>
+0
+</div>
+
+<div class="stat-label">
+    Revisar
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div
+    class="stat-number"
+    id="badCount"
+>
+0
+</div>
+
+<div class="stat-label">
+    Tomas malas
+</div>
+
+</div>
+
+
+<div class="stat">
+
+<div
+    class="stat-number"
+    id="errorCount"
+>
+0
+</div>
+
+<div class="stat-label">
+    Con errores
+</div>
+
+</div>
+
+</div>
+
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>#</th>
+
+<th>Archivo</th>
+
+<th>Fecha de grabación</th>
+
+<th>Fuente</th>
+
+<th>Confianza</th>
+
+<th>Duración</th>
+
+<th>Dispositivo</th>
+
+<th>Calidad</th>
+
+</tr>
+
+</thead>
+
+<tbody id="resultsBody"></tbody>
+
+</table>
+
+</div>
+
+
+<h2 style="margin-top:30px;">
+    📁 Organización
+</h2>
+
+<div class="folder-grid">
+
+<div class="folder">
+
+<div class="folder-icon">
+    ✅
+</div>
+
+<div class="folder-title">
+    Listo para Editar
+</div>
+
+<div
+    class="folder-count"
+    id="readyCount"
+>
+    0 clips
+</div>
+
+</div>
+
+
+<div class="folder">
+
+<div class="folder-icon">
+    ⭐
+</div>
+
+<div class="folder-title">
+    Revisar / Borradores
+</div>
+
+<div
+    class="folder-count"
+    id="reviewFolderCount"
+>
+    0 clips
+</div>
+
+</div>
+
+
+<div class="folder">
+
+<div class="folder-icon">
+    🗑️
+</div>
+
+<div class="folder-title">
+    Tomas probablemente malas
+</div>
+
+<div
+    class="folder-count"
+    id="badFolderCount"
+>
+    0 clips
+</div>
+
+</div>
+
+
+<div class="folder">
+
+<div class="folder-icon">
+    🎧
+</div>
+
+<div class="folder-title">
+    Audio Separado
+</div>
+
+<div class="folder-count">
+    Próximamente — Fase 3
+</div>
+
+</div>
+
+</div>
+
+
+<div class="actions">
+
+<button id="downloadVideosBtn">
+    ⬇️ Descargar ZIP numerado
+</button>
+
+<button
+    class="secondary"
+    id="downloadAudioBtn"
+    disabled
+>
+    🎧 Audio separado — Fase 3
+</button>
+
+<button
+    class="secondary"
+    id="clearBtn"
+>
+    🧹 Limpiar análisis
+</button>
+
+</div>
+
+</section>
+
+
+<footer>
+    ClipOrganizer AI · Metadata primero · Calidad después 🚀
+</footer>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const CHUNK_SIZE =
+    1024 * 1024;
+
+const MEDIAINFO_WASM =
+    "https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/MediaInfoModule.wasm";
+
+
+/*
+    FASE 2 — UMBRALES DE CLASIFICACIÓN
+
+    🔴 Toma mala:
+    menos de 2 segundos.
+
+    🟠 Revisar:
+    desde 2 hasta 6 segundos.
+
+    🟢 Toma buena:
+    más de 6 segundos.
+
+    La detección de cuadros prácticamente negros
+    tiene prioridad sobre la duración.
+*/
+
+const QUALITY_CONFIG = {
+
+    /*
+        Por debajo de 2 segundos,
+        el clip se considera una toma
+        extremadamente corta y se marca
+        como mala.
+    */
+
+    veryShortDuration:
+        2,
+
+    /*
+        Hasta 6 segundos inclusive:
+        puede contener una frase, saludo,
+        intro o fragmento útil, por lo que
+        NO se elimina automáticamente.
+    */
+
+    shortDuration:
+        6,
+
+    /*
+        Si más del 70% de las muestras de imagen
+        están prácticamente negras, hay una señal
+        fuerte de toma problemática.
+    */
+
+    blackFrameRatio:
+        0.70,
+
+    /*
+        Luminancia media máxima para considerar
+        un cuadro prácticamente negro.
+    */
+
+    blackLuma:
+        18
+
+};
+
+
+let mediaInfoInstance = null;
+
+let analyzedClips = [];
+
+
+/* =========================================================
+   ELEMENTOS
+========================================================= */
+
+const fileInput =
+    document.getElementById("fileInput");
+
+const dropZone =
+    document.getElementById("dropZone");
+
+const loadingCard =
+    document.getElementById("loadingCard");
+
+const loadingStatus =
+    document.getElementById("loadingStatus");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+const resultsCard =
+    document.getElementById("resultsCard");
+
+const resultsBody =
+    document.getElementById("resultsBody");
+
+const totalCount =
+    document.getElementById("totalCount");
+
+const highCount =
+    document.getElementById("highCount");
+
+const fallbackCount =
+    document.getElementById("fallbackCount");
+
+const goodCount =
+    document.getElementById("goodCount");
+
+const reviewCount =
+    document.getElementById("reviewCount");
+
+const badCount =
+    document.getElementById("badCount");
+
+const errorCount =
+    document.getElementById("errorCount");
+
+const readyCount =
+    document.getElementById("readyCount");
+
+const reviewFolderCount =
+    document.getElementById("reviewFolderCount");
+
+const badFolderCount =
+    document.getElementById("badFolderCount");
+
+const downloadVideosBtn =
+    document.getElementById("downloadVideosBtn");
+
+const clearBtn =
+    document.getElementById("clearBtn");
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function sleep(ms) {
+
+    return new Promise(
+        resolve => setTimeout(resolve, ms)
+    );
+}
+
+
+function formatBytes(bytes) {
+
+    if (!Number.isFinite(bytes)) {
+        return "—";
+    }
+
+    const units = [
+        "B",
+        "KB",
+        "MB",
+        "GB"
+    ];
+
+    let i = 0;
+    let value = bytes;
+
+    while (
+        value >= 1024 &&
+        i < units.length - 1
+    ) {
+
+        value /= 1024;
+        i++;
+    }
+
+    return `${value.toFixed(
+        i === 0 ? 0 : 2
+    )} ${units[i]}`;
+}
+
+
+function formatDuration(seconds) {
+
+    if (!Number.isFinite(seconds)) {
+        return "—";
+    }
+
+    seconds =
+        Math.round(seconds);
+
+    const h =
+        Math.floor(seconds / 3600);
+
+    const m =
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
+    const s =
+        seconds % 60;
+
+    if (h > 0) {
+
+        return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+
+/* =========================================================
+   FECHAS
+========================================================= */
+
+function parsePossibleDate(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return null;
+    }
+
+    let text =
+        String(value).trim();
+
+    if (!text) {
+        return null;
+    }
+
+    if (
+        /^(0|1|2|3|4|5|6|7|8|9|10|11|12)$/i.test(text)
+    ) {
+        return null;
+    }
+
+    let normalized =
+        text
+            .replace(/^UTC\s*/i, "")
+            .replace(/\bUTC\b/gi, "Z")
+            .replace(/\s+/g, " ")
+            .trim();
+
+    if (
+        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(normalized)
+    ) {
+
+        normalized =
+            normalized.replace(
+                " ",
+                "T"
+            );
+    }
+
+    let date =
+        new Date(normalized);
+
+    if (!isNaN(date.getTime())) {
+
+        const year =
+            date.getFullYear();
+
+        if (
+            year >= 2000 &&
+            year <= 2100
+        ) {
+
+            return date;
+        }
+    }
+
+    const match =
+        text.match(
+            /(\d{4})[-:](\d{2})[-:](\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/
+        );
+
+    if (match) {
+
+        const d =
+            new Date(
+                Number(match[1]),
+                Number(match[2]) - 1,
+                Number(match[3]),
+                Number(match[4]),
+                Number(match[5]),
+                Number(match[6] || 0)
+            );
+
+        if (!isNaN(d.getTime())) {
+            return d;
+        }
+    }
+
+    return null;
+}
+
+
+function formatDate(date) {
+
+    if (
+        !(date instanceof Date) ||
+        isNaN(date.getTime())
+    ) {
+
+        return "No disponible";
+    }
+
+    return new Intl.DateTimeFormat(
+        "es-CO",
+        {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        }
+    ).format(date);
+}
+
+
+/* =========================================================
+   DETECCIÓN DE CAMPOS DE FECHA
+========================================================= */
+
+function isDateKey(key) {
+
+    const k =
+        key.toLowerCase();
+
+    const terms = [
+
+        "date",
+        "creation",
+        "created",
+        "recorded",
+        "encoded",
+        "tagged",
+        "modified",
+        "production"
+
+    ];
+
+    return terms.some(
+        term => k.includes(term)
+    );
+}
+
+
+function collectDateFields(
+    value,
+    path = "",
+    output = []
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return output;
+    }
+
+    if (
+        typeof value !== "object"
+    ) {
+
+        if (isDateKey(path)) {
+
+            const parsed =
+                parsePossibleDate(value);
+
+            output.push({
+
+                path,
+                value: String(value),
+                parsed
+
+            });
+        }
+
+        return output;
+    }
+
+    if (Array.isArray(value)) {
+
+        value.forEach(
+            (item, index) => {
+
+                collectDateFields(
+                    item,
+                    `${path}[${index}]`,
+                    output
+                );
+
+            }
+        );
+
+        return output;
+    }
+
+    Object.entries(value)
+        .forEach(
+            ([key, val]) => {
+
+                const currentPath =
+                    path
+                        ? `${path}.${key}`
+                        : key;
+
+                collectDateFields(
+                    val,
+                    currentPath,
+                    output
+                );
+
+            }
+        );
+
+    return output;
+}
+
+
+/* =========================================================
+   FUENTES / PRIORIDADES
+========================================================= */
+
+function scoreDateField(field) {
+
+    const p =
+        field.path.toLowerCase();
+
+    const value =
+        field.value.toLowerCase();
+
+    if (
+
+        p.includes(
+            "com.apple.quicktime.creationdate"
+        ) ||
+
+        p.includes(
+            "quicktimecreationdate"
+        ) ||
+
+        p.includes(
+            "quicktime_creationdate"
+        ) ||
+
+        value.includes(
+            "com.apple.quicktime.creationdate"
+        )
+
+    ) {
+
+        return {
+
+            score: 100,
+
+            label:
+                "🍎 QuickTime / Apple CreationDate",
+
+            confidence:
+                "alta"
+
+        };
+    }
+
+    if (
+
+        p.includes("recorded_date") ||
+
+        p.includes("recordeddate") ||
+
+        p.includes("recordingdate") ||
+
+        p.includes("datetimeoriginal")
+
+    ) {
+
+        return {
+
+            score: 90,
+
+            label:
+                "🎥 Metadata de grabación",
+
+            confidence:
+                "alta"
+
+        };
+    }
+
+    return {
+
+        score: 0,
+
+        label:
+            "No disponible",
+
+        confidence:
+            "baja"
+
+    };
+}
+
+
+/* =========================================================
+   DISPOSITIVO
+========================================================= */
+
+function detectDevice(info) {
+
+    const text =
+        JSON.stringify(info)
+            .toLowerCase();
+
+    if (
+        text.includes("iphone")
+    ) {
+
+        const model =
+            findFieldContaining(
+                info,
+                [
+                    "model",
+                    "com.apple.quicktime.modelname",
+                    "com.apple.quicktime.make"
+                ]
+            );
+
+        return model ||
+            "Apple iPhone";
+    }
+
+    if (
+        text.includes("ipad")
+    ) {
+        return "Apple iPad";
+    }
+
+    if (
+        text.includes("samsung")
+    ) {
+
+        const model =
+            findFieldContaining(
+                info,
+                [
+                    "model",
+                    "manufacturer"
+                ]
+            );
+
+        return model ||
+            "Samsung / Android";
+    }
+
+    if (
+
+        text.includes("android") ||
+
+        text.includes("com.android")
+
+    ) {
+
+        return "Android";
+    }
+
+    const cameraBrands = [
+
+        "canon",
+        "nikon",
+        "sony",
+        "panasonic",
+        "fujifilm",
+        "gopro",
+        "dji",
+        "olympus",
+        "blackmagic"
+
+    ];
+
+    for (
+        const brand of cameraBrands
+    ) {
+
+        if (
+            text.includes(brand)
+        ) {
+
+            return brand.toUpperCase();
+        }
+    }
+
+    return "No identificado";
+}
+
+
+function findFieldContaining(
+    obj,
+    terms
+) {
+
+    let result = null;
+
+    function walk(value) {
+
+        if (result) {
+            return;
+        }
+
+        if (
+            !value ||
+            typeof value !== "object"
+        ) {
+            return;
+        }
+
+        if (Array.isArray(value)) {
+
+            for (
+                const item of value
+            ) {
+
+                walk(item);
+
+                if (result) {
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        for (
+            const [key, val]
+            of Object.entries(value)
+        ) {
+
+            const keyLower =
+                key.toLowerCase();
+
+            if (
+
+                typeof val === "string" &&
+
+                terms.some(
+                    term =>
+                        keyLower.includes(
+                            term.toLowerCase()
+                        )
+                )
+
+            ) {
+
+                if (
+                    val.trim()
+                ) {
+
+                    result =
+                        val.trim();
+
+                    return;
+                }
+            }
+
+            walk(val);
+
+            if (result) {
+                return;
+            }
+        }
+    }
+
+    walk(obj);
+
+    return result;
+}
+
+
+/* =========================================================
+   ELEGIR FECHA
+========================================================= */
+
+function chooseBestDate(
+    info,
+    file
+) {
+
+    const allFields =
+        collectDateFields(info);
+
+    const candidates =
+
+        allFields
+
+            .filter(
+                item => item.parsed
+            )
+
+            .map(
+                item => {
+
+                    const scoring =
+                        scoreDateField(
+                            item
+                        );
+
+                    return {
+
+                        ...item,
+                        ...scoring
+
+                    };
+                }
+            )
+
+            .filter(
+                item => item.score > 0
+            )
+
+            .sort(
+                (a, b) => {
+
+                    if (
+                        b.score !== a.score
+                    ) {
+
+                        return (
+                            b.score -
+                            a.score
+                        );
+                    }
+
+                    return (
+                        a.parsed -
+                        b.parsed
+                    );
+                }
+            );
+
+    if (
+        candidates.length > 0
+    ) {
+
+        const best =
+            candidates[0];
+
+        return {
+
+            date:
+                best.parsed,
+
+            source:
+                best.label,
+
+            confidence:
+                best.confidence,
+
+            confidenceScore:
+                best.score,
+
+            candidates,
+
+            fallback:
+                false
+
+        };
+    }
+
+    return {
+
+        date:
+            null,
+
+        source:
+            "No disponible",
+
+        confidence:
+            "baja",
+
+        confidenceScore:
+            0,
+
+        candidates: [],
+
+        fallback:
+            false
+
+    };
+}
+
+
+/* =========================================================
+   DURACIÓN
+========================================================= */
+
+function getVideoDuration(file) {
+
+    return new Promise(
+        resolve => {
+
+            const video =
+                document.createElement(
+                    "video"
+                );
+
+            const url =
+                URL.createObjectURL(
+                    file
+                );
+
+            video.preload =
+                "metadata";
+
+            video.onloadedmetadata =
+                () => {
+
+                    const duration =
+                        video.duration;
+
+                    URL.revokeObjectURL(
+                        url
+                    );
+
+                    resolve(
+
+                        Number.isFinite(
+                            duration
+                        )
+                            ? duration
+                            : null
+
+                    );
+                };
+
+            video.onerror =
+                () => {
+
+                    URL.revokeObjectURL(
+                        url
+                    );
+
+                    resolve(null);
+                };
+
+            video.src = url;
+        }
+    );
+}
+
+
+/* =========================================================
+   FASE 2
+   ANÁLISIS VISUAL BÁSICO
+========================================================= */
+
+/*
+    Analiza varios puntos del video.
+
+    NO intenta reconocer personas,
+    objetos ni contenido.
+
+    Solo busca señales técnicas
+    extremadamente evidentes.
+*/
+
+function analyzeVisualQuality(
+    file,
+    duration
+) {
+
+    return new Promise(
+        resolve => {
+
+            if (
+                !Number.isFinite(duration) ||
+                duration <= 0
+            ) {
+
+                resolve({
+
+                    score: 50,
+
+                    status:
+                        "review",
+
+                    label:
+                        "🟠 Revisar",
+
+                    reasons:
+                        [
+                            "No se pudo determinar correctamente la duración."
+                        ]
+
+                });
+
+                return;
+            }
+
+
+            const video =
+                document.createElement(
+                    "video"
+                );
+
+            const canvas =
+                document.createElement(
+                    "canvas"
+                );
+
+            const ctx =
+                canvas.getContext(
+                    "2d",
+                    {
+                        willReadFrequently:
+                            true
+                    }
+                );
+
+
+            const url =
+                URL.createObjectURL(
+                    file
+                );
+
+
+            const sampleTimes = [
+
+                0.05,
+
+                0.25,
+
+                0.50,
+
+                0.75,
+
+                0.95
+
+            ];
+
+
+            let currentIndex = 0;
+
+            let blackFrames = 0;
+
+            let analyzedFrames = 0;
+
+
+            function finish() {
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+                const ratio =
+                    analyzedFrames
+                        ? blackFrames /
+                          analyzedFrames
+                        : 0;
+
+
+                const reasons = [];
+
+
+                /*
+                    Señal fuerte:
+                    prácticamente todo el video
+                    aparece negro.
+
+                    Esta señal tiene prioridad
+                    sobre la duración.
+                */
+
+                if (
+                    ratio >=
+                    QUALITY_CONFIG.blackFrameRatio
+                ) {
+
+                    reasons.push(
+                        "La mayoría de las muestras visuales aparecen prácticamente negras."
+                    );
+
+                    resolve({
+
+                        score: 10,
+
+                        status:
+                            "bad",
+
+                        label:
+                            "🔴 Toma mala",
+
+                        reasons
+
+                    });
+
+                    return;
+                }
+
+
+                /*
+                    Menos de 2 segundos:
+                    toma extremadamente corta.
+                */
+
+                if (
+                    duration <
+                    QUALITY_CONFIG.veryShortDuration
+                ) {
+
+                    reasons.push(
+                        `Duración extremadamente corta (${formatDuration(duration)}).`
+                    );
+
+                    resolve({
+
+                        score: 20,
+
+                        status:
+                            "bad",
+
+                        label:
+                            "🔴 Toma mala",
+
+                        reasons
+
+                    });
+
+                    return;
+                }
+
+
+                /*
+                    De 2 a 6 segundos:
+                    puede contener una frase,
+                    saludo, intro o fragmento útil.
+
+                    NO se considera mala automáticamente.
+                */
+
+                if (
+                    duration <=
+                    QUALITY_CONFIG.shortDuration
+                ) {
+
+                    reasons.push(
+                        `Duración corta (${formatDuration(duration)}). Puede contener una frase, intro o fragmento útil.`
+                    );
+
+                    resolve({
+
+                        score: 55,
+
+                        status:
+                            "review",
+
+                        label:
+                            "🟠 Revisar",
+
+                        reasons
+
+                    });
+
+                    return;
+                }
+
+
+                /*
+                    Más de 6 segundos:
+                    no presenta una señal técnica
+                    evidente de problema.
+                */
+
+                resolve({
+
+                    score: 100,
+
+                    status:
+                        "good",
+
+                    label:
+                        "🟢 Buena",
+
+                    reasons:
+                        [
+                            "No se detectaron problemas técnicos evidentes en esta primera revisión."
+                        ]
+
+                });
+            }
+
+
+            function sampleFrame() {
+
+                if (
+                    currentIndex >=
+                    sampleTimes.length
+                ) {
+
+                    finish();
+
+                    return;
+                }
+
+
+                const requestedTime =
+                    Math.min(
+                        duration - 0.05,
+                        Math.max(
+                            0,
+                            duration *
+                            sampleTimes[
+                                currentIndex
+                            ]
+                        )
+                    );
+
+
+                video.currentTime =
+                    requestedTime;
+            }
+
+
+            video.addEventListener(
+                "loadedmetadata",
+                () => {
+
+                    canvas.width = 160;
+                    canvas.height = 90;
+
+                    sampleFrame();
+
+                }
+            );
+
+
+            video.addEventListener(
+                "seeked",
+                () => {
+
+                    try {
+
+                        ctx.drawImage(
+                            video,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
+
+
+                        const imageData =
+                            ctx.getImageData(
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+
+
+                        const pixels =
+                            imageData.data;
+
+
+                        let totalLuma = 0;
+
+                        let count = 0;
+
+
+                        for (
+                            let i = 0;
+                            i < pixels.length;
+                            i += 16
+                        ) {
+
+                            const r =
+                                pixels[i];
+
+                            const g =
+                                pixels[i + 1];
+
+                            const b =
+                                pixels[i + 2];
+
+
+                            const luma =
+                                (
+                                    0.2126 * r +
+                                    0.7152 * g +
+                                    0.0722 * b
+                                );
+
+
+                            totalLuma +=
+                                luma;
+
+                            count++;
+
+                        }
+
+
+                        const averageLuma =
+                            count
+                                ? totalLuma /
+                                  count
+                                : 0;
+
+
+                        if (
+                            averageLuma <=
+                            QUALITY_CONFIG.blackLuma
+                        ) {
+
+                            blackFrames++;
+                        }
+
+
+                        analyzedFrames++;
+
+                    } catch (error) {
+
+                        console.warn(
+                            "No se pudo analizar un frame:",
+                            error
+                        );
+
+                    }
+
+
+                    currentIndex++;
+
+                    sampleFrame();
+
+                }
+            );
+
+
+            video.addEventListener(
+                "error",
+                () => {
+
+                    URL.revokeObjectURL(
+                        url
+                    );
+
+                    resolve({
+
+                        score: 50,
+
+                        status:
+                            "review",
+
+                        label:
+                            "🟠 Revisar",
+
+                        reasons:
+                            [
+                                "No fue posible realizar el análisis visual del video."
+                            ]
+
+                    });
+
+                }
+            );
+
+
+            video.preload =
+                "auto";
+
+            video.muted =
+                true;
+
+            video.playsInline =
+                true;
+
+            video.src =
+                url;
+
+        }
+    );
+}
+
+
+/* =========================================================
+   FASE 2
+   CLASIFICADOR PRINCIPAL
+========================================================= */
+
+async function classifyClip(
+    file,
+    duration
+) {
+
+    const result = {
+
+        status:
+            "review",
+
+        label:
+            "🟠 Revisar",
+
+        score:
+            50,
+
+        reasons:
+            [],
+
+        technical:
+            true
+
+    };
+
+
+    /*
+        Primero comprobamos si existe duración.
+    */
+
+    if (
+        !Number.isFinite(duration)
+    ) {
+
+        result.reasons.push(
+            "No se pudo determinar la duración del video."
+        );
+
+        return result;
+    }
+
+
+    /*
+        Análisis visual básico.
+    */
+
+    const visual =
+        await analyzeVisualQuality(
+            file,
+            duration
+        );
+
+
+    result.status =
+        visual.status;
+
+    result.label =
+        visual.label;
+
+    result.score =
+        visual.score;
+
+    result.reasons =
+        visual.reasons;
+
+
+    return result;
+}
+
+
+/* =========================================================
+   MEDIAINFO
+========================================================= */
+
+async function initializeMediaInfo() {
+
+    if (
+        mediaInfoInstance
+    ) {
+
+        return mediaInfoInstance;
+    }
+
+
+    mediaInfoInstance =
+        await new Promise(
+            (resolve, reject) => {
+
+                MediaInfo(
+                    {
+
+                        format:
+                            "object",
+
+                        full:
+                            true,
+
+                        chunkSize:
+                            CHUNK_SIZE,
+
+                        locateFile:
+                            () =>
+                                MEDIAINFO_WASM
+
+                    },
+
+                    resolve,
+
+                    reject
+                );
+
+            }
+        );
+
+
+    return mediaInfoInstance;
+}
+
+
+/* =========================================================
+   ANALIZAR VIDEO
+========================================================= */
+
+async function analyzeVideo(file) {
+
+    const result = {
+
+        file,
+
+        name:
+            file.name,
+
+        size:
+            file.size,
+
+        lastModified:
+            new Date(
+                file.lastModified
+            ),
+
+        mediaInfo:
+            null,
+
+        duration:
+            null,
+
+        date:
+            null,
+
+        source:
+            "",
+
+        confidence:
+            "baja",
+
+        confidenceScore:
+            0,
+
+        fallback:
+            false,
+
+        device:
+            "No identificado",
+
+        dateFields:
+            [],
+
+        error:
+            null,
+
+        quality:
+            null
+
+    };
+
+
+    try {
+
+        const mediainfo =
+            await initializeMediaInfo();
+
+
+        const getSize =
+            () => file.size;
+
+
+        const readChunk =
+            (chunkSize, offset) => {
+
+                return file
+                    .slice(
+                        offset,
+                        offset + chunkSize
+                    )
+                    .arrayBuffer()
+                    .then(
+                        buffer =>
+                            new Uint8Array(
+                                buffer
+                            )
+                    );
+            };
+
+
+        loadingStatus.textContent =
+            `Analizando metadata: ${file.name}`;
+
+
+        /*
+            MediaInfo ORIGINAL.
+        */
+
+        const info =
+            await mediainfo.analyzeData(
+                getSize,
+                readChunk
+            );
+
+
+        result.mediaInfo =
+            info;
+
+
+        result.dateFields =
+            collectDateFields(info)
+                .filter(
+                    item =>
+                        item.parsed
+                );
+
+
+        const chosen =
+            chooseBestDate(
+                info,
+                file
+            );
+
+
+        result.date =
+            chosen.date;
+
+        result.source =
+            chosen.source;
+
+        result.confidence =
+            chosen.confidence;
+
+        result.confidenceScore =
+            chosen.confidenceScore;
+
+        result.fallback =
+            Boolean(
+                chosen.fallback
+            );
+
+
+        result.device =
+            detectDevice(info);
+
+
+        result.duration =
+            await getVideoDuration(
+                file
+            );
+
+
+        /*
+            =================================================
+            NUEVA CAPA — FASE 2
+            =================================================
+        */
+
+        loadingStatus.textContent =
+            `Revisando calidad de la toma: ${file.name}`;
+
+
+        result.quality =
+            await classifyClip(
+                file,
+                result.duration
+            );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error MediaInfo:",
+            error
+        );
+
+
+        result.error =
+            error?.message ||
+            String(error);
+
+
+        result.date =
+            null;
+
+        result.source =
+            "No disponible";
+
+        result.confidence =
+            "baja";
+
+        result.confidenceScore =
+            0;
+
+        result.fallback =
+            false;
+
+
+        result.duration =
+            await getVideoDuration(
+                file
+            );
+
+
+        /*
+            Incluso si MediaInfo falla,
+            intentamos realizar la clasificación.
+        */
+
+        try {
+
+            result.quality =
+                await classifyClip(
+                    file,
+                    result.duration
+                );
+
+        } catch (
+            qualityError
+        ) {
+
+            console.error(
+                "Error Fase 2:",
+                qualityError
+            );
+
+            result.quality = {
+
+                status:
+                    "review",
+
+                label:
+                    "🟠 Revisar",
+
+                score:
+                    50,
+
+                reasons:
+                    [
+                        "No fue posible completar la revisión técnica."
+                    ]
+
+            };
+        }
+    }
+
+
+    return result;
+}
+
+
+/* =========================================================
+   ANALIZAR TODOS
+========================================================= */
+
+async function analyzeFiles(files) {
+
+    const validFiles =
+        Array.from(files)
+            .filter(
+                file => {
+
+                    const name =
+                        file.name.toLowerCase();
+
+                    return (
+
+                        name.endsWith(".mp4") ||
+
+                        name.endsWith(".mov") ||
+
+                        name.endsWith(".m4v") ||
+
+                        name.endsWith(".webm") ||
+
+                        name.endsWith(".mkv") ||
+
+                        name.endsWith(".avi")
+
+                    );
+                }
+            );
+
+
+    if (
+        !validFiles.length
+    ) {
+
+        alert(
+            "No encontré videos compatibles."
+        );
+
+        return;
+    }
+
+
+    loadingCard.classList.add(
+        "active"
+    );
+
+    resultsCard.style.display =
+        "none";
+
+    progressBar.style.width =
+        "0%";
+
+
+    try {
+
+        await initializeMediaInfo();
+
+    } catch (error) {
+
+        console.error(error);
+
+        loadingStatus.textContent =
+            "No se pudo cargar MediaInfo.js.";
+
+        alert(
+            "No se pudo cargar el analizador MediaInfo. Revisa tu conexión a Internet e inténtalo nuevamente."
+        );
+
+        loadingCard.classList.remove(
+            "active"
+        );
+
+        return;
+    }
+
+
+    const results = [];
+
+
+    for (
+        let i = 0;
+        i < validFiles.length;
+        i++
+    ) {
+
+        const file =
+            validFiles[i];
+
+
+        loadingStatus.textContent =
+            `Analizando ${i + 1} de ${validFiles.length}: ${file.name}`;
+
+
+        const result =
+            await analyzeVideo(
+                file
+            );
+
+
+        results.push(
+            result
+        );
+
+
+        const percent =
+            (
+                (i + 1) /
+                validFiles.length
+            ) * 100;
+
+
+        progressBar.style.width =
+            `${percent}%`;
+
+
+        await sleep(10);
+    }
+
+
+    /*
+        ORDEN ORIGINAL DE FASE 1:
+
+        1. Clips con fecha original.
+        2. Orden cronológico.
+        3. Clips sin fecha.
+        4. Orden de selección.
+    */
+
+    results.forEach(
+        (item, index) => {
+
+            item.originalIndex =
+                index;
+
+        }
+    );
+
+
+    results.sort(
+        (a, b) => {
+
+            const hasDateA =
+                a.date instanceof Date &&
+                !isNaN(
+                    a.date.getTime()
+                );
+
+
+            const hasDateB =
+                b.date instanceof Date &&
+                !isNaN(
+                    b.date.getTime()
+                );
+
+
+            if (
+                hasDateA &&
+                !hasDateB
+            ) {
+
+                return -1;
+            }
+
+
+            if (
+                !hasDateA &&
+                hasDateB
+            ) {
+
+                return 1;
+            }
+
+
+            if (
+                !hasDateA &&
+                !hasDateB
+            ) {
+
+                return (
+                    a.originalIndex -
+                    b.originalIndex
+                );
+            }
+
+
+            const dateA =
+                a.date.getTime();
+
+            const dateB =
+                b.date.getTime();
+
+
+            if (
+                dateA !== dateB
+            ) {
+
+                return (
+                    dateA -
+                    dateB
+                );
+            }
+
+
+            return (
+                a.originalIndex -
+                b.originalIndex
+            );
+
+        }
+    );
+
+
+    analyzedClips =
+        results;
+
+
+    renderResults();
+
+
+    loadingCard.classList.remove(
+        "active"
+    );
+
+
+    resultsCard.style.display =
+        "block";
+
+
+    resultsCard.scrollIntoView({
+        behavior:
+            "smooth",
+
+        block:
+            "start"
+    });
+}
+
+
+/* =========================================================
+   RENDERIZAR
+========================================================= */
+
+function renderResults() {
+
+    resultsBody.innerHTML =
+        "";
+
+
+    let high = 0;
+
+    let noOriginalDate = 0;
+
+    let errors = 0;
+
+    let good = 0;
+
+    let review = 0;
+
+    let bad = 0;
+
+
+    analyzedClips.forEach(
+        (clip, index) => {
+
+            if (
+                clip.confidence ===
+                "alta"
+            ) {
+
+                high++;
+            }
+
+
+            if (!clip.date) {
+
+                noOriginalDate++;
+            }
+
+
+            if (clip.error) {
+
+                errors++;
+            }
+
+
+            if (
+                clip.quality?.status ===
+                "good"
+            ) {
+
+                good++;
+
+            } else if (
+                clip.quality?.status ===
+                "bad"
+            ) {
+
+                bad++;
+
+            } else {
+
+                review++;
+            }
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const confidenceClass =
+
+                clip.confidence ===
+                "alta"
+
+                    ? "high"
+
+                    : clip.confidence ===
+                      "media"
+
+                        ? "medium"
+
+                        : "low";
+
+
+            const confidenceText =
+
+                clip.confidence ===
+                "alta"
+
+                    ? "🟢 Alta"
+
+                    : clip.confidence ===
+                      "media"
+
+                        ? "🟡 Media"
+
+                        : "🔴 Baja";
+
+
+            const qualityClass =
+
+                clip.quality?.status ===
+                "good"
+
+                    ? "good"
+
+                    : clip.quality?.status ===
+                      "bad"
+
+                        ? "bad"
+
+                        : "review";
+
+
+            const qualityLabel =
+
+                clip.quality?.label ||
+                "🟠 Revisar";
+
+
+            const diagnosticHTML =
+                buildDiagnosticHTML(
+                    clip
+                );
+
+
+            tr.innerHTML = `
+
+<td>
+<strong>
+${String(index + 1).padStart(2, "0")}
+</strong>
+</td>
+
+<td>
+
+<div class="filename">
+${escapeHTML(clip.name)}
+</div>
+
+<div class="source">
+${formatBytes(clip.size)}
+</div>
+
+</td>
+
+<td>
+
+<div class="date-main">
+${formatDate(clip.date)}
+</div>
+
+${
+!clip.date
+
+? `
+
+<div class="source">
+⚠️ No se encontró fecha original
+</div>
+
+`
+
+: ""
+
+}
+
+</td>
+
+<td>
+
+<div>
+${escapeHTML(clip.source)}
+</div>
+
+</td>
+
+<td>
+
+<span class="confidence ${confidenceClass}">
+${confidenceText}
+</span>
+
+</td>
+
+<td>
+${formatDuration(clip.duration)}
+</td>
+
+<td>
+
+<div class="device">
+${escapeHTML(clip.device)}
+</div>
+
+</td>
+
+<td>
+
+<span class="quality-badge ${qualityClass}">
+${qualityLabel}
+</span>
+
+</td>
+
+`;
+
+
+            resultsBody.appendChild(
+                tr
+            );
+
+
+            const diagnosticRow =
+                document.createElement(
+                    "tr"
+                );
+
+
+            diagnosticRow.innerHTML = `
+
+<td colspan="8">
+
+${diagnosticHTML}
+
+</td>
+
+`;
+
+
+            resultsBody.appendChild(
+                diagnosticRow
+            );
+
+        }
+    );
+
+
+    totalCount.textContent =
+        analyzedClips.length;
+
+
+    highCount.textContent =
+        high;
+
+
+    fallbackCount.textContent =
+        noOriginalDate;
+
+
+    goodCount.textContent =
+        good;
+
+
+    reviewCount.textContent =
+        review;
+
+
+    badCount.textContent =
+        bad;
+
+
+    errorCount.textContent =
+        errors;
+
+
+    readyCount.textContent =
+        `${good} clips`;
+
+
+    reviewFolderCount.textContent =
+        `${review} clips`;
+
+
+    badFolderCount.textContent =
+        `${bad} clips`;
+}
+
+
+/* =========================================================
+   DIAGNÓSTICO
+========================================================= */
+
+function buildDiagnosticHTML(clip) {
+
+    let datesHTML = "";
+
+
+    if (
+        clip.dateFields.length
+    ) {
+
+        datesHTML =
+            clip.dateFields
+                .map(
+                    field => {
+
+                        return `
+
+<div class="diag-row">
+
+<div class="diag-key">
+
+${escapeHTML(field.path)}
+
+</div>
+
+<div class="diag-value">
+
+${escapeHTML(field.value)}
+
+${
+field.parsed
+
+? `
+
+<span class="muted">
+
+→ ${formatDate(field.parsed)}
+
+</span>
+
+`
+
+: ""
+
+}
+
+</div>
+
+</div>
+
+`;
+
+                    }
+                )
+                .join("");
+
+    } else {
+
+        datesHTML = `
+
+<div class="warning">
+
+⚠️ MediaInfo no encontró campos de fecha interpretables.
+
+</div>
+
+`;
+
+    }
+
+
+    let statusHTML;
+
+
+    if (clip.error) {
+
+        statusHTML = `
+
+<div class="error">
+
+❌ No fue posible analizar completamente
+la metadata de este archivo.
+
+</div>
+
+`;
+
+    } else if (clip.date) {
+
+        statusHTML = `
+
+<div class="success">
+
+✅ Se encontró metadata temporal.
+
+La fecha seleccionada fue:
+
+<strong>
+${escapeHTML(clip.source)}
+</strong>
+
+</div>
+
+`;
+
+    } else {
+
+        statusHTML = `
+
+<div class="warning">
+
+⚠️ MediaInfo no encontró una fecha
+que pueda considerarse fecha ORIGINAL
+de grabación.
+
+Se muestra
+
+<strong>
+No disponible
+</strong>.
+
+File.lastModified no se utiliza como
+fecha de grabación.
+
+</div>
+
+`;
+    }
+
+
+    const quality =
+        clip.quality ||
+        {
+
+            label:
+                "🟠 Revisar",
+
+            status:
+                "review",
+
+            score:
+                50,
+
+            reasons:
+                [
+                    "No se obtuvo una clasificación."
+                ]
+
+        };
+
+
+    const qualityClass =
+
+        quality.status ===
+        "good"
+
+            ? "success"
+
+            : quality.status ===
+              "bad"
+
+                ? "error"
+
+                : "warning";
+
+
+    const qualityReasons =
+        quality.reasons
+            .map(
+                reason =>
+                    `<li>${escapeHTML(reason)}</li>`
+            )
+            .join("");
+
+
+    const qualityHTML = `
+
+<div class="${qualityClass}">
+
+<strong>
+${escapeHTML(quality.label)}
+</strong>
+
+<br><br>
+
+Puntuación técnica inicial:
+<strong>
+${quality.score}/100
+</strong>
+
+<ul style="margin-bottom:0;">
+
+${qualityReasons}
+
+</ul>
+
+</div>
+
+`;
+
+
+    const errorHTML =
+
+        clip.error
+
+            ? `
+
+<div
+class="error"
+style="margin-top:12px;"
+>
+
+❌ Detalle técnico:
+
+${escapeHTML(clip.error)}
+
+</div>
+
+`
+
+            : "";
+
+
+    return `
+
+<details class="diagnostic">
+
+<summary>
+
+🔎 Diagnóstico completo de metadata —
+
+${escapeHTML(clip.name)}
+
+</summary>
+
+
+<div class="diagnostic-content">
+
+
+${statusHTML}
+
+
+${errorHTML}
+
+
+<div
+class="diag-section"
+style="margin-top:15px;"
+>
+
+<div class="diag-title">
+
+🤖 Fase 2 — Evaluación de la toma
+
+</div>
+
+${qualityHTML}
+
+</div>
+
+
+<div
+class="diag-section"
+>
+
+<div class="diag-title">
+
+📅 Campos de fecha encontrados por MediaInfo
+
+</div>
+
+${datesHTML}
+
+</div>
+
+
+<div class="diag-section">
+
+<div class="diag-title">
+
+📦 Información del archivo
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+Nombre
+</div>
+
+<div class="diag-value">
+
+${escapeHTML(clip.name)}
+
+</div>
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+Tamaño
+</div>
+
+<div class="diag-value">
+
+${formatBytes(clip.size)}
+
+</div>
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+File.lastModified
+</div>
+
+<div class="diag-value">
+
+${formatDate(clip.lastModified)}
+
+</div>
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+Dispositivo detectado
+</div>
+
+<div class="diag-value">
+
+${escapeHTML(clip.device)}
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="diag-section">
+
+<div class="diag-title">
+
+🧠 Decisión de ClipOrganizer
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+Fecha utilizada
+</div>
+
+<div class="diag-value">
+
+${formatDate(clip.date)}
+
+</div>
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+Fuente elegida
+</div>
+
+<div class="diag-value">
+
+${escapeHTML(clip.source)}
+
+</div>
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+Confianza
+</div>
+
+<div class="diag-value">
+
+${escapeHTML(clip.confidence)}
+
+</div>
+
+</div>
+
+
+<div class="diag-row">
+
+<div class="diag-key">
+Evaluación de toma
+</div>
+
+<div class="diag-value">
+
+${escapeHTML(quality.label)}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</details>
+
+`;
+
+}
+
+
+/* =========================================================
+   DRAG & DROP
+========================================================= */
+
+dropZone.addEventListener(
+    "dragover",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.add(
+            "dragover"
+        );
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragleave",
+    () => {
+
+        dropZone.classList.remove(
+            "dragover"
+        );
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "drop",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.remove(
+            "dragover"
+        );
+
+
+        const files =
+            event.dataTransfer.files;
+
+
+        analyzeFiles(files);
+
+    }
+);
+
+
+/* =========================================================
+   FILE INPUT
+========================================================= */
+
+fileInput.addEventListener(
+    "change",
+    () => {
+
+        if (
+            fileInput.files.length
+        ) {
+
+            analyzeFiles(
+                fileInput.files
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   DESCARGAR ZIP
+========================================================= */
+
+downloadVideosBtn.addEventListener(
+    "click",
+    async () => {
+
+        if (
+            !analyzedClips.length
+        ) {
+
+            return;
+        }
+
+
+        if (
+            typeof JSZip === "undefined"
+        ) {
+
+            alert(
+                "No se pudo cargar el generador ZIP. Revisa tu conexión a Internet e inténtalo nuevamente."
+            );
+
+            return;
+        }
+
+
+        downloadVideosBtn.disabled =
+            true;
+
+
+        const originalText =
+            downloadVideosBtn.textContent;
+
+
+        try {
+
+            const zip =
+                new JSZip();
+
+
+            for (
+                let i = 0;
+                i < analyzedClips.length;
+                i++
+            ) {
+
+                const clip =
+                    analyzedClips[i];
+
+
+                const originalName =
+                    clip.name;
+
+
+                const numberedName =
+                    `${String(
+                        i + 1
+                    ).padStart(
+                        3,
+                        "0"
+                    )}_${originalName}`;
+
+
+                loadingCard.classList.add(
+                    "active"
+                );
+
+
+                loadingStatus.textContent =
+                    `Preparando ZIP: ${i + 1} de ${analyzedClips.length} — ${numberedName}`;
+
+
+                progressBar.style.width =
+                    `${(
+                        (i + 1) /
+                        analyzedClips.length
+                    ) * 100}%`;
+
+
+                zip.file(
+                    numberedName,
+                    clip.file
+                );
+
+
+                await sleep(10);
+            }
+
+
+            loadingStatus.textContent =
+                "Comprimiendo ZIP...";
+
+
+            progressBar.style.width =
+                "100%";
+
+
+            const zipBlob =
+                await zip.generateAsync(
+                    {
+                        type: "blob",
+                        compression: "STORE"
+                    },
+
+                    metadata => {
+
+                        loadingStatus.textContent =
+                            `Comprimiendo ZIP: ${Math.round(
+                                metadata.percent
+                            )}%`;
+
+                        progressBar.style.width =
+                            `${metadata.percent}%`;
+
+                    }
+                );
+
+
+            const now =
+                new Date();
+
+
+            const datePart =
+                `${now.getFullYear()}-${String(
+                    now.getMonth() + 1
+                ).padStart(
+                    2,
+                    "0"
+                )}-${String(
+                    now.getDate()
+                ).padStart(
+                    2,
+                    "0"
+                )}`;
+
+
+            const zipName =
+                `ClipOrganizer_${datePart}.zip`;
+
+
+            const url =
+                URL.createObjectURL(
+                    zipBlob
+                );
+
+
+            const a =
+                document.createElement(
+                    "a"
+                );
+
+
+            a.href =
+                url;
+
+            a.download =
+                zipName;
+
+
+            document.body.appendChild(
+                a
+            );
+
+
+            a.click();
+
+            a.remove();
+
+
+            setTimeout(
+                () => {
+
+                    URL.revokeObjectURL(
+                        url
+                    );
+
+                },
+                3000
+            );
+
+
+            loadingStatus.textContent =
+                `✅ ZIP listo: ${zipName}`;
+
+
+            await sleep(700);
+
+
+        } catch (error) {
+
+            console.error(
+                "Error creando ZIP:",
+                error
+            );
+
+
+            alert(
+                "No se pudo crear el ZIP. Revisa la consola para obtener más información."
+            );
+
+
+        } finally {
+
+            downloadVideosBtn.disabled =
+                false;
+
+
+            downloadVideosBtn.textContent =
+                originalText;
+
+
+            loadingCard.classList.remove(
+                "active"
+            );
+
+
+            progressBar.style.width =
+                "0%";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   LIMPIAR
+========================================================= */
+
+clearBtn.addEventListener(
+    "click",
+    () => {
+
+        analyzedClips = [];
+
+
+        resultsBody.innerHTML =
+            "";
+
+
+        resultsCard.style.display =
+            "none";
+
+
+        loadingCard.classList.remove(
+            "active"
+        );
+
+
+        progressBar.style.width =
+            "0%";
+
+
+        fileInput.value =
+            "";
+
+
+        totalCount.textContent =
+            "0";
+
+
+        highCount.textContent =
+            "0";
+
+
+        fallbackCount.textContent =
+            "0";
+
+
+        goodCount.textContent =
+            "0";
+
+
+        reviewCount.textContent =
+            "0";
+
+
+        badCount.textContent =
+            "0";
+
+
+        errorCount.textContent =
+            "0";
+
+
+        readyCount.textContent =
+            "0 clips";
+
+
+        reviewFolderCount.textContent =
+            "0 clips";
+
+
+        badFolderCount.textContent =
+            "0 clips";
+
+    }
+);
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+console.log(
+    "🎬 ClipOrganizer AI Fase 2 iniciado"
+);
+
+console.log(
+    "🔒 Análisis realizado localmente en el navegador."
+);
+
+console.log(
+    "📅 Sistema de fechas: metadata original → No disponible"
+);
+
+console.log(
+    "📦 Sistema ZIP: orden cronológico → numeración → ZIP"
+);
+
+console.log(
+    "🤖 Fase 2: detector técnico conservador de tomas"
+);
+
+console.log(
+    "🔴 <2s = Toma mala | 🟠 2–6s = Revisar | 🟢 >6s = Buena"
+);
+
+</script>
+
+</body>
+</html>
