@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ClipOrganizer AI — Organización Inteligente Local</title>
+
+<!-- MediaInfo.js -->
+<script src="https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/mediainfo.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at top, #182238 0%, #090d16 48%, #05070b 100%);
+    color: #f3f5f7;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+}
+
+.container {
+    width: min(1150px, 94%);
+    margin: 0 auto;
+    padding: 35px 0 60px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(28px, 5vw, 42px);
+}
+
+.subtitle {
+    color: #aeb8c9;
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+.badges {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.badge {
+    background: #111827;
+    border: 1px solid #263247;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 12px;
+    color: #bfc9da;
+}
+
+.badge.local {
+    border-color: #285b45;
+    color: #78e6a9;
+}
+
+.card {
+    background: rgba(14, 19, 31, 0.92);
+    border: 1px solid #202b3e;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 15px 45px rgba(0,0,0,.25);
+}
+
+.drop-zone {
+    border: 2px dashed #394862;
+    border-radius: 16px;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: #7b8cff;
+    background: rgba(123, 140, 255, .06);
+}
+
+.drop-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.drop-zone h2 {
+    margin: 0 0 8px;
+}
+
+.drop-zone p {
+    margin: 0;
+    color: #929db0;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+button {
+    border: 0;
+    border-radius: 11px;
+    padding: 12px 17px;
+    background: #6675ff;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.secondary {
+    background: #202a3c;
+}
+
+.danger {
+    background: #47202a;
+}
+
+.loading {
+    display: none;
+}
+
+.loading.active {
+    display: block;
+}
+
+.progress {
+    height: 8px;
+    background: #161e2c;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #7382ff;
+    transition: width .2s;
+}
+
+.status {
+    color: #aeb8c9;
+    font-size: 14px;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.stat {
+    background: #101725;
+    border: 1px solid #202c40;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.stat-number {
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.stat-label {
+    color: #8793a8;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* TABLE */
+
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #202c40;
+    border-radius: 13px;
+}
+
+table {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #202738;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background: #121a29;
+    color: #b9c5d8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+td {
+    font-size: 13px;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+.filename {
+    font-weight: 700;
+    max-width: 260px;
+    word-break: break-word;
+}
+
+.date-main {
+    font-weight: 700;
+}
+
+.source {
+    color: #aeb8c9;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.confidence {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.high {
+    background: rgba(44, 184, 105, .14);
+    color: #69e69c;
+}
+
+.medium {
+    background: rgba(240, 180, 60, .14);
+    color: #f4c768;
+}
+
+.low {
+    background: rgba(238, 88, 88, .14);
+    color: #ff8d8d;
+}
+
+.device {
+    color: #bbc6d7;
+}
+
+.muted {
+    color: #69758a;
+}
+
+/* DIAGNOSTIC */
+
+.diagnostic {
+    margin-top: 16px;
+    border: 1px solid #263247;
+    border-radius: 13px;
+    overflow: hidden;
+}
+
+.diagnostic summary {
+    cursor: pointer;
+    padding: 13px 15px;
+    background: #111927;
+    color: #c7d0df;
+    font-weight: 700;
+}
+
+.diagnostic-content {
+    padding: 15px;
+    background: #0b111c;
+}
+
+.diag-section {
+    margin-bottom: 18px;
+}
+
+.diag-section:last-child {
+    margin-bottom: 0;
+}
+
+.diag-title {
+    color: #8d9bb0;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.diag-row {
+    display: grid;
+    grid-template-columns: minmax(190px, 1fr) minmax(180px, 2fr);
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid #192333;
+    font-size: 12px;
+}
+
+.diag-row:last-child {
+    border-bottom: 0;
+}
+
+.diag-key {
+    color: #7f8da3;
+    word-break: break-word;
+}
+
+.diag-value {
+    color: #d5dbe5;
+    word-break: break-word;
+}
+
+.warning {
+    background: rgba(240, 180, 60, .08);
+    border: 1px solid rgba(240, 180, 60, .22);
+    color: #eec76e;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.success {
+    background: rgba(44, 184, 105, .08);
+    border: 1px solid rgba(44, 184, 105, .22);
+    color: #72e7a1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.error {
+    background: rgba(238, 88, 88, .08);
+    border: 1px solid rgba(238, 88, 88, .22);
+    color: #ff9292;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.folder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.folder {
+    background: #101725;
+    border: 1px solid #202c40;
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.folder-icon {
+    font-size: 28px;
+}
+
+.folder-title {
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+.folder-count {
+    color: #8793a8;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.small-note {
+    color: #6f7d92;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+footer {
+    text-align: center;
+    color: #58657a;
+    font-size: 12px;
+    margin-top: 35px;
+}
+
+@media (max-width: 650px) {
+    .container {
+        width: 92%;
+        padding-top: 22px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .drop-zone {
+        min-height: 190px;
+    }
+
+    .diag-row {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <div class="logo">🎬</div>
+
+    <h1>ClipOrganizer AI</h1>
+
+    <div class="subtitle">
+        Organización inteligente de clips basada en la fecha real del archivo
+    </div>
+
+    <div class="badges">
+        <span class="badge local">🔒 Procesamiento local</span>
+        <span class="badge">📱 iPhone</span>
+        <span class="badge">🤖 Android</span>
+        <span class="badge">📷 Cámaras</span>
+        <span class="badge">🎥 MP4 / MOV</span>
+    </div>
+</header>
+
+<!-- UPLOAD -->
+
+<section class="card">
+
+    <label for="fileInput" class="drop-zone" id="dropZone">
+
+        <div>
+            <div class="drop-icon">📂</div>
+
+            <h2>Selecciona tus videos</h2>
+
+            <p>
+                O arrástralos aquí
+            </p>
+
+            <p class="small-note" style="margin-top:10px;">
+                ClipOrganizer intentará encontrar la fecha ORIGINAL de grabación
+                antes de usar la fecha del archivo.
+            </p>
+        </div>
+
+    </label>
+
+    <input
+        type="file"
+        id="fileInput"
+        multiple
+        accept="video/mp4,video/quicktime,.mp4,.mov,.m4v,.avi,.mkv,.webm"
+    >
+
+</section>
+
+<!-- LOADING -->
+
+<section class="card loading" id="loadingCard">
+
+    <div class="status" id="loadingStatus">
+        Preparando análisis...
+    </div>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+</section>
+
+<!-- RESULTS -->
+
+<section class="card" id="resultsCard" style="display:none;">
+
+    <h2>📊 Diagnóstico de los clips</h2>
+
+    <p class="small-note">
+        La tabla se ordena por la fecha ORIGINAL de grabación encontrada
+        en los metadatos. La fecha del archivo se conserva por separado
+        y nunca se presenta como fecha de grabación.
+    </p>
+
+    <div class="summary">
+
+        <div class="stat">
+            <div class="stat-number" id="totalCount">0</div>
+            <div class="stat-label">Clips analizados</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number" id="highCount">0</div>
+            <div class="stat-label">Fechas confiables</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number" id="fallbackCount">0</div>
+            <div class="stat-label">Sin fecha original</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number" id="errorCount">0</div>
+            <div class="stat-label">Con errores</div>
+        </div>
+
+    </div>
+
+    <!-- MAIN TABLE -->
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Archivo</th>
+                    <th>Fecha de grabación</th>
+                    <th>Fuente</th>
+                    <th>Confianza</th>
+                    <th>Duración</th>
+                    <th>Dispositivo</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="resultsBody"></tbody>
+
+        </table>
+
+    </div>
+
+    <!-- FOLDERS -->
+
+    <h2 style="margin-top:30px;">📁 Organización</h2>
+
+    <div class="folder-grid">
+
+        <div class="folder">
+            <div class="folder-icon">✅</div>
+            <div class="folder-title">Listo para Editar</div>
+            <div class="folder-count" id="readyCount">
+                0 clips
+            </div>
+        </div>
+
+        <div class="folder">
+            <div class="folder-icon">⭐</div>
+            <div class="folder-title">Clips Extra / Borradores</div>
+            <div class="folder-count">
+                0 clips
+            </div>
+        </div>
+
+        <div class="folder">
+            <div class="folder-icon">🎧</div>
+            <div class="folder-title">Audio Separado</div>
+            <div class="folder-count">
+                Próximamente
+            </div>
+        </div>
+
+        <div class="folder">
+            <div class="folder-icon">🗑️</div>
+            <div class="folder-title">Trashed</div>
+            <div class="folder-count">
+                La IA decidirá posteriormente
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+
+    <div class="actions">
+
+        <button id="downloadVideosBtn">
+            ⬇️ Descargar videos numerados
+        </button>
+
+        <button class="secondary" id="downloadAudioBtn" disabled>
+            🎧 Audio separado — Próximamente
+        </button>
+
+        <button class="secondary" id="clearBtn">
+            🧹 Limpiar análisis
+        </button>
+
+    </div>
+
+</section>
+
+<footer>
+    ClipOrganizer AI · Metadata primero · IA después 🚀
+</footer>
+
+</div>
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const CHUNK_SIZE = 1024 * 1024;
+
+const MEDIAINFO_WASM =
+    "https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/MediaInfoModule.wasm";
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+let mediaInfoInstance = null;
+let analyzedClips = [];
+
+
+/* =========================================================
+   ELEMENTOS
+========================================================= */
+
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById("dropZone");
+
+const loadingCard = document.getElementById("loadingCard");
+const loadingStatus = document.getElementById("loadingStatus");
+const progressBar = document.getElementById("progressBar");
+
+const resultsCard = document.getElementById("resultsCard");
+const resultsBody = document.getElementById("resultsBody");
+
+const totalCount = document.getElementById("totalCount");
+const highCount = document.getElementById("highCount");
+const fallbackCount = document.getElementById("fallbackCount");
+const errorCount = document.getElementById("errorCount");
+
+const readyCount = document.getElementById("readyCount");
+
+const downloadVideosBtn =
+    document.getElementById("downloadVideosBtn");
+
+const clearBtn =
+    document.getElementById("clearBtn");
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+function formatBytes(bytes) {
+
+    if (!Number.isFinite(bytes)) return "—";
+
+    const units = ["B", "KB", "MB", "GB"];
+
+    let i = 0;
+    let value = bytes;
+
+    while (
+        value >= 1024 &&
+        i < units.length - 1
+    ) {
+        value /= 1024;
+        i++;
+    }
+
+    return `${value.toFixed(i === 0 ? 0 : 2)} ${units[i]}`;
+}
+
+
+function formatDuration(seconds) {
+
+    if (!Number.isFinite(seconds)) {
+        return "—";
+    }
+
+    seconds = Math.round(seconds);
+
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    if (h > 0) {
+        return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+
+/* =========================================================
+   FECHAS
+========================================================= */
+
+function parsePossibleDate(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return null;
+    }
+
+    let text = String(value).trim();
+
+    if (!text) {
+        return null;
+    }
+
+    let normalized = text
+        .replace(/^UTC\s*/i, "")
+        .trim();
+
+    /*
+      YYYY-MM-DD HH:mm:ss
+    */
+
+    normalized = normalized.replace(
+        /^(\d{4}-\d{2}-\d{2})\s+/,
+        "$1T"
+    );
+
+    /*
+      ISO / QuickTime
+    */
+
+    let date = new Date(normalized);
+
+    if (!isNaN(date.getTime())) {
+
+        const year = date.getUTCFullYear();
+
+        if (
+            year >= 2000 &&
+            year <= 2100
+        ) {
+            return date;
+        }
+    }
+
+
+    /*
+      YYYY:MM:DD HH:mm:ss
+    */
+
+    let match = text.match(
+        /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/
+    );
+
+    if (match) {
+
+        const year = Number(match[1]);
+        const month = Number(match[2]) - 1;
+        const day = Number(match[3]);
+        const hour = Number(match[4]);
+        const minute = Number(match[5]);
+        const second = Number(match[6] || 0);
+
+        const result = new Date(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second
+        );
+
+        if (
+            !isNaN(result.getTime()) &&
+            year >= 2000 &&
+            year <= 2100
+        ) {
+            return result;
+        }
+    }
+
+
+    /*
+      DD/MM/YYYY HH:mm:ss
+    */
+
+    match = text.match(
+        /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/
+    );
+
+    if (match) {
+
+        const day = Number(match[1]);
+        const month = Number(match[2]) - 1;
+        const year = Number(match[3]);
+
+        const hour = Number(match[4] || 0);
+        const minute = Number(match[5] || 0);
+        const second = Number(match[6] || 0);
+
+        const result = new Date(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second
+        );
+
+        if (
+            !isNaN(result.getTime()) &&
+            year >= 2000 &&
+            year <= 2100
+        ) {
+            return result;
+        }
+    }
+
+    return null;
+}
+
+
+function formatDate(date) {
+
+    if (
+        !(date instanceof Date) ||
+        isNaN(date.getTime())
+    ) {
+        return "No disponible";
+    }
+
+    return new Intl.DateTimeFormat("es-CO", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }).format(date);
+}
+
+
+/* =========================================================
+   NORMALIZACIÓN
+========================================================= */
+
+function normalizeKey(value) {
+
+    return String(value || "")
+        .toLowerCase()
+        .replace(/[\s_\-.:]/g, "");
+}
+
+
+/* =========================================================
+   MEDIAINFO — RECORRIDO PROFUNDO
+========================================================= */
+
+function collectAllFields(
+    value,
+    path = "",
+    output = []
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return output;
+    }
+
+    if (
+        typeof value !== "object"
+    ) {
+
+        output.push({
+            path,
+            value: String(value)
+        });
+
+        return output;
+    }
+
+    if (Array.isArray(value)) {
+
+        value.forEach((item, index) => {
+
+            collectAllFields(
+                item,
+                `${path}[${index}]`,
+                output
+            );
+
+        });
+
+        return output;
+    }
+
+    Object.entries(value).forEach(
+        ([key, val]) => {
+
+            const currentPath =
+                path
+                    ? `${path}.${key}`
+                    : key;
+
+            collectAllFields(
+                val,
+                currentPath,
+                output
+            );
+
+        }
+    );
+
+    return output;
+}
+
+
+/* =========================================================
+   CAMPOS DE FECHA
+========================================================= */
+
+/*
+  IMPORTANTE:
+
+  Aquí NO usamos lastModified.
+
+  Solo buscamos campos que realmente puedan
+  representar una fecha original de captura/grabación.
+
+  Encoded / Tagged / Modified quedan fuera.
+*/
+
+function looksLikeDateField(path, value) {
+
+    const p = normalizeKey(path);
+    const v = String(value || "").trim();
+
+    /*
+      Apple / QuickTime
+    */
+
+    const appleTerms = [
+        "comapplequicktimecreationdate",
+        "quicktimecreationdate",
+        "quicktimecreationtime"
+    ];
+
+    if (
+        appleTerms.some(
+            term => p.includes(term)
+        )
+    ) {
+        return true;
+    }
+
+
+    /*
+      DateTimeOriginal
+    */
+
+    if (
+        p.includes("datetimeoriginal")
+    ) {
+        return true;
+    }
+
+
+    /*
+      Recorded / Recording
+    */
+
+    if (
+        p.includes("recordeddate") ||
+        p.includes("recordedtime") ||
+        p.includes("recordingdate") ||
+        p.includes("recordingtime")
+    ) {
+        return true;
+    }
+
+
+    /*
+      CreationDate / CreationTime:
+
+      Solo aceptamos estas fechas cuando
+      pertenecen claramente a una pista/video.
+
+      Esto evita tomar fechas genéricas de
+      exportación como grabación original.
+    */
+
+    if (
+        (
+            p.includes("creationdate") ||
+            p.includes("creationtime")
+        ) &&
+        (
+            p.includes("video") ||
+            p.includes("track")
+        )
+    ) {
+        return true;
+    }
+
+
+    /*
+      Production Date
+    */
+
+    if (
+        p.includes("productiondate") ||
+        p.includes("productiontime")
+    ) {
+        return true;
+    }
+
+
+    /*
+      No usamos:
+      - Encoded
+      - Tagged
+      - Modified
+      - File.lastModified
+    */
+
+    return false;
+}
+
+
+/* =========================================================
+   EXTRAER CANDIDATOS
+========================================================= */
+
+function collectDateCandidates(data) {
+
+    const fields =
+        collectAllFields(data);
+
+    const candidates = [];
+
+    fields.forEach(field => {
+
+        if (
+            !looksLikeDateField(
+                field.path,
+                field.value
+            )
+        ) {
+            return;
+        }
+
+        const parsed =
+            parsePossibleDate(
+                field.value
+            );
+
+        candidates.push({
+            path: field.path,
+            value: field.value,
+            parsed
+        });
+
+    });
+
+    return candidates;
+}
+
+
+/* =========================================================
+   PUNTUACIÓN
+========================================================= */
+
+function scoreDateField(field) {
+
+    const p =
+        normalizeKey(field.path);
+
+    const raw =
+        String(field.value || "").toLowerCase();
+
+
+    /*
+      1. APPLE / QUICKTIME
+    */
+
+    if (
+        p.includes("comapplequicktimecreationdate") ||
+        p.includes("quicktimecreationdate") ||
+        p.includes("quicktimecreationtime") ||
+        raw.includes("com.apple.quicktime.creationdate")
+    ) {
+
+        return {
+            score: 120,
+            label: "🍎 QuickTime / Apple CreationDate",
+            confidence: "alta"
+        };
+    }
+
+
+    /*
+      2. DATETIMEORIGINAL
+    */
+
+    if (
+        p.includes("datetimeoriginal")
+    ) {
+
+        return {
+            score: 115,
+            label: "📷 DateTimeOriginal",
+            confidence: "alta"
+        };
+    }
+
+
+    /*
+      3. RECORDED / RECORDING
+    */
+
+    if (
+        p.includes("recordeddate") ||
+        p.includes("recordedtime") ||
+        p.includes("recordingdate") ||
+        p.includes("recordingtime")
+    ) {
+
+        return {
+            score: 105,
+            label: "🎥 Fecha de grabación",
+            confidence: "alta"
+        };
+    }
+
+
+    /*
+      4. CREATION DATE DE PISTA
+    */
+
+    if (
+        (
+            p.includes("creationdate") ||
+            p.includes("creationtime")
+        ) &&
+        (
+            p.includes("video") ||
+            p.includes("track")
+        )
+    ) {
+
+        return {
+            score: 90,
+            label: "🎬 Creation Date de pista",
+            confidence: "alta"
+        };
+    }
+
+
+    /*
+      5. PRODUCTION
+    */
+
+    if (
+        p.includes("productiondate") ||
+        p.includes("productiontime")
+    ) {
+
+        return {
+            score: 60,
+            label: "🎬 Production Date",
+            confidence: "media"
+        };
+    }
+
+
+    /*
+      Cualquier otro campo NO se utiliza.
+    */
+
+    return {
+        score: 0,
+        label: "No utilizada",
+        confidence: "baja"
+    };
+}
+
+
+/* =========================================================
+   ELEGIR FECHA ORIGINAL
+========================================================= */
+
+function chooseBestOriginalDate(
+    candidates
+) {
+
+    const evaluated =
+        candidates
+            .filter(
+                candidate =>
+                    candidate.parsed instanceof Date &&
+                    !isNaN(
+                        candidate.parsed.getTime()
+                    )
+            )
+            .map(candidate => {
+
+                const scoring =
+                    scoreDateField(
+                        candidate
+                    );
+
+                return {
+                    ...candidate,
+                    ...scoring
+                };
+
+            });
+
+
+    const valid =
+        evaluated
+            .filter(
+                item =>
+                    item.score > 0
+            )
+            .sort(
+                (a, b) => {
+
+                    if (
+                        b.score !== a.score
+                    ) {
+                        return b.score - a.score;
+                    }
+
+                    const aHasTime =
+                        /\d{2}:\d{2}/.test(
+                            a.value
+                        );
+
+                    const bHasTime =
+                        /\d{2}:\d{2}/.test(
+                            b.value
+                        );
+
+                    return (
+                        Number(bHasTime) -
+                        Number(aHasTime)
+                    );
+                }
+            );
+
+
+    if (!valid.length) {
+        return null;
+    }
+
+    return valid[0];
+}
+
+
+/* =========================================================
+   DISPOSITIVO
+========================================================= */
+
+function detectDevice(data) {
+
+    const json =
+        JSON.stringify(data);
+
+    const text =
+        json.toLowerCase();
+
+
+    if (
+        text.includes("iphone")
+    ) {
+
+        const model =
+            json.match(
+                /iPhone\s*(?:[A-Za-z0-9 ]+)?/i
+            );
+
+        if (model) {
+            return model[0].trim();
+        }
+
+        return "iPhone";
+    }
+
+
+    if (
+        text.includes("ipad")
+    ) {
+        return "iPad";
+    }
+
+
+    if (
+        text.includes("ipod")
+    ) {
+        return "iPod";
+    }
+
+
+    if (
+        text.includes("samsung")
+    ) {
+
+        const model =
+            json.match(
+                /SM-[A-Z0-9]+/i
+            );
+
+        if (model) {
+            return "Samsung " + model[0];
+        }
+
+        return "Samsung";
+    }
+
+
+    if (
+        text.includes("pixel")
+    ) {
+        return "Google Pixel";
+    }
+
+
+    if (
+        text.includes("xiaomi")
+    ) {
+        return "Xiaomi";
+    }
+
+
+    if (
+        text.includes("huawei")
+    ) {
+        return "Huawei";
+    }
+
+
+    if (
+        text.includes("canon")
+    ) {
+        return "Canon";
+    }
+
+
+    if (
+        text.includes("sony")
+    ) {
+        return "Sony";
+    }
+
+
+    if (
+        text.includes("nikon")
+    ) {
+        return "Nikon";
+    }
+
+
+    return "No identificado";
+}
+
+
+/* =========================================================
+   DURACIÓN
+========================================================= */
+
+function findDuration(data) {
+
+    const fields =
+        collectAllFields(data);
+
+    const possible =
+        fields.filter(field => {
+
+            const key =
+                normalizeKey(
+                    field.path
+                );
+
+            return key.includes(
+                "duration"
+            );
+        });
+
+
+    for (
+        const field of possible
+    ) {
+
+        const value =
+            String(field.value);
+
+        const number =
+            Number(value);
+
+        if (
+            Number.isFinite(number) &&
+            number > 0 &&
+            number < 86400
+        ) {
+
+            return number;
+        }
+
+
+        const match =
+            value.match(
+                /^(\d+):(\d{2}):(\d{2}(?:\.\d+)?)$/
+            );
+
+        if (match) {
+
+            return (
+                Number(match[1]) * 3600 +
+                Number(match[2]) * 60 +
+                Number(match[3])
+            );
+        }
+    }
+
+
+    return null;
+}
+
+
+/* =========================================================
+   MEDIAINFO
+   ESTA PARTE SE MANTIENE COMO LA QUE YA FUNCIONABA
+========================================================= */
+
+async function getMediaInfo() {
+
+    if (mediaInfoInstance) {
+        return mediaInfoInstance;
+    }
+
+    mediaInfoInstance =
+        await MediaInfo.mediaInfoFactory({
+            format: "object",
+            full: true,
+            chunkSize: CHUNK_SIZE,
+            locateFile: () =>
+                MEDIAINFO_WASM
+        });
+
+    return mediaInfoInstance;
+}
+
+
+/* =========================================================
+   ANALIZAR ARCHIVO
+========================================================= */
+
+async function analizarArchivo(
+    file,
+    index,
+    total
+) {
+
+    const mediaInfo =
+        await getMediaInfo();
+
+
+    loadingStatus.textContent =
+        `Analizando ${index + 1} de ${total}: ${file.name}`;
+
+
+    progressBar.style.width =
+        `${Math.round((index / total) * 100)}%`;
+
+
+    let data = null;
+
+
+    try {
+
+        /*
+          ESTA LLAMADA SE MANTIENE IGUAL.
+        */
+
+        data =
+            await mediaInfo.analyzeData(
+
+                () => file.size,
+
+                async (chunkSize, offset) => {
+
+                    const chunk =
+                        file.slice(
+                            offset,
+                            offset + chunkSize
+                        );
+
+                    return new Uint8Array(
+                        await chunk.arrayBuffer()
+                    );
+                }
+
+            );
+
+
+        const dateCandidates =
+            collectDateCandidates(data);
+
+
+        const bestDate =
+            chooseBestOriginalDate(
+                dateCandidates
+            );
+
+
+        const duration =
+            findDuration(data);
+
+
+        const device =
+            detectDevice(data);
+
+
+        /*
+          Esta fecha SOLO se guarda para
+          diagnóstico. Nunca es fecha original.
+        */
+
+        const fileDate =
+            new Date(
+                file.lastModified
+            );
+
+
+        return {
+
+            file,
+
+            name:
+                file.name,
+
+            size:
+                file.size,
+
+            originalDate:
+                bestDate
+                    ? bestDate.parsed
+                    : null,
+
+            originalDateText:
+                bestDate
+                    ? formatDate(
+                        bestDate.parsed
+                    )
+                    : "No disponible",
+
+            source:
+                bestDate
+                    ? bestDate.label
+                    : "—",
+
+            confidence:
+                bestDate
+                    ? bestDate.confidence
+                    : "—",
+
+            score:
+                bestDate
+                    ? bestDate.score
+                    : 0,
+
+            duration,
+
+            device,
+
+            fileDate,
+
+            fileDateText:
+                formatDate(fileDate),
+
+            dateCandidates,
+
+            allMetadata:
+                data,
+
+            error:
+                null
+        };
+
+
+    } catch (error) {
+
+        console.error(
+            "Error analizando",
+            file.name,
+            error
+        );
+
+
+        return {
+
+            file,
+
+            name:
+                file.name,
+
+            size:
+                file.size,
+
+            originalDate:
+                null,
+
+            originalDateText:
+                "No disponible",
+
+            source:
+                "Error de análisis",
+
+            confidence:
+                "—",
+
+            score:
+                0,
+
+            duration:
+                null,
+
+            device:
+                "No identificado",
+
+            fileDate:
+                new Date(
+                    file.lastModified
+                ),
+
+            fileDateText:
+                formatDate(
+                    new Date(
+                        file.lastModified
+                    )
+                ),
+
+            dateCandidates:
+                [],
+
+            allMetadata:
+                null,
+
+            error:
+                error?.message ||
+                String(error)
+        };
+    }
+}
+
+
+/* =========================================================
+   PROCESAMIENTO
+========================================================= */
+
+async function procesarArchivos(
+    files
+) {
+
+    if (!files.length) {
+        return;
+    }
+
+
+    resultsCard.style.display =
+        "none";
+
+    loadingCard.classList.add(
+        "active"
+    );
+
+    progressBar.style.width =
+        "0%";
+
+    analyzedClips = [];
+
+
+    try {
+
+        for (
+            let i = 0;
+            i < files.length;
+            i++
+        ) {
+
+            const result =
+                await analizarArchivo(
+                    files[i],
+                    i,
+                    files.length
+                );
+
+            analyzedClips.push(
+                result
+            );
+
+            await sleep(20);
+        }
+
+
+        progressBar.style.width =
+            "100%";
+
+        loadingStatus.textContent =
+            "Análisis completado.";
+
+
+        /*
+          FECHAS REALES PRIMERO.
+          SIN FECHA DESPUÉS.
+
+          Los archivos sin fecha NO se ordenan
+          por lastModified.
+        */
+
+        analyzedClips.sort(
+            (a, b) => {
+
+                const aDate =
+                    a.originalDate instanceof Date &&
+                    !isNaN(
+                        a.originalDate.getTime()
+                    );
+
+                const bDate =
+                    b.originalDate instanceof Date &&
+                    !isNaN(
+                        b.originalDate.getTime()
+                    );
+
+
+                if (
+                    aDate &&
+                    bDate
+                ) {
+
+                    return (
+                        a.originalDate.getTime() -
+                        b.originalDate.getTime()
+                    );
+                }
+
+
+                if (
+                    aDate &&
+                    !bDate
+                ) {
+                    return -1;
+                }
+
+
+                if (
+                    !aDate &&
+                    bDate
+                ) {
+                    return 1;
+                }
+
+
+                return 0;
+            }
+        );
+
+
+        renderResults();
+
+
+    } catch (error) {
+
+        console.error(
+            "Error general:",
+            error
+        );
+
+        loadingStatus.textContent =
+            "Ocurrió un error durante el análisis.";
+
+    } finally {
+
+        setTimeout(() => {
+
+            loadingCard.classList.remove(
+                "active"
+            );
+
+        }, 700);
+    }
+}
+
+
+/* =========================================================
+   RESULTADOS
+========================================================= */
+
+function renderResults() {
+
+    resultsBody.innerHTML =
+        "";
+
+
+    let dated = 0;
+    let undated = 0;
+    let errors = 0;
+
+
+    analyzedClips.forEach(
+        (clip, index) => {
+
+            if (
+                clip.originalDate instanceof Date &&
+                !isNaN(
+                    clip.originalDate.getTime()
+                )
+            ) {
+
+                dated++;
+
+            } else {
+
+                undated++;
+            }
+
+
+            if (clip.error) {
+                errors++;
+            }
+
+
+            const row =
+                document.createElement("tr");
+
+
+            let confidenceHTML =
+                `<span class="muted">—</span>`;
+
+
+            if (
+                clip.confidence === "alta"
+            ) {
+
+                confidenceHTML =
+                    `<span class="confidence high">🟢 Alta</span>`;
+
+            } else if (
+                clip.confidence === "media"
+            ) {
+
+                confidenceHTML =
+                    `<span class="confidence medium">🟡 Media</span>`;
+
+            } else if (
+                clip.confidence === "baja"
+            ) {
+
+                confidenceHTML =
+                    `<span class="confidence low">🟠 Baja</span>`;
+            }
+
+
+            const dateHTML =
+                clip.originalDate
+                    ? `
+                        <div class="date-main">
+                            ${escapeHTML(
+                                clip.originalDateText
+                            )}
+                        </div>
+                      `
+                    : `
+                        <div class="date-main muted">
+                            No disponible
+                        </div>
+                      `;
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${index + 1}
+                </td>
+
+                <td class="filename">
+                    ${escapeHTML(
+                        clip.name
+                    )}
+
+                    <div class="source">
+                        ${escapeHTML(
+                            formatBytes(
+                                clip.size
+                            )
+                        )}
+                    </div>
+                </td>
+
+                <td>
+                    ${dateHTML}
+                </td>
+
+                <td>
+                    <div class="source">
+                        ${escapeHTML(
+                            clip.source
+                        )}
+                    </div>
+                </td>
+
+                <td>
+                    ${confidenceHTML}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        formatDuration(
+                            clip.duration
+                        )
+                    )}
+                </td>
+
+                <td class="device">
+                    ${escapeHTML(
+                        clip.device
+                    )}
+                </td>
+            `;
+
+
+            resultsBody.appendChild(
+                row
+            );
+        }
+    );
+
+
+    totalCount.textContent =
+        analyzedClips.length;
+
+    highCount.textContent =
+        dated;
+
+    fallbackCount.textContent =
+        undated;
+
+    errorCount.textContent =
+        errors;
+
+    readyCount.textContent =
+        `${analyzedClips.length} clips`;
+
+
+    renderDiagnostics();
+
+
+    resultsCard.style.display =
+        "block";
+}
+
+
+/* =========================================================
+   DIAGNÓSTICO
+========================================================= */
+
+function renderDiagnostics() {
+
+    let container =
+        document.getElementById(
+            "diagnosticsContainer"
+        );
+
+
+    if (!container) {
+
+        container =
+            document.createElement("div");
+
+        container.id =
+            "diagnosticsContainer";
+
+
+        const title =
+            document.createElement("h2");
+
+        title.textContent =
+            "🔬 Diagnóstico de metadatos";
+
+        title.style.marginTop =
+            "30px";
+
+
+        const note =
+            document.createElement("p");
+
+        note.className =
+            "small-note";
+
+        note.textContent =
+            "Aquí puedes comprobar qué fechas encontró MediaInfo y cuál fue seleccionada.";
+
+
+        resultsCard.appendChild(
+            title
+        );
+
+        resultsCard.appendChild(
+            note
+        );
+
+        resultsCard.appendChild(
+            container
+        );
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    analyzedClips.forEach(
+        (clip, index) => {
+
+            const details =
+                document.createElement(
+                    "details"
+                );
+
+            details.className =
+                "diagnostic";
+
+
+            const summary =
+                document.createElement(
+                    "summary"
+                );
+
+
+            summary.textContent =
+                `${index + 1}. ${clip.name}`;
+
+
+            details.appendChild(
+                summary
+            );
+
+
+            const content =
+                document.createElement(
+                    "div"
+                );
+
+            content.className =
+                "diagnostic-content";
+
+
+            /*
+              RESULTADO
+            */
+
+            const resultSection =
+                document.createElement(
+                    "div"
+                );
+
+            resultSection.className =
+                "diag-section";
+
+
+            const resultTitle =
+                document.createElement(
+                    "div"
+                );
+
+            resultTitle.className =
+                "diag-title";
+
+            resultTitle.textContent =
+                "Resultado";
+
+
+            resultSection.appendChild(
+                resultTitle
+            );
+
+
+            if (
+                clip.originalDate
+            ) {
+
+                resultSection.innerHTML += `
+
+                    <div class="success">
+
+                        🟢 <strong>Fecha original encontrada</strong><br><br>
+
+                        Fecha:
+                        ${escapeHTML(
+                            clip.originalDateText
+                        )}
+                        <br>
+
+                        Fuente:
+                        ${escapeHTML(
+                            clip.source
+                        )}
+                        <br>
+
+                        Confianza:
+                        ${escapeHTML(
+                            clip.confidence
+                        )}
+                        <br>
+
+                        Puntuación:
+                        ${clip.score}
+
+                    </div>
+                `;
+
+            } else {
+
+                resultSection.innerHTML += `
+
+                    <div class="warning">
+
+                        ⚪ <strong>Fecha original no disponible</strong><br><br>
+
+                        No se encontró una fecha de grabación
+                        suficientemente confiable en los metadatos.
+
+                        <br><br>
+
+                        📁 Fecha del archivo:
+                        ${escapeHTML(
+                            clip.fileDateText
+                        )}
+
+                        <br><br>
+
+                        Esta fecha NO se utiliza como fecha
+                        original de grabación.
+
+                    </div>
+                `;
+            }
+
+
+            content.appendChild(
+                resultSection
+            );
+
+
+            /*
+              CANDIDATOS
+            */
+
+            const candidatesSection =
+                document.createElement(
+                    "div"
+                );
+
+            candidatesSection.className =
+                "diag-section";
+
+
+            const candidatesTitle =
+                document.createElement(
+                    "div"
+                );
+
+            candidatesTitle.className =
+                "diag-title";
+
+            candidatesTitle.textContent =
+                "Campos de fecha encontrados";
+
+
+            candidatesSection.appendChild(
+                candidatesTitle
+            );
+
+
+            if (
+                clip.dateCandidates.length
+            ) {
+
+                clip.dateCandidates.forEach(
+                    candidate => {
+
+                        const scoring =
+                            scoreDateField(
+                                candidate
+                            );
+
+
+                        const row =
+                            document.createElement(
+                                "div"
+                            );
+
+                        row.className =
+                            "diag-row";
+
+
+                        const key =
+                            document.createElement(
+                                "div"
+                            );
+
+                        key.className =
+                            "diag-key";
+
+                        key.textContent =
+                            candidate.path;
+
+
+                        const value =
+                            document.createElement(
+                                "div"
+                            );
+
+                        value.className =
+                            "diag-value";
+
+
+                        value.innerHTML =
+                            `
+                            <strong>
+                                ${escapeHTML(
+                                    candidate.value
+                                )}
+                            </strong>
+
+                            <br>
+
+                            ${
+                                candidate.parsed
+                                    ? `Fecha interpretada:
+                                       ${escapeHTML(
+                                           formatDate(
+                                               candidate.parsed
+                                           )
+                                       )}`
+                                    : "No se pudo interpretar como fecha"
+                            }
+
+                            <br>
+
+                            Prioridad:
+                            ${scoring.score}
+
+                            ·
+
+                            ${escapeHTML(
+                                scoring.label
+                            )}
+                            `;
+
+
+                        row.appendChild(
+                            key
+                        );
+
+                        row.appendChild(
+                            value
+                        );
+
+                        candidatesSection.appendChild(
+                            row
+                        );
+                    }
+                );
+
+            } else {
+
+                const empty =
+                    document.createElement(
+                        "div"
+                    );
+
+                empty.className =
+                    "warning";
+
+                empty.textContent =
+                    "MediaInfo no encontró campos que parezcan fechas originales.";
+
+                candidatesSection.appendChild(
+                    empty
+                );
+            }
+
+
+            content.appendChild(
+                candidatesSection
+            );
+
+
+            /*
+              INFORMACIÓN DEL ARCHIVO
+            */
+
+            const fileSection =
+                document.createElement(
+                    "div"
+                );
+
+            fileSection.className =
+                "diag-section";
+
+
+            const fileTitle =
+                document.createElement(
+                    "div"
+                );
+
+            fileTitle.className =
+                "diag-title";
+
+            fileTitle.textContent =
+                "Información del archivo";
+
+
+            fileSection.appendChild(
+                fileTitle
+            );
+
+
+            fileSection.innerHTML += `
+
+                <div class="diag-row">
+
+                    <div class="diag-key">
+                        Nombre
+                    </div>
+
+                    <div class="diag-value">
+                        ${escapeHTML(
+                            clip.name
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="diag-row">
+
+                    <div class="diag-key">
+                        Tamaño
+                    </div>
+
+                    <div class="diag-value">
+                        ${escapeHTML(
+                            formatBytes(
+                                clip.size
+                            )
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="diag-row">
+
+                    <div class="diag-key">
+                        Fecha del archivo
+                    </div>
+
+                    <div class="diag-value">
+                        ${escapeHTML(
+                            clip.fileDateText
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="diag-row">
+
+                    <div class="diag-key">
+                        Dispositivo
+                    </div>
+
+                    <div class="diag-value">
+                        ${escapeHTML(
+                            clip.device
+                        )}
+                    </div>
+
+                </div>
+
+            `;
+
+
+            content.appendChild(
+                fileSection
+            );
+
+
+            details.appendChild(
+                content
+            );
+
+
+            container.appendChild(
+                details
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   DRAG & DROP
+========================================================= */
+
+dropZone.addEventListener(
+    "dragover",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.add(
+            "dragover"
+        );
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragleave",
+    () => {
+
+        dropZone.classList.remove(
+            "dragover"
+        );
+    }
+);
+
+
+dropZone.addEventListener(
+    "drop",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.remove(
+            "dragover"
+        );
+
+
+        const files =
+            Array.from(
+                event.dataTransfer.files || []
+            );
+
+
+        const videos =
+            files.filter(
+                file =>
+                    file.type.startsWith("video/") ||
+                    /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(
+                        file.name
+                    )
+            );
+
+
+        if (videos.length) {
+
+            procesarArchivos(
+                videos
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   SELECCIÓN NORMAL
+========================================================= */
+
+fileInput.addEventListener(
+    "change",
+    () => {
+
+        const files =
+            Array.from(
+                fileInput.files || []
+            );
+
+
+        if (files.length) {
+
+            procesarArchivos(
+                files
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   DESCARGAR VIDEOS NUMERADOS
+========================================================= */
+
+downloadVideosBtn.addEventListener(
+    "click",
+    async () => {
+
+        if (
+            !analyzedClips.length
+        ) {
+            return;
+        }
+
+
+        for (
+            let i = 0;
+            i < analyzedClips.length;
+            i++
+        ) {
+
+            const clip =
+                analyzedClips[i];
+
+
+            const extension =
+                clip.name.includes(".")
+                    ? clip.name.substring(
+                        clip.name.lastIndexOf(".")
+                    )
+                    : "";
+
+
+            const newName =
+                `${String(i + 1).padStart(3, "0")}_${clip.name}`;
+
+
+            const url =
+                URL.createObjectURL(
+                    clip.file
+                );
+
+
+            const link =
+                document.createElement(
+                    "a"
+                );
+
+
+            link.href =
+                url;
+
+            link.download =
+                newName;
+
+
+            document.body.appendChild(
+                link
+            );
+
+            link.click();
+
+            link.remove();
+
+
+            setTimeout(
+                () => URL.revokeObjectURL(url),
+                1000
+            );
+
+
+            await sleep(250);
+        }
+    }
+);
+
+
+/* =========================================================
+   LIMPIAR
+========================================================= */
+
+clearBtn.addEventListener(
+    "click",
+    () => {
+
+        analyzedClips = [];
+
+        resultsBody.innerHTML =
+            "";
+
+        resultsCard.style.display =
+            "none";
+
+        loadingCard.classList.remove(
+            "active"
+        );
+
+        progressBar.style.width =
+            "0%";
+
+        loadingStatus.textContent =
+            "Preparando análisis...";
+
+        fileInput.value =
+            "";
+    }
+);
+
+</script>
+
+</body>
+</html>
