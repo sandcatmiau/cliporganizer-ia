@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Diagnóstico ClipOrganizer AI</title>
+
+<style>
+    :root{
+        --bg:#0d0d0f;
+        --card:#151519;
+        --border:#28282f;
+        --text:#f4f4f6;
+        --muted:#a5a5ae;
+        --green:#55d98a;
+        --red:#ff6666;
+        --orange:#ffb454;
+        --blue:#6675ff;
+    }
+
+    *{
+        box-sizing:border-box;
+    }
+
+    body{
+        margin:0;
+        padding:24px;
+        background:var(--bg);
+        color:var(--text);
+        font-family:Arial,sans-serif;
+    }
+
+    .container{
+        max-width:760px;
+        margin:auto;
+    }
+
+    h1{
+        margin-bottom:8px;
+    }
+
+    .subtitle{
+        color:var(--muted);
+        margin-bottom:24px;
+    }
+
+    .card{
+        background:var(--card);
+        border:1px solid var(--border);
+        border-radius:16px;
+        padding:20px;
+        margin-bottom:16px;
+    }
+
+    .test{
+        padding:16px;
+        border:1px solid var(--border);
+        border-radius:12px;
+        margin:10px 0;
+    }
+
+    .name{
+        font-weight:bold;
+        margin-bottom:6px;
+    }
+
+    .value{
+        font-family:monospace;
+        word-break:break-word;
+        color:var(--muted);
+    }
+
+    .ok{
+        border-color:var(--green);
+    }
+
+    .ok .value{
+        color:var(--green);
+    }
+
+    .fail{
+        border-color:var(--red);
+    }
+
+    .fail .value{
+        color:var(--red);
+    }
+
+    .warn{
+        border-color:var(--orange);
+    }
+
+    .warn .value{
+        color:var(--orange);
+    }
+
+    button{
+        width:100%;
+        padding:15px;
+        border:0;
+        border-radius:10px;
+        background:var(--blue);
+        color:white;
+        font-size:16px;
+        font-weight:bold;
+        margin-top:10px;
+    }
+
+    pre{
+        white-space:pre-wrap;
+        word-break:break-word;
+        background:#0a0a0c;
+        padding:15px;
+        border-radius:10px;
+        overflow:auto;
+        color:#ddd;
+        font-size:13px;
+    }
+
+    .big{
+        font-size:20px;
+        font-weight:bold;
+        margin-bottom:10px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🔬 Diagnóstico ClipOrganizer AI</h1>
+
+    <div class="subtitle">
+        Esta página comprueba si el navegador y Vercel permiten utilizar FFmpeg WebAssembly.
+    </div>
+
+    <div class="card">
+
+        <div class="big" id="overall">
+            ⏳ Ejecutando diagnóstico...
+        </div>
+
+        <div id="tests"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>📡 Headers de Vercel</h2>
+
+        <pre id="headers">Comprobando...</pre>
+
+    </div>
+
+    <div class="card">
+
+        <h2>📁 Archivos FFmpeg locales</h2>
+
+        <pre id="files">Comprobando...</pre>
+
+    </div>
+
+    <div class="card">
+
+        <h2>🧾 Diagnóstico completo</h2>
+
+        <pre id="report">Generando...</pre>
+
+        <button onclick="location.reload()">
+            🔄 Volver a comprobar
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+"use strict";
+
+const tests = [];
+const reportLines = [];
+
+function addTest(name, value, status){
+
+    tests.push({
+        name,
+        value,
+        status
+    });
+
+    reportLines.push(
+        `${status === "ok" ? "✅" : status === "fail" ? "❌" : "⚠️"} ${name}: ${value}`
+    );
+}
+
+function renderTests(){
+
+    const container = document.getElementById("tests");
+
+    container.innerHTML = tests.map(test => {
+
+        return `
+            <div class="test ${test.status}">
+                <div class="name">${escapeHtml(test.name)}</div>
+                <div class="value">${escapeHtml(test.value)}</div>
+            </div>
+        `;
+
+    }).join("");
+
+    document.getElementById("report").textContent =
+        reportLines.join("\n");
+}
+
+function escapeHtml(value){
+
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+async function checkEverything(){
+
+    /*
+     * 1. crossOriginIsolated
+     */
+
+    const isolated =
+        typeof window.crossOriginIsolated !== "undefined"
+            ? window.crossOriginIsolated
+            : false;
+
+    addTest(
+        "crossOriginIsolated",
+        String(isolated),
+        isolated ? "ok" : "fail"
+    );
+
+
+    /*
+     * 2. SharedArrayBuffer
+     */
+
+    const sabType =
+        typeof SharedArrayBuffer;
+
+    addTest(
+        "SharedArrayBuffer",
+        sabType,
+        sabType === "function" ? "ok" : "fail"
+    );
+
+
+    /*
+     * 3. Atomics
+     */
+
+    const atomicsType =
+        typeof Atomics;
+
+    addTest(
+        "Atomics",
+        atomicsType,
+        atomicsType === "object" ? "ok" : "warn"
+    );
+
+
+    /*
+     * 4. Origin
+     */
+
+    addTest(
+        "Origen",
+        window.location.origin,
+        "ok"
+    );
+
+
+    /*
+     * 5. HTTPS
+     */
+
+    const https =
+        location.protocol === "https:";
+
+    addTest(
+        "HTTPS",
+        location.protocol,
+        https ? "ok" : "fail"
+    );
+
+
+    /*
+     * 6. Navegador
+     */
+
+    addTest(
+        "Navegador",
+        navigator.userAgent,
+        "ok"
+    );
+
+
+    /*
+     * 7. FFmpeg wrapper
+     */
+
+    try{
+
+        const response =
+            await fetch("/ffmpeg/ffmpeg.min.js", {
+                method:"HEAD",
+                cache:"no-store"
+            });
+
+        addTest(
+            "ffmpeg.min.js",
+            `HTTP ${response.status}`,
+            response.ok ? "ok" : "fail"
+        );
+
+    }catch(error){
+
+        addTest(
+            "ffmpeg.min.js",
+            error.message,
+            "fail"
+        );
+
+    }
+
+
+    /*
+     * 8. FFmpeg core JS
+     */
+
+    try{
+
+        const response =
+            await fetch("/ffmpeg/ffmpeg-core.js", {
+                method:"HEAD",
+                cache:"no-store"
+            });
+
+        addTest(
+            "ffmpeg-core.js",
+            `HTTP ${response.status}`,
+            response.ok ? "ok" : "fail"
+        );
+
+    }catch(error){
+
+        addTest(
+            "ffmpeg-core.js",
+            error.message,
+            "fail"
+        );
+
+    }
+
+
+    /*
+     * 9. FFmpeg WASM
+     */
+
+    try{
+
+        const response =
+            await fetch("/ffmpeg/ffmpeg-core.wasm", {
+                method:"HEAD",
+                cache:"no-store"
+            });
+
+        addTest(
+            "ffmpeg-core.wasm",
+            `HTTP ${response.status}`,
+            response.ok ? "ok" : "fail"
+        );
+
+    }catch(error){
+
+        addTest(
+            "ffmpeg-core.wasm",
+            error.message,
+            "fail"
+        );
+
+    }
+
+
+    /*
+     * 10. FFmpeg worker
+     */
+
+    try{
+
+        const response =
+            await fetch("/ffmpeg/ffmpeg-core.worker.js", {
+                method:"HEAD",
+                cache:"no-store"
+            });
+
+        addTest(
+            "ffmpeg-core.worker.js",
+            `HTTP ${response.status}`,
+            response.ok ? "ok" : "fail"
+        );
+
+    }catch(error){
+
+        addTest(
+            "ffmpeg-core.worker.js",
+            error.message,
+            "fail"
+        );
+
+    }
+
+
+    /*
+     * Headers reales de la página
+     */
+
+    try{
+
+        const response =
+            await fetch(location.href, {
+                method:"GET",
+                cache:"no-store"
+            });
+
+        const coop =
+            response.headers.get(
+                "Cross-Origin-Opener-Policy"
+            );
+
+        const coep =
+            response.headers.get(
+                "Cross-Origin-Embedder-Policy"
+            );
+
+        const corp =
+            response.headers.get(
+                "Cross-Origin-Resource-Policy"
+            );
+
+        document.getElementById("headers").textContent =
+`Cross-Origin-Opener-Policy:
+${coop || "(NO PRESENTE)"}
+
+Cross-Origin-Embedder-Policy:
+${coep || "(NO PRESENTE)"}
+
+Cross-Origin-Resource-Policy:
+${corp || "(NO PRESENTE)"}
+
+URL:
+${location.href}`;
+
+    }catch(error){
+
+        document.getElementById("headers").textContent =
+            "❌ No se pudieron leer los headers:\n" +
+            error.message;
+
+    }
+
+
+    /*
+     * Estado de archivos
+     */
+
+    try{
+
+        const urls = [
+            "/ffmpeg/ffmpeg.min.js",
+            "/ffmpeg/ffmpeg-core.js",
+            "/ffmpeg/ffmpeg-core.wasm",
+            "/ffmpeg/ffmpeg-core.worker.js"
+        ];
+
+        const results = [];
+
+        for(const url of urls){
+
+            try{
+
+                const response =
+                    await fetch(url, {
+                        method:"HEAD",
+                        cache:"no-store"
+                    });
+
+                results.push(
+                    `${response.ok ? "✅" : "❌"} ${url} → HTTP ${response.status}`
+                );
+
+            }catch(error){
+
+                results.push(
+                    `❌ ${url} → ${error.message}`
+                );
+
+            }
+
+        }
+
+        document.getElementById("files").textContent =
+            results.join("\n");
+
+    }catch(error){
+
+        document.getElementById("files").textContent =
+            error.message;
+
+    }
+
+
+    /*
+     * Resultado general
+     */
+
+    const failed =
+        tests.filter(
+            test => test.status === "fail"
+        );
+
+    const overall =
+        document.getElementById("overall");
+
+    if(
+        isolated &&
+        sabType === "function"
+    ){
+
+        overall.textContent =
+            "🎉 SharedArrayBuffer está disponible";
+
+        overall.style.color =
+            "var(--green)";
+
+    }else{
+
+        overall.textContent =
+            "❌ El navegador todavía no tiene SharedArrayBuffer disponible";
+
+        overall.style.color =
+            "var(--red)";
+
+    }
+
+
+    renderTests();
+
+}
+
+checkEverything();
+
+</script>
+
+</body>
+</html>
