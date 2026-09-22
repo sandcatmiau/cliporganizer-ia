@@ -13,5 +13,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/anuncios-limpios/:path*",
+      "destination": "https://untimely-hello.com*"
+    }
   ]
 }
