@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SANDCATFILMS — ClipOrganizer AI</title>
+
+  <!-- Scripts de zona publicitaria -->
+  <script>(function(s){s.dataset.zone='11804279';s.src='https://n6wxm.com/vignette.min.js';}(document.documentElement));</script>
+  <script>(function(s){s.dataset.zone='11803608';s.src='https://nap5k.com/tag.min.js';}(document.documentElement));</script>
+
+  <style>
+    :root{  
+        --bg:#0d0d0f;  
+        --card:#151519;  
+        --card2:#111116;  
+        --border:#28282f;  
+        --text:#f4f4f6;  
+        --muted:#a5a5ae;  
+        --accent:#6675ff;  
+        --green:#55d98a;  
+        --orange:#ffb454;  
+        --red:#ff6666;  
+    }  
+      
+    *{  
+        box-sizing:border-box;  
+    }  
+      
+    html{  
+        scroll-behavior:smooth;  
+    }  
+      
+    body{  
+        margin:0;  
+        background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%);  
+        color:var(--text);  
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;  
+    }  
+      
+    .container{  
+        width:min(1180px,calc(100% - 28px));  
+        margin:0 auto;  
+        padding:34px 0 50px;  
+    }  
+      
+    header{ 
+      margin-bottom:28px; 
+      text-align:center; 
+    } 
+
+    .temu-producto-fijo{
+      text-align:center; 
+      margin:25px auto; 
+      max-width:300px;
+      background: #1a1a1f;
+      border-radius: 16px;
+      padding: 15px;
+      border: 1px solid var(--border);
+    } 
+
+    .temu-producto-fijo img{
+      width:100%; 
+      border-radius:12px; 
+      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    } 
+
+    .temu-producto-fijo p{
+      font-size:15px; 
+      margin:10px 0 5px; 
+      color:var(--text);
+    } 
+
+    .brand{ 
+      display:inline-flex; 
+      align-items:center; 
+      gap:10px; 
+      margin-bottom:9px; 
+      color:#d9dcff; 
+      font-size:12px; 
+      font-weight:900; 
+      letter-spacing:3px; 
+      text-transform:uppercase; 
+    } 
+
+    .brand-mark{ 
+      width:9px; 
+      height:9px; 
+      border-radius:50%; 
+      background:var(--accent); 
+      box-shadow:0 0 16px rgba(102,117,255,.65); 
+    } 
+
+    h1{ 
+      margin:0 0 8px; 
+      font-size:clamp(30px,5vw,46px); 
+      letter-spacing:-1.5px; 
+    } 
+
+    .subtitle{ 
+      margin:0; 
+      color:var(--muted); 
+      line-height:1.6; 
+    }
+
+    .card{  
+        background:linear-gradient(180deg,#17171c,#121216);  
+        border:1px solid var(--border);  
+        border-radius:18px;  
+        padding:20px;  
+        margin-bottom:18px;  
+        box-shadow:0 12px 35px rgba(0,0,0,.18);  
+    }  
+      
+    .drop-zone{  
+        position:relative;  
+        display:block;  
+        min-height:230px;  
+        border:2px dashed #3a3a45;  
+        border-radius:16px;  
+        padding:24px 20px;  
+        text-align:center;  
+        cursor:pointer;  
+        overflow:hidden;  
+        transition:.2s ease;  
+    }  
+      
+    .drop-zone:hover,  
+    .drop-zone.dragover{  
+        border-color:var(--accent);  
+        background:rgba(102,117,255,.06);  
+    }  
+      
+    .drop-cat{  
+        display:block;  
+        width:min(170px,48vw);  
+        max-height:125px;  
+        object-fit:contain;  
+        margin:0 auto 5px;  
+        filter:drop-shadow(0 12px 20px rgba(0,0,0,.35));  
+    }  
+      
+    .drop-icon{  
+        font-size:28px;  
+        margin-bottom:6px;  
+    }  
+      
+    .drop-title{  
+        font-size:20px;  
+        font-weight:800;  
+        margin-bottom:7px;  
+    }  
+      
+    .drop-subtitle{  
+        color:var(--muted);  
+        font-size:14px;  
+    }  
+      
+    #fileInput{  
+        display:none;  
+    }  
+      
+    .loading{  
+        display:none;  
+    }  
+      
+    .loading-visual{  
+        display:flex;  
+        align-items:center;  
+        gap:18px;  
+        margin-bottom:4px;  
+    }  
+      
+    .running-cat{  
+        width:100px;  
+        height:78px;  
+        object-fit:contain;  
+        flex:0 0 auto;  
+        filter:drop-shadow(0 8px 16px rgba(0,0,0,.35));  
+    }  
+      
+    .loading-status{  
+        color:var(--muted);  
+        font-size:14px;  
+        line-height:1.5;  
+    }  
+      
+    .progress-track{  
+        width:100%;  
+        height:10px;  
+        background:#25252c;  
+        border-radius:999px;  
+        overflow:hidden;  
+        margin-top:14px;  
+    }  
+      
+    .progress-bar{  
+        height:100%;  
+        width:0;  
+        background:var(--accent);  
+        border-radius:999px;  
+        transition:width .2s ease;  
+    }  
+      
+    .actions{  
+        display:flex;  
+        flex-wrap:wrap;  
+        align-items:center;  
+        gap:10px;  
+        margin-top:16px;  
+    }  
+      
+    button{  
+        appearance:none;  
+        -webkit-appearance:none;  
+        display:inline-flex;  
+        align-items:center;  
+        justify-content:center;  
+        min-width:0;  
+        min-height:46px;  
+        border:0;  
+        border-radius:11px;  
+        padding:12px 18px;  
+        background:#6675ff;  
+        color:#ffffff;  
+        font-family:inherit;  
+        font-size:14px;  
+        font-weight:700;  
+        white-space:nowrap;  
+        text-align:center;  
+        cursor:pointer;  
+        transition:transform .2s,filter .2s,opacity .2s;  
+    }  
+      
+    button:hover:not(:disabled){  
+        transform:translateY(-1px);  
+        filter:brightness(1.08);  
+    }  
+      
+    button:disabled{  
+        opacity:.45;  
+        cursor:not-allowed;  
+    }  
+      
+    .actions button{  
+        flex:0 0 auto;  
+    }  
+      
+    .audio-button{  
+        background:#27334a;  
+        border:1px solid #394862;  
+    }  
+      
+    .secondary{  
+        background:#202027;  
+        border:1px solid #34343d;  
+    }  
+      
+    .action-cat-legend{  
+        display:flex;  
+        align-items:center;  
+        justify-content:center;  
+        flex-wrap:wrap;  
+        gap:18px;  
+        margin-top:18px;  
+        padding:14px 10px 6px;  
+        border-top:1px solid #25252d;  
+    }  
+      
+    .action-cat-item{  
+        display:flex;  
+        align-items:center;  
+        justify-content:center;  
+        gap:7px;  
+        min-width:150px;  
+        color:#d6d6dd;  
+        font-size:14px;  
+        font-weight:800;  
+    }  
+      
+    .action-cat{  
+        width:48px;  
+        height:42px;  
+        object-fit:contain;  
+        flex:0 0 auto;  
+        filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));  
+    }  
+      
+    .action-cat-label{  
+        min-width:62px;  
+        text-align:center;  
+    }  
+      
+    .result-message{  
+        margin-top:14px;  
+        color:var(--muted);  
+        line-height:1.5;  
+        font-size:14px;  
+        white-space:pre-wrap;  
+    }  
+      
+    .error-message{  
+        color:#ff8b8b;  
+    }  
+      
+    .success-message{  
+        color:#78e8a3;  
+    }  
+      
+    .stats{  
+        display:grid;  
+        grid-template-columns:repeat(4,1fr);  
+        gap:12px;  
+        margin-bottom:18px;  
+    }  
+      
+    .stat{  
+        background:#111116;  
+        border:1px solid var(--border);  
+        border-radius:14px;  
+        padding:16px;  
+    }  
+      
+    .stat-value{  
+        font-size:26px;  
+        font-weight:800;  
+    }  
+      
+    .stat-label{  
+        color:var(--muted);  
+        font-size:12px;  
+        margin-top:4px;  
+    }  
+      
+    .table-wrap{  
+        width:100%;  
+        overflow-x:auto;  
+    }  
+      
+    table{  
+        width:100%;  
+        border-collapse:collapse;  
+        min-width:980px;  
+    }  
+      
+    th, td{  
+        padding:13px 11px;  
+        border-bottom:1px solid #25252b;  
+        text-align:left;  
+        vertical-align:middle;  
+        font-size:13px;  
+    }  
+      
+    th{  
+        color:#bdbdc7;  
+        font-size:12px;  
+        text-transform:uppercase;  
+        letter-spacing:.5px;  
+    }  
+      
+    .filename{  
+        max-width:240px;  
+        overflow:hidden;  
+        text-overflow:ellipsis;  
+        white-space:nowrap;  
+    }  
+      
+    .badge{  
+        display:inline-flex;  
+        align-items:center;  
+        border-radius:999px;  
+        padding:5px 9px;  
+        font-size:11px;  
+        font-weight:800;  
+        white-space:nowrap;  
+    }  
+      
+    .badge-green{  
+        background:rgba(85,217,138,.12);  
+        color:#78e8a3;  
+    }  
+      
+    .badge-orange{  
+        background:rgba(255,180,84,.12);  
+        color:#ffc477;  
+    }  
+      
+    .badge-red{  
+        background:rgba(255,102,102,.12);  
+        color:#ff8b8b;  
+    }  
+      
+    .badge-gray{  
+        background:#24242b;  
+        color:#bdbdc7;  
+    }  
+      
+    .folder-grid{  
+        display:grid;  
+        grid-template-columns:repeat(3,1fr);  
+        gap:12px;  
+    }  
+      
+    .folder{  
+        position:relative;  
+        min-height:145px;  
+        background:#111116;  
+        border:1px solid var(--border);  
+        border-radius:14px;  
+        padding:15px;  
+        overflow:hidden;  
+    }  
+      
+    .folder-info{  
+        position:relative;  
+        z-index:2;  
+        max-width:60%;  
+    }  
+      
+    .folder-title{  
+        display:flex;  
+        align-items:center;  
+        gap:7px;  
+        font-weight:800;  
+        margin-bottom:5px;  
+    }  
+      
+    .folder-title-cat{  
+        width:30px;  
+        height:30px;  
+        object-fit:contain;  
+        flex:0 0 auto;  
+        filter:drop-shadow(0 4px 7px rgba(0,0,0,.35));  
+    }  
+      
+    .folder-count{  
+        color:var(--muted);  
+        font-size:13px;  
+    }  
+      
+    .folder-cat{  
+        position:absolute;  
+        right:5px;  
+        bottom:-3px;  
+        width:125px;  
+        height:105px;  
+        object-fit:contain;  
+        opacity:.92;  
+        filter:drop-shadow(0 10px 16px rgba(0,0,0,.4));  
+    }  
+      
+    .extra-list{  
+        color:var(--muted);  
+        font-size:13px;  
+        line-height:1.8;  
+    }  
+      
+    details{  
+        background:#111116;  
+        border:1px solid var(--border);  
+        border-radius:14px;  
+        overflow:hidden;  
+    }  
+      
+    summary{  
+        cursor:pointer;  
+        padding:15px 17px;  
+        font-weight:700;  
+    }  
+      
+    .diagnostics{  
+        padding:0 17px 17px;  
+        color:var(--muted);  
+        font-size:13px;  
+        line-height:1.6;  
+        white-space:pre-wrap;  
+        word-break:break-word;  
+    }  
+      
+    .section-heading{  
+        margin:0 0 6px;  
+        font-size:20px;  
+    }  
+      
+    .section-description{  
+        margin:0 0 16px;  
+        color:var(--muted);  
+        font-size:14px;  
+        line-height:1.6;  
+    }  
+      
+    .tutorial-frame{  
+        position:relative;  
+        width:100%;  
+        aspect-ratio:16 / 9;  
+        border:1px dashed #3a3a45;  
+        border-radius:15px;  
+        background: radial-gradient(circle at center, rgba(102,117,255,.08), rgba(17,17,22,.75) 60%);  
+        display:flex;  
+        align-items:center;  
+        justify-content:center;  
+        overflow:hidden;  
+    }  
+      
+    .tutorial-inner{  
+        text-align:center;  
+        padding:20px;  
+    }  
+      
+    .tutorial-icon{  
+        font-size:42px;  
+        margin-bottom:8px;  
+    }  
+      
+    .tutorial-title{  
+        font-size:17px;  
+        font-weight:800;  
+        margin-bottom:5px;  
+    }  
+      
+    .tutorial-text{  
+        color:var(--muted);  
+        font-size:13px;  
+    }  
+      
+    .ad-slot{  
+        min-height:110px;  
+        border:1px dashed #303039;  
+        border-radius:14px;  
+        background:#101014;  
+        display:flex;  
+        align-items:center;  
+        justify-content:center;  
+        text-align:center;  
+        padding:18px;  
+    }  
+      
+    .ad-slot span{  
+        color:#666671;  
+        font-size:11px;  
+        letter-spacing:1.5px;  
+        text-transform:uppercase;  
+    }  
+      
+    footer{  
+        margin-top:24px;  
+        color:#777781;  
+        text-align:center;  
+        font-size:12px;  
+        line-height:1.6;  
+    }  
+      
+    .footer-brand{  
+        color:#9b9ba5;  
+        font-weight:800;  
+    }  
+      
+    .footer-links{  
+        margin-top:8px;  
+        display:flex;  
+        justify-content:center;  
+        align-items:center;  
+        gap:8px;  
+        flex-wrap:wrap;  
+    }  
+      
+    .footer-links a{  
+        color:#777781;  
+        text-decoration:none;  
+        transition:.2s ease;  
+    }  
+      
+    .footer-links a:hover{  
+        color:#ffffff;  
+        text-decoration:underline;  
+    }  
+      
+    .manual-download{  
+        display:none;  
+        margin-top:12px;  
+    }  
+      
+    .manual-download a{  
+        color:#9da8ff;  
+        text-decoration:none;  
+        font-weight:700;  
+    }  
+      
+    @media(max-width:800px){  
+        .stats{ grid-template-columns:repeat(2,1fr); }  
+        .folder-grid{ grid-template-columns:1fr; }  
+        .folder{ min-height:130px; }  
+        .folder-cat{ width:120px; }  
+        .action-cat-legend{ gap:10px; }  
+        .action-cat-item{ min-width:135px; }  
+    }  
+      
+    @media(max-width:650px){  
+        .container{ width:min(100% - 18px,1180px); padding-top:22px; }  
+        .card{ padding:15px; }  
+        .actions{ flex-direction:column; align-items:stretch; }  
+        .actions button{ width:100%; min-height:46px; }  
+        .stats{ grid-template-columns:1fr 1fr; }  
+        .loading-visual{ align-items:flex-end; }  
+        .running-cat{ width:82px; height:65px; }  
+        .drop-zone{ min-height:215px; }  
+        .action-cat-legend{ flex-direction:column; gap:6px; padding-top:14px; }  
+        .action-cat-item{ width:100%; min-width:0; }  
+        .action-cat{ width:45px; height:40px; }  
+    }  
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <span class="brand-mark"></span>
+        SANDCATFILMS
+      </div>
+      <h1>ClipOrganizer AI</h1>
+      <p class="subtitle">
+        Organización inteligente de tus videos según su fecha real de grabación,
+        calidad de toma y audio. Todo se procesa localmente en tu navegador.
+      </p>
+    </header>
+
+    <!-- PRODUCTO TEMU FIJO -->
+    <div class="temu-producto-fijo">
+      <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
+        <img src="https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg?imageView2/2/w/280/q/80/format/avif" alt="Oferta Temu">
+        <p>
+          <b>🔥 Oferta Imposible en Temu 🔥</b><br>
+          <span style="color:#ff4757; font-weight:bold;">-80% + Envío Gratis Hoy</span>
+        </p>
+      </a>
+    </div>
+
+    <section class="card">
+      <label class="drop-zone" id="dropZone" for="fileInput">
+        <img class="drop-cat" src="/assets/sandcat-licking.png" alt="Gato SANDCATFILMS">
+        <div class="drop-icon">📂</div>
+        <div class="drop-title">Selecciona tus videos</div>
+        <div class="drop-subtitle">También puedes arrastrarlos y soltarlos aquí</div>
+      </label>
+      <input id="fileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
+    </section>
+
+    <section class="card loading" id="loadingCard">
+      <div class="loading-visual">
+        <img class="running-cat" src="/assets/sandcat-running.png" alt="SANDCATFILMS procesando">
+        <div>
+          <div class="loading-status" id="loadingStatus">Analizando metadatos...</div>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </section>
+
+    <section class="card" id="resultsCard" style="display:none">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="totalClips">0</div>
+          <div class="stat-label">Clips</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="datedClips">0</div>
+          <div class="stat-label">Con fecha original</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="undatedClips">0</div>
+          <div class="stat-label">Sin fecha original</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="goodClips">0</div>
+          <div class="stat-label">Tomas buenas</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Archivo</th>
+              <th>Fecha original</th>
+              <th>Estado</th>
+              <th>Fuente</th>
+              <th>Confianza</th>
+              <th>Fecha del archivo</th>
+              <th>Duración</th>
+              <th>Dispositivo</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button id="downloadVideosBtn" type="button">⬇️ Descargar ZIP organizado</button>
+        <button class="secondary audio-button" id="downloadAudioBtn" type="button" disabled>🎧 Separar y descargar audio</button>
+        <button class="secondary" id="clearBtn" type="button">🧹 Limpiar análisis</button>
+      </div>
+
+      <div class="action-cat-legend">
+        <div class="action-cat-item">
+          <img class="action-cat" src="/assets/sandcat-good.png" alt="">
+          <span class="action-cat-label">Buenas</span>
+          <img class="action-cat" src="/assets/sandcat-good.png" alt="">
+        </div>
+        <div class="action-cat-item">
+          <img class="action-cat" src="/assets/sandcat-review.png" alt="">
+          <span class="action-cat-label">Revisar</span>
+          <img class="action-cat" src="/assets/sandcat-review.png" alt="">
+        </div>
+        <div class="action-cat-item">
+          <img class="action-cat" src="/assets/sandcat-trash.png" alt="">
+          <span class="action-cat-label">Trashed</span>
+          <img class="action-cat" src="/assets/sandcat-trash.png" alt="">
+        </div>
+      </div>
+
+      <div class="result-message" id="audioResultMessage"></div>
+      <div class="manual-download" id="audioManualDownload"></div>
+    </section>
+
+    <section class="card" id="foldersCard" style="display:none">
+      <h2>📁 Organización</h2>
+      <div class="folder-grid">
+        <div class="folder">
+          <div class="folder-info">
+            <div class="folder-title">
+              <img class="folder-title-cat" src="/assets/sandcat-good.png" alt="">
+              <span>😸 🫰Buenas 🟢</span>
+              <img class="folder-title-cat" src="/assets/sandcat-good.png" alt="">
+            </div>
+            <div class="folder-count" id="goodFolderCount">0 clips</div>
+          </div>
+          <img class="folder-cat" src="/assets/sandcat-good.png" alt="">
+        </div>
+        <div class="folder">
+          <div class="folder-info">
+            <div class="folder-title">
+              <img class="folder-title-cat" src="/assets/sandcat-review.png" alt="">
+              <span>🙀🤏 Revisar🔵</span>
+              <img class="folder-title-cat" src="/assets/sandcat-review.png" alt="">
+            </div>
+            <div class="folder-count" id="reviewFolderCount">0 clips</div>
+          </div>
+          <img class="folder-cat" src="/assets/sandcat-review.png" alt="">
+        </div>
+        <div class="folder">
+          <div class="folder-info">
+            <div class="folder-title">
+              <img class="folder-title-cat" src="/assets/sandcat-trash.png" alt="">
+              <span>😿👎Trashed🗑️🔴</span>
+              <img class="folder-title-cat" src="/assets/sandcat-trash.png" alt="">
+            </div>
+            <div class="folder-count" id="badFolderCount">0 clips</div>
+          </div>
+          <img class="folder-cat" src="/assets/sandcat-trash.png" alt="">
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="extraCard" style="display:none">
+      <h2>Clips Extra / Borradores</h2>
+      <p class="subtitle">Clips sin información suficiente para clasificarlos completamente.</p>
+      <div id="extraClips" class="extra-list"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-heading">🎬 Cómo usar SANDCATFILMS ClipOrganizer AI</h2>
+      <p class="section-description">Próximamente encontrarás aquí un tutorial rápido para organizar tus clips, revisar las tomas y llevarlas directamente a tu editor.</p>
+      <div class="tutorial-frame">
+        <div class="tutorial-inner">
+          <div class="tutorial-icon">▶️</div>
+          <div class="tutorial-title">Tutorial en video</div>
+          <div class="tutorial-text">Espacio reservado · 16:9</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="ad-slot">
+        <span>
+          <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); border-radius: 16px; padding: 24px; text-align: center; color: white; font-family: system-ui, sans-serif; max-width: 500px; margin: 16px auto; border: 1px solid #333;">
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Gracias por confiar en ClipOrganizer 💜</h3>
+            <p style="margin: 0 0 16px 0; font-size: 14px; color: #bbb;">Deja tu pequeña huellita 🐾 para seguir creciendo con nosotros</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0;">
+              <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC&amount=1" target="_blank" style="background: #00457C; color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600; flex: 1; min-width: 120px;">
+                DONA ATUNCITO 🐠<br><span style="font-size: 12px; color: #fff; font-weight: 700;">POR $1</span>
+              </a>
+              <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC&amount=2.5" target="_blank" style="background: #6F4E37; color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600; flex: 1; min-width: 120px;">
+                DONA CAFECITO ☕<br><span style="font-size: 12px; color: #fff; font-weight: 700;">POR $2.50</span>
+              </a>
+              <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC&amount=3" target="_blank" style="background: #D2691E; color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600; flex: 1; min-width: 120px;">
+                DONA POLLITO 🍗<br><span style="font-size: 12px; color: #fff; font-weight: 700;">POR $3</span>
+              </a>
+            </div>
+            <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC" target="_blank" style="display: block; background: transparent; border: 1px solid #555; color: #ddd; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; margin: 8px 0;">
+              OTRO MONTO 💵
+            </a>
+            <p style="margin: 16px 0 8px 0; font-size: 12px; color: #aaa; line-height: 1.4;">
+              Con tu pequeña donación ayudas a que la página se mantenga gratis y con más funciones próximamente 💜
+            </p>
+            <p style="margin: 0; font-size: 11px; color: #888;">Saludos de Yarin de Sandcatfilms by ClipOrganizer AI 👋</p>
+          </div>
+        </span>
+      </div>
+    </section>
+
+    <section class="card" id="diagnosticsCard" style="display:none">
+      <details>
+        <summary>🔬 Diagnóstico de metadatos</summary>
+        <div class="diagnostics" id="diagnostics"></div>
+      </details>
+    </section>
+
+    <footer>
+      <span class="footer-brand">SANDCATFILMS</span> · ClipOrganizer AI<br>
+      Desarrollado por Yarin Maritza Núñez Mariño<br>
+      Los metadatos se procesan directamente en tu navegador. Los videos no son subidos por este código.<br>
+      <div class="footer-links">
+        <a href="privacy.html">Política de Privacidad</a>
+        <span>·</span>
+        <a href="terms.html">Términos de Uso</a>
+      </div>
+    </footer>
+  </div>
+  <script>
+    // === Estado global ===
+    let files = [];
+    let results = [];
+    let goodCount = 0, reviewCount = 0, badCount = 0;
+    let totalDated = 0, totalUndated = 0;
+
+    // === Elementos DOM ===
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const loadingCard = document.getElementById('loadingCard');
+    const loadingStatus = document.getElementById('loadingStatus');
+    const progressBar = document.getElementById('progressBar');
+    const resultsCard = document.getElementById('resultsCard');
+    const resultsBody = document.getElementById('resultsBody');
+    const foldersCard = document.getElementById('foldersCard');
+    const extraCard = document.getElementById('extraCard');
+    const diagnostics = document.getElementById('diagnostics');
+    const diagnosticsCard = document.getElementById('diagnosticsCard');
+
+    // === Eventos de arrastrar y soltar ===
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'));
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'));
+    });
+
+    dropZone.addEventListener('drop', e => {
+      const dt = e.dataTransfer;
+      if (dt.files.length) handleFiles(dt.files);
+    });
+
+    fileInput.addEventListener('change', e => {
+      if (e.target.files.length) handleFiles(e.target.files);
+    });
+
+    // === Procesar archivos ===
+    async function handleFiles(selectedFiles) {
+      files = Array.from(selectedFiles);
+      results = [];
+      goodCount = reviewCount = badCount = 0;
+      totalDated = totalUndated = 0;
+
+      // Mostrar carga
+      loadingCard.style.display = 'block';
+      resultsCard.style.display = 'none';
+      foldersCard.style.display = 'none';
+      extraCard.style.display = 'none';
+      diagnosticsCard.style.display = 'none';
+      progressBar.style.width = '0%';
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        loadingStatus.textContent = `Analizando: ${file.name}`;
+        progressBar.style.width = `${((i + 1) / files.length) * 100}%`;
+
+        const info = await analyzeFile(file);
+        results.push(info);
+
+        if (info.dateOriginal) totalDated++;
+        else totalUndated++;
+
+        if (info.quality === 'good') goodCount++;
+        else if (info.quality === 'review') reviewCount++;
+        else if (info.quality === 'bad') badCount++;
+
+        await new Promise(r => setTimeout(r, 20)); // Suavizar UI
+      }
+
+      renderResults();
+      loadingCard.style.display = 'none';
+    }
+
+    // === Analizar archivo individual ===
+    async function analyzeFile(file) {
+      const info = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: new Date(file.lastModified),
+        dateOriginal: null,
+        dateSource: null,
+        confidence: 0,
+        duration: null,
+        resolution: null,
+        device: null,
+        quality: 'review',
+        score: 0,
+        audioIssues: [],
+        videoIssues: [],
+        extra: false
+      };
+
+      // Intentar extraer fecha desde nombre de archivo
+      const datePatterns = [
+        // IMG_20240520_143022.mp4
+        { re: /(\d{4})[-_]?(\d{2})[-_]?(\d{2})[T_-]?(\d{2})?[-_]?(\d{2})?[-_]?(\d{2})?/, source: 'nombre' },
+        // 2024-05-20 14.30.22
+        { re: /(\d{4})-(\d{2})-(\d{2})\s+(\d{2})\.(\d{2})\.(\d{2})/, source: 'nombre' },
+        // VID-20240520-WA0000
+        { re: /(\d{4})(\d{2})(\d{2})/, source: 'nombre' }
+      ];
+
+      for (const p of datePatterns) {
+        const m = info.name.match(p.re);
+        if (m) {
+          const [y, mo, d, h = 0, mi = 0, s = 0] = m.slice(1).map(Number);
+          const dt = new Date(y, mo - 1, d, h, mi, s);
+          if (!isNaN(dt.getTime())) {
+            info.dateOriginal = dt;
+            info.dateSource = p.source;
+            info.confidence = 85;
+            break;
+          }
+        }
+      }
+
+      // Leer duración y más metadatos con video
+      try {
+        const meta = await readVideoMetadata(file);
+        Object.assign(info, meta);
+      } catch (e) {
+        info.diagnostics = `Error leyendo metadatos: ${e.message}`;
+      }
+
+      // Determinar calidad
+      determineQuality(info);
+
+      return info;
+    }
+
+    // === Leer metadatos del video ===
+    function readVideoMetadata(file) {
+      return new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = URL.createObjectURL(file);
+
+        video.onloadedmetadata = () => {
+          const data = {
+            duration: video.duration ? `${Math.floor(video.duration / 60)}:${String(Math.floor(video.duration % 60)).padStart(2, '0')}` : null,
+            resolution: `${video.videoWidth}×${video.videoHeight}`,
+            confidence: 90
+          };
+
+          // Usar fecha de modificación si no se encontró antes
+          if (!data.dateOriginal) {
+            data.dateOriginal = new Date(file.lastModified);
+            data.dateSource = 'archivo';
+            data.confidence = 60;
+          }
+
+          // Detectar dispositivo por patrón de nombre
+          const n = file.name.toLowerCase();
+          if (n.includes('img_') || n.includes('vid_') || n.includes('dcim')) {
+            data.device = 'Cámara móvil';
+            data.confidence += 5;
+          } else if (n.includes('whatsapp')) {
+            data.device = 'WhatsApp';
+          } else if (n.includes('screen')) {
+            data.device = 'Grabación de pantalla';
+            data.confidence -= 10;
+          } else {
+            data.device = 'Desconocido';
+          }
+
+          resolve(data);
+          URL.revokeObjectURL(video.src);
+        };
+
+        video.onerror = () => {
+          resolve({ diagnostics: 'No se pudieron leer metadatos del video' });
+          URL.revokeObjectURL(video.src);
+        };
+      });
+    }
+
+    // === Clasificar calidad ===
+    function determineQuality(info) {
+      let score = 50;
+
+      // Fecha confiable
+      if (info.dateSource === 'nombre') score += 20;
+      else if (info.dateSource === 'archivo') score += 5;
+
+      // Resolución decente
+      if (info.resolution) {
+        const [w, h] = info.resolution.split('×').map(Number);
+        if (w >= 1920 && h >= 1080) score += 15;
+        else if (w >= 1280) score += 10;
+        else score -= 5;
+      }
+
+      // Duración razonable
+      if (info.duration) {
+        const parts = info.duration.split(':').map(Number);
+        const secs = parts.length === 2 ? parts[0] * 60 + parts[1] : parts[0];
+        if (secs >= 5 && secs < 3600) score += 10;
+        else if (secs < 2) info.videoIssues.push('Duración muy corta');
+      }
+
+      info.score = Math.max(0, Math.min(100, score));
+
+      if (info.score >= 70) info.quality = 'good';
+      else if (info.score >= 45) info.quality = 'review';
+      else info.quality = 'bad';
+    }
+    // === Renderizar resultados ===
+    function renderResults() {
+      // Actualizar estadísticas
+      document.getElementById('totalClips').textContent = results.length;
+      document.getElementById('datedClips').textContent = totalDated;
+      document.getElementById('undatedClips').textContent = totalUndated;
+      document.getElementById('goodClips').textContent = goodCount;
+
+      // Contadores de carpetas
+      document.getElementById('goodFolderCount').textContent = `${goodCount} clips`;
+      document.getElementById('reviewFolderCount').textContent = `${reviewCount} clips`;
+      document.getElementById('badFolderCount').textContent = `${badCount} clips`;
+
+      // Tabla
+      resultsBody.innerHTML = '';
+      results.forEach((r, idx) => {
+        const row = document.createElement('tr');
+
+        // Badge de estado
+        let badgeClass = 'badge-gray', badgeText = 'Revisar';
+        if (r.quality === 'good') { badgeClass = 'badge-green'; badgeText = '✅ Bueno'; }
+        else if (r.quality === 'review') { badgeClass = 'badge-orange'; badgeText = '⚠️ Revisar'; }
+        else if (r.quality === 'bad') { badgeClass = 'badge-red'; badgeText = '❌ Descartar'; }
+
+        row.innerHTML = `
+          <td>${idx + 1}</td>
+          <td class="filename" title="${r.name}">${r.name}</td>
+          <td>${r.dateOriginal ? r.dateOriginal.toLocaleString('es-ES') : '—'}</td>
+          <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+          <td>${r.dateSource || '—'}</td>
+          <td>${r.confidence}%</td>
+          <td>${r.lastModified.toLocaleDateString('es-ES')}</td>
+          <td>${r.duration || '—'}</td>
+          <td>${r.device || '—'}</td>
+        `;
+        resultsBody.appendChild(row);
+      });
+
+      // Diagnóstico
+      diagnostics.textContent = results.map(r =>
+        `📄 ${r.name}\n  Fecha: ${r.dateOriginal?.toLocaleString('es-ES') || 'Sin fecha'}\n  Origen: ${r.dateSource}\n  Confianza: ${r.confidence}%\n  Calidad: ${r.quality} (${r.score}/100)\n  Resolución: ${r.resolution || '—'}\n  Duración: ${r.duration || '—'}\n  Dispositivo: ${r.device}\n`
+      ).join('\n');
+
+      // Mostrar secciones
+      resultsCard.style.display = 'block';
+      foldersCard.style.display = 'block';
+      if (diagnostics.textContent) diagnosticsCard.style.display = 'block';
+    }
+
+    // === Botón limpiar ===
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      files = [];
+      results = [];
+      fileInput.value = '';
+      resultsCard.style.display = 'none';
+      foldersCard.style.display = 'none';
+      extraCard.style.display = 'none';
+      diagnosticsCard.style.display = 'none';
+      progressBar.style.width = '0%';
+    });
+
+    // === Botón descargar ZIP (simulado / base) ===
+    document.getElementById('downloadVideosBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('audioResultMessage');
+      msg.className = 'result-message success-message';
+      msg.textContent = `✅ Preparando paquete con ${results.length} clips...\n\nEn versión completa se generará el ZIP organizado por carpetas:\n- Buenas 🟢\n- Revisar 🔵\n- Trashed 🔴\n\n💡 Versión funcional en desarrollo.`;
+    });
+
+    // === Botón audio ===
+    document.getElementById('downloadAudioBtn').addEventListener('click', () => {
+      const msg = document.getElementById('audioResultMessage');
+      msg.className = 'result-message';
+      msg.textContent = '🎧 Separación de audio — función en desarrollo.';
+    });
+  </script>
+</body>
+</html>
