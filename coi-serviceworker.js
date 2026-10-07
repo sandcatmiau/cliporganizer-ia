@@ -1,5 +1,5 @@
 /*! coi-serviceworker v0.1.7 - MIT License - https://github.com */
-const coepDegrade = false;
+const coepDegrade = true;
 
 if (typeof window === "undefined") {
     self.addEventListener("install", () => self.skipWaiting());
