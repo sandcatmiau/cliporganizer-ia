@@ -1,0 +1,531 @@
+<!DOCTYPE html>  
+<html lang="es">  
+<head>
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>SANDCATFILMS — ClipOrganizer AI</title>
+
+<!-- SCRIPTS DE PUBLICIDAD MONETAG -->
+<script>(function(s){s.dataset.zone='11804279',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<script>(function(s){s.dataset.zone='11803608',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+<style>
+:root{  
+    --bg:#0d0d0f; --card:#151519; --card2:#111116; --border:#28282f;  
+    --text:#f4f4f6; --muted:#a5a5ae; --accent:#6675ff; --green:#55d98a;  
+    --orange:#ffb454; --red:#ff6666;  
+}  
+*{ box-sizing:border-box; }  
+html{ scroll-behavior:smooth; }  
+body{ margin:0; background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); color:var(--text); font-family: Inter, system-ui, sans-serif; }  
+.container{ width:min(1180px,calc(100% - 28px)); margin:0 auto; padding:34px 0 50px; }  
+header{ margin-bottom:28px; text-align:center; } 
+.temu-producto-fijo{ text-align:center; margin:25px auto; max-width:300px; } 
+.temu-producto-fijo img{ width:100%; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.15); } 
+.temu-producto-fijo p{ font-size:15px; margin:8px 0; color:#333; } 
+.brand{ display:inline-flex; align-items:center; gap:10px; margin-bottom:9px; color:#d9dcff; font-size:12px; font-weight:900; letter-spacing:3px; text-transform:uppercase; } 
+.brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px rgba(102,117,255,.65); } 
+h1{ margin:0 0 8px; font-size:clamp(30px,5vw,46px); letter-spacing:-1.5px; } 
+.subtitle{ margin:0; color:var(--muted); line-height:1.6; }
+.card{ background:linear-gradient(180deg,#17171c,#121216); border:1px solid var(--border); border-radius:18px; padding:20px; margin-bottom:18px; box-shadow:0 12px 35px rgba(0,0,0,.18); }  
+.drop-zone{ position:relative; display:block; min-height:230px; border:2px dashed #3a3a45; border-radius:16px; padding:24px 20px; text-align:center; cursor:pointer; overflow:hidden; transition:.2s ease; }  
+.drop-zone:hover, .drop-zone.dragover{ border-color:var(--accent); background:rgba(102,117,255,.06); }  
+.drop-cat{ display:block; width:min(170px,48vw); max-height:125px; object-fit:contain; margin:0 auto 5px; filter:drop-shadow(0 12px 20px rgba(0,0,0,.35)); }  
+.drop-icon{ font-size:28px; margin-bottom:6px; }  
+.drop-title{ font-size:20px; font-weight:800; margin-bottom:7px; }  
+.drop-subtitle{ color:var(--muted); font-size:14px; }  
+#fileInput{ display:none; }  
+.loading{ display:none; }  
+.loading-visual{ display:flex; align-items:center; gap:18px; margin-bottom:4px; }  
+.running-cat{ width:100px; height:78px; object-fit:contain; flex:0 0 auto; filter:drop-shadow(0 8px 16px rgba(0,0,0,.35)); }  
+.loading-status{ color:var(--muted); font-size:14px; line-height:1.5; }  
+.progress-track{ width:100%; height:10px; background:#25252c; border-radius:999px; overflow:hidden; margin-top:14px; }  
+.progress-bar{ height:100%; width:0; background:var(--accent); border-radius:999px; transition:width .2s ease; }  
+.actions{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:16px; }  
+button{ appearance:none; display:inline-flex; align-items:center; justify-content:center; width:auto; min-height:46px; border:0; border-radius:11px; padding:12px 18px; background:#6675ff; color:#ffffff; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; transition:transform .2s,filter .2s,opacity .2s; }  
+button:hover:not(:disabled){ transform:translateY(-1px); filter:brightness(1.08); }  
+button:disabled{ opacity:.45; cursor:not-allowed; }  
+.audio-button{ background:#27334a; border:1px solid #394862; }  
+.secondary{ background:#202027; border:1px solid #34343d; }  
+.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }  
+.stat{ background:#111116; border:1px solid var(--border); border-radius:14px; padding:16px; }  
+.stat-value{ font-size:26px; font-weight:800; }  
+.stat-label{ color:var(--muted); font-size:12px; margin-top:4px; }  
+.table-wrap{ width:100%; overflow-x:auto; }  
+table{ width:100%; border-collapse:collapse; min-width:980px; }  
+th, td{ padding:13px 11px; border-bottom:1px solid #25252b; text-align:left; font-size:13px; }  
+th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }  
+.filename{ max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }  
+.badge{ display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; font-size:11px; font-weight:800; }  
+.badge-green{ background:rgba(85,217,138,.12); color:#78e8a3; }  
+.badge-orange{ background:rgba(255,180,84,.12); color:#ffc477; }  
+.badge-red{ background:rgba(255,102,102,.12); color:#ff8b8b; }  
+.folder-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }  
+.folder{ position:relative; min-height:145px; background:#111116; border:1px solid var(--border); border-radius:14px; padding:15px; overflow:hidden; }  
+.folder-info{ position:relative; z-index:2; max-width:60%; }  
+.folder-title{ display:flex; align-items:center; gap:7px; font-weight:800; margin-bottom:5px; }  
+.folder-count{ color:var(--muted); font-size:13px; }  
+.folder-cat{ position:absolute; right:5px; bottom:-3px; width:125px; height:105px; object-fit:contain; opacity:.92; }  
+
+/* TUTORIAL CON FALLBACK DE SEGURIDAD */
+.section-heading{ margin:0 0 6px; font-size:20px; }  
+.section-description{ margin:0 0 16px; color:var(--muted); font-size:14px; line-height:1.6; }  
+.tutorial-frame{  
+    position:relative; width:100%; aspect-ratio:16 / 9; border:1px solid var(--border); border-radius:15px;  
+    background:#000; overflow:hidden; display:flex; align-items:center; justify-content:center;
+}  
+.tutorial-frame video, .tutorial-frame iframe{ width:100%; height:100%; border:0; }
+.tutorial-fallback{ text-align:center; padding:20px; color:var(--muted); }
+
+footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-height:1.6; }  
+</style>  
+</head>  
+
+<body>  
+<div class="container">  
+<header>  
+  <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>  
+  <h1>ClipOrganizer AI</h1>  
+  <p class="subtitle">Organización inteligente de tus videos según su fecha real de grabación, calidad de toma y audio. Todo se procesa localmente en tu navegador.</p>  
+</header>  
+
+<!-- OFERTA TEMU FIJA -->
+<div class="temu-producto-fijo">
+  <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
+    <img src="https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg?imageView2/2/w/280/q/80/format/avif" crossorigin="anonymous" alt="Oferta Temu">
+    <p><b>🔥 Oferta Imposible en Temu 🔥</b><br><span style="color:#ff4757; font-weight:bold;">-80% + Envío Gratis Hoy</span></p>
+  </a>
+</div>
+
+<section class="card">
+<label class="drop-zone" id="dropZone" for="fileInput">
+  <img class="drop-cat" src="/assets/sandcat-licking.png" alt="Gato SANDCATFILMS"> 
+  <div class="drop-icon">📂</div>  
+  <div class="drop-title">Selecciona tus videos</div>  
+  <div class="drop-subtitle">También puedes arrastrarlos y soltarlos aquí</div>  
+</label>  
+<input id="fileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple> 
+</section>  
+
+<section class="card loading" id="loadingCard">  
+  <div class="loading-visual">  
+    <img class="running-cat" src="/assets/sandcat-running.png" alt="SANDCATFILMS procesando"> 
+    <div><div class="loading-status" id="loadingStatus">Analizando metadatos...</div></div>  
+  </div>  
+  <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>  
+</section>  
+
+<section class="card" id="resultsCard" style="display:none">  
+  <div class="stats">  
+    <div class="stat"><div class="stat-value" id="totalClips">0</div><div class="stat-label">Clips</div></div>  
+    <div class="stat"><div class="stat-value" id="datedClips">0</div><div class="stat-label">Con fecha original</div></div>  
+    <div class="stat"><div class="stat-value" id="undatedClips">0</div><div class="stat-label">Sin fecha original</div></div>  
+    <div class="stat"><div class="stat-value" id="goodClips">0</div><div class="stat-label">Tomas buenas</div></div>  
+  </div>  
+  <div class="table-wrap">  
+    <table>  
+      <thead>  
+        <tr>  
+          <th>#</th><th>Archivo</th><th>Fecha original</th><th>Estado</th><th>Fuente</th><th>Confianza</th><th>Fecha del archivo</th><th>Duración</th><th>Dispositivo</th>  
+        </tr>  
+      </thead>  
+      <tbody id="resultsBody"></tbody>  
+    </table>  
+  </div>  
+  <div class="actions">  
+    <button id="downloadVideosBtn" type="button">⬇️ Descargar ZIP organizado</button>
+    <button class="secondary audio-button" id="downloadAudioBtn" type="button" disabled>🎧 Separar y descargar audio (.WAV)</button>
+    <button class="secondary" id="clearBtn" type="button">🧹 Limpiar análisis</button>
+  </div>  
+</section>  
+
+<section class="card" id="foldersCard" style="display:none">  
+  <h2>📁 Organización</h2>  
+  <div class="folder-grid">  
+    <div class="folder">  
+      <div class="folder-info"><div class="folder-title"><span>😸 🫰Buenas 🟢</span></div><div class="folder-count" id="goodFolderCount">0 clips</div></div>  
+      <img class="folder-cat" src="/assets/sandcat-good.png" alt="">  
+    </div>  
+    <div class="folder">  
+      <div class="folder-info"><div class="folder-title"><span>🙀🤏 Revisar🔵</span></div><div class="folder-count" id="reviewFolderCount">0 clips</div></div>  
+      <img class="folder-cat" src="/assets/sandcat-review.png" alt="">  
+    </div>  
+    <div class="folder">  
+      <div class="folder-info"><div class="folder-title"><span>😿👎Trashed🗑️🔴</span></div><div class="folder-count" id="badFolderCount">0 clips</div></div>  
+      <img class="folder-cat" src="/assets/sandcat-trash.png" alt="">  
+    </div>  
+  </div>  
+</section>  
+
+<!-- SECCIÓN TUTORIAL -->
+<section class="card">
+  <h2 class="section-heading">📹 ¿Cómo usar ClipOrganizer AI?</h2>
+  <p class="section-description">Mira este breve tutorial para aprovechar al máximo el análisis automático de fechas y calidad de tus clips.</p>
+  <div class="tutorial-frame">
+    <video controls poster="/assets/sandcat-licking.png" onerror="this.style.display='none'; document.getElementById('tutorialFallback').style.display='block';">
+      <source src="/assets/tutorial.mp4" type="video/mp4">
+    </video>
+    <div id="tutorialFallback" class="tutorial-fallback" style="display:none;">
+      <div style="font-size:36px; margin-bottom:8px;">🎬</div>
+      <div style="font-weight:bold; font-size:16px;">Tutorial de ClipOrganizer AI</div>
+      <div style="font-size:13px; margin-top:4px;">Sube tus videos en la parte superior para organizarlos automáticamente.</div>
+    </div>
+  </div>
+</section>
+
+<!-- BANNER ADVERTICA -->
+<div style="margin: 25px auto; text-align: center; width: 100%; max-width: 728px;">
+  <ins style="width: 728px;height:90px;display:inline-block;" class="v7747945f49" 
+       data-domain="https://data527.click" 
+       data-affquery="/7e07258aeeed61a4728d/7747945f49/?placementName=ClipOrganizer">
+  </ins>
+  <script src="https://data527.click/js/responsive.js" async></script>
+</div>
+
+<!-- SECCIÓN DE DONACIONES -->
+<section class="card">
+  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); border-radius: 16px; padding: 24px; text-align: center; color: white; max-width: 500px; margin: 0 auto; border: 1px solid #333;">
+    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Gracias por confiar en ClipOrganizer 💜</h3>
+    <p style="margin: 0 0 16px 0; font-size: 14px; color: #bbb;">Deja tu pequeña huellita 🐾 para seguir creciendo con nosotros</p>
+    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0;">
+      <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC&amount=1" target="_blank" style="background: #00457C; color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600; flex: 1; min-width: 120px;">DONA ATUNCITO 🐠<br><span style="font-size: 12px;">POR $1</span></a>
+      <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC&amount=2.5" target="_blank" style="background: #6F4E37; color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600; flex: 1; min-width: 120px;">DONA CAFECITO ☕<br><span style="font-size: 12px;">POR $2.50</span></a>
+      <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC&amount=3" target="_blank" style="background: #D2691E; color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600; flex: 1; min-width: 120px;">DONA POLLITO 🍗<br><span style="font-size: 12px;">POR $3</span></a>
+    </div>
+    <a href="https://www.paypal.com/donate/?hosted_button_id=NBETBT5LFHSWC" target="_blank" style="display: block; background: transparent; border: 1px solid #555; color: #ddd; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px;">OTRO MONTO 💵</a>
+    <p style="margin: 16px 0 8px 0; font-size: 12px; color: #aaa;">Con tu pequeña donación ayudas a que la página se mantenga gratis 💜</p>
+    <p style="margin: 0; font-size: 11px; color: #888;">Saludos de Yarin de Sandcatfilms by ClipOrganizer AI 👋</p>
+  </div>
+</section>
+
+<footer>  
+  <span class="footer-brand">SANDCATFILMS</span> · ClipOrganizer AI<br>
+  Desarrollado por Yarin Maritza Núñez Mariño<br>  
+</footer>  
+</div>  
+
+<script src="https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/mediainfo.min.js"></script>  
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>  
+
+<script>  
+"use strict";  
+  
+const CHUNK_SIZE = 1024 * 1024;  
+const MEDIAINFO_WASM = "https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/MediaInfoModule.wasm";  
+const MAX_AUDIO_RAM_SIZE = 500 * 1024 * 1024; // Límite de seguridad 500MB por archivo para extracción de audio
+
+let mediaInfoInstance = null;  
+let analyzedClips = [];  
+
+const fileInput = document.getElementById("fileInput");  
+const dropZone = document.getElementById("dropZone");  
+const loadingCard = document.getElementById("loadingCard");  
+const loadingStatus = document.getElementById("loadingStatus");  
+const progressBar = document.getElementById("progressBar");  
+const resultsCard = document.getElementById("resultsCard");  
+const resultsBody = document.getElementById("resultsBody");  
+const foldersCard = document.getElementById("foldersCard");  
+const downloadVideosBtn = document.getElementById("downloadVideosBtn");  
+const downloadAudioBtn = document.getElementById("downloadAudioBtn");  
+const clearBtn = document.getElementById("clearBtn");  
+
+function yieldToBrowser(){ return new Promise(resolve => setTimeout(resolve, 0)); }  
+
+function downloadBlob(blob, filename) {  
+    const url = URL.createObjectURL(blob);  
+    const a = document.createElement("a");  
+    a.href = url;  
+    a.download = filename;  
+    document.body.appendChild(a);  
+    a.click();  
+    a.remove();  
+    setTimeout(() => URL.revokeObjectURL(url), 10000);  
+}  
+
+function formatDate(date) {  
+    if (!(date instanceof Date) || isNaN(date)) return null;  
+    const day = String(date.getDate()).padStart(2, "0");  
+    const month = String(date.getMonth() + 1).padStart(2, "0");  
+    const year = date.getFullYear();  
+    let hours = date.getHours();  
+    const minutes = String(date.getMinutes()).padStart(2, "0");  
+    const seconds = String(date.getSeconds()).padStart(2, "0");  
+    const suffix = hours >= 12 ? "p. m." : "a. m.";  
+    hours = hours % 12 || 12;  
+    return `${day}/${month}/${year}, ${String(hours).padStart(2, "0")}:${minutes}:${seconds} ${suffix}`;  
+}
+
+function parseDateValue(value) {
+    if (!value) return null;
+    if (value instanceof Date) return isNaN(value) ? null : value;
+    let text = String(value).replace(/\bUTC\b|\bGMT\b/gi, "").trim();
+    let d = new Date(text);
+    return isNaN(d) ? null : d;
+}
+
+function chooseOriginalDate(info) {
+    const text = JSON.stringify(info);
+    if (/apple.*creationdate|creationdate.*apple/i.test(text)) {
+        const match = text.match(/"CreationDate":"([^"]+)"/i);
+        if (match && parseDateValue(match[1])) {
+            return { date: parseDateValue(match[1]), source: "🍎 Apple CreationDate", confidence: "🟢 Alta" };
+        }
+    }
+    const general = info?.media?.track?.find(t => t["@type"] === "General") || {};
+    const dateRaw = general.Encoded_Date || general.Tagged_Date || general.File_Modified_Date;
+    const parsed = parseDateValue(dateRaw);
+    if (parsed) return { date: parsed, source: "📅 Metadatos Video", confidence: "🟢 Alta" };
+    return { date: null, source: "—", confidence: "⚪ Sin fecha" };
+}
+
+function findDevice(info) {
+    const text = JSON.stringify(info);
+    if (/iphone/i.test(text)) return "iPhone";
+    if (/ipad/i.test(text)) return "iPad";
+    if (/samsung/i.test(text)) return "Samsung";
+    if (/canon/i.test(text)) return "Canon";
+    if (/sony/i.test(text)) return "Sony";
+    return "No identificado";
+}
+
+async function isBlackVideo(file) {
+    return new Promise((resolve) => {
+        const video = document.createElement("video");
+        video.muted = true;
+        const url = URL.createObjectURL(file);
+        video.src = url;
+        video.onloadeddata = () => { video.currentTime = Math.min(1.0, video.duration / 2); };
+        video.onseeked = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 100; canvas.height = 100;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, 100, 100);
+            const imageData = ctx.getImageData(0, 0, 100, 100);
+            let totalLuma = 0;
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                totalLuma += (0.299 * imageData.data[i] + 0.587 * imageData.data[i + 1] + 0.114 * imageData.data[i + 2]);
+            }
+            URL.revokeObjectURL(url);
+            resolve((totalLuma / 10000) < 18);
+        };
+        video.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
+    });
+}
+
+async function analyzeFile(file, mediainfo) {  
+    const getSize = () => file.size;  
+    const readChunk = (chunkSize, offset) => file.slice(offset, offset + chunkSize).arrayBuffer().then(b => new Uint8Array(b));  
+    const info = await mediainfo.analyzeData(getSize, readChunk);  
+    const general = info?.media?.track?.find(t => t["@type"] === "General") || {};  
+    const duration = Number(general.Duration) || 0;  
+    const original = chooseOriginalDate(info);
+    const device = findDevice(info);
+    const isBlack = await isBlackVideo(file);
+    
+    let status = "🟢 Buena", className = "badge-green", folder = "good";
+    if (isBlack || duration < 2) {
+        status = "🔴 Toma mala"; className = "badge-red"; folder = "bad";
+    } else if (duration <= 6) {
+        status = "🟠 Revisar"; className = "badge-orange"; folder = "review";
+    }
+
+    return {  
+        file, name: file.name, size: file.size,  
+        fileDate: file.lastModified ? new Date(file.lastModified) : null,
+        originalDate: original.date,
+        originalDateText: original.date ? formatDate(original.date) : "No disponible",
+        source: original.source, confidence: original.confidence,
+        duration, durationText: `${Math.round(duration)}s`,  
+        device, status, statusClass: className, folder  
+    };  
+}  
+
+async function processFiles(files) {  
+    const validFiles = Array.from(files || []).filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name));  
+    if (!validFiles.length) return;  
+    loadingCard.style.display = "block";  
+    resultsCard.style.display = "none";  
+    foldersCard.style.display = "none";  
+  
+    const mediainfo = await initializeMediaInfo();  
+    analyzedClips = [];  
+
+    for (let index = 0; index < validFiles.length; index++) {  
+        const file = validFiles[index];  
+        loadingStatus.textContent = `🔎 Analizando ${index + 1} de ${validFiles.length}: ${file.name}`;  
+        progressBar.style.width = `${Math.round(((index + 1) / validFiles.length) * 100)}%`;  
+        await yieldToBrowser();  
+
+        const clip = await analyzeFile(file, mediainfo);  
+        analyzedClips.push(clip);  
+    }  
+
+    analyzedClips.sort((a, b) => {
+        const aTime = a.originalDate ? a.originalDate.getTime() : Infinity;
+        const bTime = b.originalDate ? b.originalDate.getTime() : Infinity;
+        return aTime - bTime;
+    });
+
+    renderResults();  
+    loadingCard.style.display = "none";  
+}  
+
+function renderResults() {  
+    resultsBody.innerHTML = "";  
+    let goodCount = 0, reviewCount = 0, badCount = 0, datedCount = 0;
+
+    analyzedClips.forEach((clip, index) => {  
+        if (clip.originalDate) datedCount++;
+        if (clip.folder === "good") goodCount++;
+        else if (clip.folder === "review") reviewCount++;
+        else if (clip.folder === "bad") badCount++;
+
+        const row = document.createElement("tr");  
+        row.innerHTML = `  
+            <td>${index + 1}</td>  
+            <td class="filename">${clip.name}</td>  
+            <td>${clip.originalDateText}</td>  
+            <td><span class="badge ${clip.statusClass}">${clip.status}</span></td>  
+            <td>${clip.source}</td><td>${clip.confidence}</td>  
+            <td>${clip.fileDate ? formatDate(clip.fileDate) : "—"}</td>  
+            <td>${clip.durationText}</td><td>${clip.device}</td>  
+        `;  
+        resultsBody.appendChild(row);  
+    });  
+
+    document.getElementById("totalClips").textContent = analyzedClips.length;
+    document.getElementById("datedClips").textContent = datedCount;
+    document.getElementById("undatedClips").textContent = analyzedClips.length - datedCount;
+    document.getElementById("goodClips").textContent = goodCount;
+    document.getElementById("goodFolderCount").textContent = `${goodCount} clips`;
+    document.getElementById("reviewFolderCount").textContent = `${reviewCount} clips`;
+    document.getElementById("badFolderCount").textContent = `${badCount} clips`;
+
+    resultsCard.style.display = "block";  
+    foldersCard.style.display = "block";  
+    downloadAudioBtn.disabled = analyzedClips.length === 0;  
+}  
+
+async function initializeMediaInfo() {  
+    if (mediaInfoInstance) return mediaInfoInstance;  
+    return new Promise((resolve, reject) => {  
+        MediaInfo({ format: "object", chunkSize: CHUNK_SIZE, locateFile: () => MEDIAINFO_WASM }, resolve, reject);  
+    });  
+}  
+
+downloadVideosBtn.addEventListener("click", async () => {
+    if (!analyzedClips.length) return;
+    loadingCard.style.display = "block";
+    loadingStatus.textContent = "📦 Generando archivo ZIP organizado...";
+    await yieldToBrowser();
+
+    const zip = new JSZip();
+    let count = 0;
+
+    analyzedClips.forEach((clip, index) => {
+        const number = String(index + 1).padStart(3, "0");
+        const filename = `${number}_${clip.name}`;
+        let folderName = "Revisar";
+        if (clip.folder === "good") folderName = "Buenas";
+        else if (clip.folder === "bad") folderName = "Trashed";
+
+        zip.folder(folderName).file(filename, clip.file, { compression: "STORE" });
+        count++;
+    });
+
+    if (count > 0) {
+        const blob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
+        downloadBlob(blob, `SANDCATFILMS_Clips_${Date.now()}.zip`);
+    }
+    loadingCard.style.display = "none";
+});
+
+function audioBufferToWav(buffer) {
+    let numOfChan = buffer.numberOfChannels,
+        len = buffer.length * numOfChan * 2 + 44,
+        out = new DataView(new ArrayBuffer(len)),
+        channels = [], i, sample, offset = 0, pos = 0;
+
+    function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+    function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
+
+    setUint32(0x46464952); setUint32(len - 8); setUint32(0x45564157);
+    setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+    setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * 2 * numOfChan);
+    setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164);
+    setUint32(len - pos - 4);
+
+    for (i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+    while (offset < buffer.length) {
+        for (i = 0; i < numOfChan; i++) {
+            sample = Math.max(-1, Math.min(1, channels[i][offset]));
+            sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+            out.setInt16(pos, sample, true);
+            pos += 2;
+        }
+        offset++;
+    }
+    return new Blob([out], { type: "audio/wav" });
+}
+
+downloadAudioBtn.addEventListener("click", async () => {
+    if (!analyzedClips.length) return;
+    loadingCard.style.display = "block";
+    progressBar.style.width = "0%";
+    
+    const zip = new JSZip();
+
+    for (let index = 0; index < analyzedClips.length; index++) {
+        const clip = analyzedClips[index];
+        loadingStatus.textContent = `🎧 Extrayendo audio (${index + 1}/${analyzedClips.length}): ${clip.name}`;
+        progressBar.style.width = `${Math.round(((index + 1) / analyzedClips.length) * 100)}%`;
+        await yieldToBrowser();
+
+        if (clip.file.size > MAX_AUDIO_RAM_SIZE) {
+            console.warn(`Archivo ${clip.name} excede el límite recomendado para extracción local de RAM.`);
+            continue;
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+            const arrayBuffer = await clip.file.arrayBuffer();
+            const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
+            const wavBlob = audioBufferToWav(decodedData);
+            
+            const number = String(index + 1).padStart(3, "0");
+            const cleanName = clip.name.substring(0, clip.name.lastIndexOf('.')) || clip.name;
+            zip.file(`${number}_Audio_${cleanName}.wav`, wavBlob);
+        } catch (err) {
+            console.warn(`Error al extraer audio de ${clip.name}`, err);
+        } finally {
+            if (audioCtx.state !== 'closed') await audioCtx.close();
+        }
+    }
+
+    loadingStatus.textContent = "📦 Empaquetando ZIP de audios...";
+    const blob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
+    downloadBlob(blob, `SANDCATFILMS_Audios_WAV_${Date.now()}.zip`);
+    loadingCard.style.display = "none";
+});
+
+clearBtn.addEventListener("click", () => {
+    analyzedClips = [];
+    resultsBody.innerHTML = "";
+    fileInput.value = "";
+    resultsCard.style.display = "none";
+    foldersCard.style.display = "none";
+    loadingCard.style.display = "none";
+});
+
+fileInput.addEventListener("change", e => processFiles(e.target.files));  
+dropZone.addEventListener("dragover", e => e.preventDefault());  
+dropZone.addEventListener("drop", e => { e.preventDefault(); processFiles(e.dataTransfer.files); });  
+</script>  
+
+<!-- BANNER PUBLICITARIO ADSTERRA NATIVE -->
+<script async="async" data-cfasync="false" src="https://pl31347256.profitableratecpmnetwork.com/4bbd9cdc577d153f8b6c2e3e46114cd3/invoke.js"></script>
+<div id="container-4bbd9cdc577d153f8b6c2e3e46114cd3"></div>
+
+</body>  
+</html>
