@@ -263,7 +263,7 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   </div>
 </section>
 
-<!-- BANNER ADVERTICA CON FALLBACK PERSONALIZADO (SERVICIOS Y TEMU SIN GATO) -->
+<!-- BANNER ADVERTICA CON FALLBACK PERSONALIZADO (SERVICIOS Y TEMU CON IMÁGENES DENTRO DE /assets/) -->
 <div class="ad-slot-container" id="ad-advertica-container">
   <ins style="width: 728px; height: 90px; display: inline-block;" class="v7747945f49" 
        data-domain="https://data527.click" 
@@ -274,17 +274,31 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
 
 <script>
 function cargarAnuncioRespaldo() {
-  console.log("Red principal sin inventario. Cargando banner de servicios de edición...");
+  console.log("Red principal sin inventario. Cargando banner de servicios y Temu...");
   const container = document.getElementById('ad-advertica-container');
   if (container) {
     container.innerHTML = `
-      <div style="padding: 16px; text-align: center; width: 100%; max-width: 600px;">
-        <p style="color: #6675ff; font-weight: 800; font-size: 16px; margin: 0 0 6px 0;">
+      <div style="padding: 16px; text-align: center; width: 100%; max-width: 650px;">
+        
+        <!-- IMÁGENES PEQUEÑAS LADO A LADO -->
+        <div style="display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 12px;">
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
+            <img src="/assets/planes-sandcatfilms.png" alt="SANDCATFILMS Servicios" style="width: 140px; height: 75px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);">
+          </a>
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
+            <img src="/assets/temu-promo.jpg" alt="Temu Ofertas" style="width: 140px; height: 75px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);">
+          </a>
+        </div>
+
+        <!-- TEXTO INFORMATIVO -->
+        <p style="color: #6675ff; font-weight: 800; font-size: 15px; margin: 0 0 4px 0;">
           🎬 ¿Quieres contratar servicios de edición?
         </p>
         <p style="color: #e1e1e6; font-size: 13px; margin: 0 0 12px 0; line-height: 1.4;">
           Mira los catálogos de <b>SANDCATFILMS</b> y contrata nuestro servicio profesional.
         </p>
+
+        <!-- BOTONES DE ACCIÓN -->
         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
           <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" style="background: #6675ff; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;">
              Ver Catálogo de Servicios 🎬
@@ -293,6 +307,7 @@ function cargarAnuncioRespaldo() {
             🔥 Oferta Temu
           </a>
         </div>
+
       </div>
     `;
   }
