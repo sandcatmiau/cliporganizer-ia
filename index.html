@@ -2,12 +2,21 @@
 <html lang="es">  
 <head>
 <meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
 <title>SANDCATFILMS — ClipOrganizer AI</title>
 
 <!-- SCRIPTS DE PUBLICIDAD MONETAG -->
 <script>(function(s){s.dataset.zone='11804279',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <script>(function(s){s.dataset.zone='11803608',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+<script>
+// Manejador para silenciar errores de conexión a redes publicitaria en consola
+window.addEventListener('error', function(e) {
+  if (e.target && e.target.src && (e.target.src.includes('data527.click') || e.target.src.includes('profitableratecpmnetwork.com'))) {
+    e.preventDefault();
+  }
+}, true);
+</script>
 
 <style>
 :root{  
@@ -77,6 +86,22 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
 .tutorial-frame video, .tutorial-frame iframe{ width:100%; height:100%; border:0; }
 .tutorial-fallback{ text-align:center; padding:20px; color:var(--muted); }
 
+/* CONTENEDOR ESTABILIZADOR DE ANUNCIOS */
+.ad-slot-container {
+  width: 100%;
+  max-width: 728px;
+  min-height: 280px;
+  margin: 25px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
 footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-height:1.6; }  
 </style>  
 </head>  
@@ -89,7 +114,7 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   <p class="subtitle">Organización inteligente de tus videos según su fecha real de grabación, calidad de toma y audio. Todo se procesa localmente en tu navegador.</p>  
 </header>  
 
-<!-- OFERTA TEMU FIJA -->
+<!-- OFERTA TEMU FIJA SUPERIOR -->
 <div class="temu-producto-fijo">
   <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
     <img src="https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg?imageView2/2/w/280/q/80/format/avif" crossorigin="anonymous" alt="Oferta Temu">
@@ -173,14 +198,48 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   </div>
 </section>
 
-<!-- BANNER ADVERTICA -->
-<div style="margin: 25px auto; text-align: center; width: 100%; max-width: 728px;">
-  <ins style="width: 728px;height:90px;display:inline-block;" class="v7747945f49" 
+<!-- BANNER ADVERTICA CON RESPALDO (FALLBACK) Y TAMAÑO FIJO -->
+<div class="ad-slot-container" id="ad-advertica-container">
+  <ins style="width: 728px; height: 90px; display: inline-block;" class="v7747945f49" 
        data-domain="https://data527.click" 
        data-affquery="/7e07258aeeed61a4728d/7747945f49/?placementName=ClipOrganizer">
   </ins>
-  <script src="https://data527.click/js/responsive.js" async></script>
+  <script src="https://data527.click/js/responsive.js" async onerror="cargarAnuncioRespaldo()"></script>
 </div>
+
+<script>
+function cargarAnuncioRespaldo() {
+  console.log("Red principal sin inventario. Cargando respaldo...");
+  const container = document.getElementById('ad-advertica-container');
+  if (container) {
+    container.innerHTML = `
+      <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; padding:15px; width:100%;">
+        <p style="color:#ff4757; font-weight:bold; font-size:15px; margin:0 0 8px 0; text-align:center;">
+          🔥 Oferta Exclusiva en Temu 🔥<br>
+          <span style="font-size:12px; color:#aaa; font-weight:normal;">-80% + Envío Gratis Hoy</span>
+        </p>
+        <img src="/assets/sandcat-review.png" alt="SANDCATFILMS Oferta" style="max-width:240px; height:auto; border-radius:10px;">
+      </a>
+    `;
+  }
+}
+
+// Verificación por temporizador: si pasados 3.5s la subasta devuelve 0 anuncios, activa el fallback
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const container = document.getElementById('ad-advertica-container');
+    if (container) {
+      const hasIframe = container.querySelector('iframe');
+      const hasImg = container.querySelector('img');
+      const insElement = container.querySelector('ins');
+      // Si el elemento <ins> no tiene contenido renderizado dentro
+      if (!hasIframe && !hasImg && insElement && insElement.children.length === 0) {
+        cargarAnuncioRespaldo();
+      }
+    }
+  }, 3500);
+});
+</script>
 
 <!-- SECCIÓN DE DONACIONES -->
 <section class="card">
