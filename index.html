@@ -10,7 +10,7 @@
 <script>(function(s){s.dataset.zone='11803608',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 
 <script>
-// Manejador para silenciar errores de conexión a redes publicitaria en consola
+// Manejador para silenciar errores de conexión a redes publicitarias en consola
 window.addEventListener('error', function(e) {
   if (e.target && e.target.src && (e.target.src.includes('data527.click') || e.target.src.includes('profitableratecpmnetwork.com'))) {
     e.preventDefault();
@@ -28,10 +28,30 @@ window.addEventListener('error', function(e) {
 html{ scroll-behavior:smooth; }  
 body{ margin:0; background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); color:var(--text); font-family: Inter, system-ui, sans-serif; }  
 .container{ width:min(1180px,calc(100% - 28px)); margin:0 auto; padding:34px 0 50px; }  
-header{ margin-bottom:28px; text-align:center; } 
-.temu-producto-fijo{ text-align:center; margin:25px auto; max-width:300px; } 
-.temu-producto-fijo img{ width:100%; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.15); } 
-.temu-producto-fijo p{ font-size:15px; margin:8px 0; color:#333; } 
+header{ margin-bottom:20px; text-align:center; } 
+
+/* BANNER TEMU COMPACTO HORIZONTAL */
+.temu-banner-compacto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 14px;
+  max-width: 480px;
+  margin: 15px auto 25px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.2s ease;
+}
+.temu-banner-compacto:hover { transform: translateY(-2px); }
+.temu-banner-compacto img { width: 90px; height: auto; border-radius: 8px; flex-shrink: 0; }
+.temu-banner-info { text-align: left; }
+.temu-banner-title { font-size: 13px; font-weight: bold; margin: 0 0 4px 0; color: #ff4757; }
+.temu-banner-sub { font-size: 11px; color: var(--muted); margin: 0; }
+
 .brand{ display:inline-flex; align-items:center; gap:10px; margin-bottom:9px; color:#d9dcff; font-size:12px; font-weight:900; letter-spacing:3px; text-transform:uppercase; } 
 .brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px rgba(102,117,255,.65); } 
 h1{ margin:0 0 8px; font-size:clamp(30px,5vw,46px); letter-spacing:-1.5px; } 
@@ -44,10 +64,49 @@ h1{ margin:0 0 8px; font-size:clamp(30px,5vw,46px); letter-spacing:-1.5px; }
 .drop-title{ font-size:20px; font-weight:800; margin-bottom:7px; }  
 .drop-subtitle{ color:var(--muted); font-size:14px; }  
 #fileInput{ display:none; }  
+
+/* ANIMACIÓN Y CARGA CON GATITO PERSIGUIENDO PAJARITO */
 .loading{ display:none; }  
-.loading-visual{ display:flex; align-items:center; gap:18px; margin-bottom:4px; }  
-.running-cat{ width:100px; height:78px; object-fit:contain; flex:0 0 auto; filter:drop-shadow(0 8px 16px rgba(0,0,0,.35)); }  
-.loading-status{ color:var(--muted); font-size:14px; line-height:1.5; }  
+.loading-chase-track {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px dashed rgba(255,255,255,0.05);
+}
+.chase-group {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  animation: runAcross 4.5s linear infinite;
+  white-space: nowrap;
+}
+@keyframes runAcross {
+  0% { left: -120px; }
+  100% { left: 100%; }
+}
+.running-cat-img { width: 75px; height: 60px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+.bird-icon { font-size: 24px; animation: birdFlap 0.3s ease-in-out infinite alternate; }
+@keyframes birdFlap { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+
+.loading-status{ color:var(--text); font-size:14px; font-weight:600; line-height:1.5; margin-bottom: 4px; }  
+.fact-box {
+  background: rgba(102, 117, 255, 0.08);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  color: #d9dcff;
+  font-size: 13px;
+  margin-top: 10px;
+  transition: opacity 0.3s ease;
+}
+
 .progress-track{ width:100%; height:10px; background:#25252c; border-radius:999px; overflow:hidden; margin-top:14px; }  
 .progress-bar{ height:100%; width:0; background:var(--accent); border-radius:999px; transition:width .2s ease; }  
 .actions{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:16px; }  
@@ -72,7 +131,7 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
 .folder-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }  
 .folder{ position:relative; min-height:145px; background:#111116; border:1px solid var(--border); border-radius:14px; padding:15px; overflow:hidden; }  
 .folder-info{ position:relative; z-index:2; max-width:60%; }  
-.folder-title{ display:flex; align-items:center; gap:7px; font-weight:800; margin-bottom:5px; }  
+.folder-title{ display:flex; align-items:center; gap:7px; font-weight:800; margin-bottom:5px; font-size:14px; }  
 .folder-count{ color:var(--muted); font-size:13px; }  
 .folder-cat{ position:absolute; right:5px; bottom:-3px; width:125px; height:105px; object-fit:contain; opacity:.92; }  
 
@@ -90,7 +149,7 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
 .ad-slot-container {
   width: 100%;
   max-width: 728px;
-  min-height: 280px;
+  min-height: 250px;
   margin: 25px auto;
   display: flex;
   align-items: center;
@@ -114,13 +173,14 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   <p class="subtitle">Organización inteligente de tus videos según su fecha real de grabación, calidad de toma y audio. Todo se procesa localmente en tu navegador.</p>  
 </header>  
 
-<!-- OFERTA TEMU FIJA SUPERIOR -->
-<div class="temu-producto-fijo">
-  <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
-    <img src="https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg?imageView2/2/w/280/q/80/format/avif" crossorigin="anonymous" alt="Oferta Temu">
-    <p><b>🔥 Oferta Imposible en Temu 🔥</b><br><span style="color:#ff4757; font-weight:bold;">-80% + Envío Gratis Hoy</span></p>
-  </a>
-</div>
+<!-- OFERTA TEMU COMPACTA Y HORIZONTAL SUPERIOR -->
+<a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" class="temu-banner-compacto">
+  <img src="https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg?imageView2/2/w/280/q/80/format/avif" crossorigin="anonymous" alt="Oferta Temu">
+  <div class="temu-banner-info">
+    <div class="temu-banner-title">🔥 Oferta Imposible en Temu 🔥</div>
+    <div class="temu-banner-sub">-80% + Envío Gratis Hoy</div>
+  </div>
+</a>
 
 <section class="card">
 <label class="drop-zone" id="dropZone" for="fileInput">
@@ -132,11 +192,16 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
 <input id="fileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple> 
 </section>  
 
+<!-- CARD DE CARGA CON GATITO CORRIENDO TRAS PAJARITO Y FRASES ROTATIVAS -->
 <section class="card loading" id="loadingCard">  
-  <div class="loading-visual">  
-    <img class="running-cat" src="/assets/sandcat-running.png" alt="SANDCATFILMS procesando"> 
-    <div><div class="loading-status" id="loadingStatus">Analizando metadatos...</div></div>  
-  </div>  
+  <div class="loading-chase-track">
+    <div class="chase-group">
+      <img class="running-cat-img" src="/assets/sandcat-running.png" alt="Gato corriendo">
+      <span class="bird-icon">🐦</span>
+    </div>
+  </div>
+  <div class="loading-status" id="loadingStatus">Analizando metadatos...</div>  
+  <div class="fact-box" id="factBox">💡 Cargando datos sobre SANDCATFILMS...</div>
   <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>  
 </section>  
 
@@ -168,15 +233,15 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   <h2>📁 Organización</h2>  
   <div class="folder-grid">  
     <div class="folder">  
-      <div class="folder-info"><div class="folder-title"><span>😸 🫰Buenas 🟢</span></div><div class="folder-count" id="goodFolderCount">0 clips</div></div>  
+      <div class="folder-info"><div class="folder-title"><span>🦜😸👍 Buenas</span></div><div class="folder-count" id="goodFolderCount">0 clips</div></div>  
       <img class="folder-cat" src="/assets/sandcat-good.png" alt="">  
     </div>  
     <div class="folder">  
-      <div class="folder-info"><div class="folder-title"><span>🙀🤏 Revisar🔵</span></div><div class="folder-count" id="reviewFolderCount">0 clips</div></div>  
+      <div class="folder-info"><div class="folder-title"><span>🟣🙀🤏 Revisar</span></div><div class="folder-count" id="reviewFolderCount">0 clips</div></div>  
       <img class="folder-cat" src="/assets/sandcat-review.png" alt="">  
     </div>  
     <div class="folder">  
-      <div class="folder-info"><div class="folder-title"><span>😿👎Trashed🗑️🔴</span></div><div class="folder-count" id="badFolderCount">0 clips</div></div>  
+      <div class="folder-info"><div class="folder-title"><span>🗑️😿👎 Trashed</span></div><div class="folder-count" id="badFolderCount">0 clips</div></div>  
       <img class="folder-cat" src="/assets/sandcat-trash.png" alt="">  
     </div>  
   </div>  
@@ -198,7 +263,7 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   </div>
 </section>
 
-<!-- BANNER ADVERTICA CON RESPALDO (FALLBACK) Y TAMAÑO FIJO -->
+<!-- BANNER ADVERTICA CON FALLBACK PERSONALIZADO (SERVICIOS Y TEMU SIN GATO) -->
 <div class="ad-slot-container" id="ad-advertica-container">
   <ins style="width: 728px; height: 90px; display: inline-block;" class="v7747945f49" 
        data-domain="https://data527.click" 
@@ -209,22 +274,31 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
 
 <script>
 function cargarAnuncioRespaldo() {
-  console.log("Red principal sin inventario. Cargando respaldo...");
+  console.log("Red principal sin inventario. Cargando banner de servicios de edición...");
   const container = document.getElementById('ad-advertica-container');
   if (container) {
     container.innerHTML = `
-      <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; padding:15px; width:100%;">
-        <p style="color:#ff4757; font-weight:bold; font-size:15px; margin:0 0 8px 0; text-align:center;">
-          🔥 Oferta Exclusiva en Temu 🔥<br>
-          <span style="font-size:12px; color:#aaa; font-weight:normal;">-80% + Envío Gratis Hoy</span>
+      <div style="padding: 16px; text-align: center; width: 100%; max-width: 600px;">
+        <p style="color: #6675ff; font-weight: 800; font-size: 16px; margin: 0 0 6px 0;">
+          🎬 ¿Quieres contratar servicios de edición?
         </p>
-        <img src="/assets/sandcat-review.png" alt="SANDCATFILMS Oferta" style="max-width:240px; height:auto; border-radius:10px;">
-      </a>
+        <p style="color: #e1e1e6; font-size: 13px; margin: 0 0 12px 0; line-height: 1.4;">
+          Mira los catálogos de <b>SANDCATFILMS</b> y contrata nuestro servicio profesional.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" style="background: #6675ff; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;">
+             Ver Catálogo de Servicios 🎬
+          </a>
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" style="background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid #ff4757; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;">
+            🔥 Oferta Temu
+          </a>
+        </div>
+      </div>
     `;
   }
 }
 
-// Verificación por temporizador: si pasados 3.5s la subasta devuelve 0 anuncios, activa el fallback
+// Verificación por temporizador: si pasados 3.5s la subasta no renderiza contenido, activa el respaldo
 window.addEventListener('load', () => {
   setTimeout(() => {
     const container = document.getElementById('ad-advertica-container');
@@ -232,7 +306,6 @@ window.addEventListener('load', () => {
       const hasIframe = container.querySelector('iframe');
       const hasImg = container.querySelector('img');
       const insElement = container.querySelector('ins');
-      // Si el elemento <ins> no tiene contenido renderizado dentro
       if (!hasIframe && !hasImg && insElement && insElement.children.length === 0) {
         cargarAnuncioRespaldo();
       }
@@ -268,13 +341,35 @@ window.addEventListener('load', () => {
 
 <script>  
 "use strict";  
-  
+
 const CHUNK_SIZE = 1024 * 1024;  
 const MEDIAINFO_WASM = "https://cdn.jsdelivr.net/npm/mediainfo.js@0.1.7/dist/MediaInfoModule.wasm";  
-const MAX_AUDIO_RAM_SIZE = 500 * 1024 * 1024; // Límite de seguridad 500MB por archivo para extracción de audio
+const MAX_AUDIO_RAM_SIZE = 500 * 1024 * 1024; 
 
 let mediaInfoInstance = null;  
 let analyzedClips = [];  
+let factInterval = null;
+
+const factsList = [
+  "💡 ¿Sabías que SANDCATFILMS significa gato de reloj de arena?",
+  "💡 ¿Sabías que SANDCATFILMS es parte de Lunamayre oficial?",
+  "💡 ¿Sabías que la creadora de SANDCATFILMS tiene su templo de tarot para consultas y rituales?"
+];
+
+function startFactsRotation() {
+  const factBox = document.getElementById("factBox");
+  let index = 0;
+  if (factBox) factBox.textContent = factsList[0];
+  if (factInterval) clearInterval(factInterval);
+  factInterval = setInterval(() => {
+    index = (index + 1) % factsList.length;
+    if (factBox) factBox.textContent = factsList[index];
+  }, 3000);
+}
+
+function stopFactsRotation() {
+  if (factInterval) clearInterval(factInterval);
+}
 
 const fileInput = document.getElementById("fileInput");  
 const dropZone = document.getElementById("dropZone");  
@@ -402,9 +497,11 @@ async function analyzeFile(file, mediainfo) {
 async function processFiles(files) {  
     const validFiles = Array.from(files || []).filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name));  
     if (!validFiles.length) return;  
+    
     loadingCard.style.display = "block";  
     resultsCard.style.display = "none";  
     foldersCard.style.display = "none";  
+    startFactsRotation();
   
     const mediainfo = await initializeMediaInfo();  
     analyzedClips = [];  
@@ -426,6 +523,7 @@ async function processFiles(files) {
     });
 
     renderResults();  
+    stopFactsRotation();
     loadingCard.style.display = "none";  
 }  
 
@@ -476,6 +574,7 @@ downloadVideosBtn.addEventListener("click", async () => {
     if (!analyzedClips.length) return;
     loadingCard.style.display = "block";
     loadingStatus.textContent = "📦 Generando archivo ZIP organizado...";
+    startFactsRotation();
     await yieldToBrowser();
 
     const zip = new JSZip();
@@ -484,9 +583,11 @@ downloadVideosBtn.addEventListener("click", async () => {
     analyzedClips.forEach((clip, index) => {
         const number = String(index + 1).padStart(3, "0");
         const filename = `${number}_${clip.name}`;
-        let folderName = "Revisar";
-        if (clip.folder === "good") folderName = "Buenas";
-        else if (clip.folder === "bad") folderName = "Trashed";
+        
+        // EMOJIS COMPLETOS EN LOS NOMBRES DE LAS CARPETAS ZIP
+        let folderName = "🟣🙀🤏 Revisar";
+        if (clip.folder === "good") folderName = "🦜😸👍 Buenas";
+        else if (clip.folder === "bad") folderName = "🗑️😿👎 Trashed";
 
         zip.folder(folderName).file(filename, clip.file, { compression: "STORE" });
         count++;
@@ -496,6 +597,7 @@ downloadVideosBtn.addEventListener("click", async () => {
         const blob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
         downloadBlob(blob, `SANDCATFILMS_Clips_${Date.now()}.zip`);
     }
+    stopFactsRotation();
     loadingCard.style.display = "none";
 });
 
@@ -532,6 +634,7 @@ downloadAudioBtn.addEventListener("click", async () => {
     if (!analyzedClips.length) return;
     loadingCard.style.display = "block";
     progressBar.style.width = "0%";
+    startFactsRotation();
     
     const zip = new JSZip();
 
@@ -565,6 +668,7 @@ downloadAudioBtn.addEventListener("click", async () => {
     loadingStatus.textContent = "📦 Empaquetando ZIP de audios...";
     const blob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
     downloadBlob(blob, `SANDCATFILMS_Audios_WAV_${Date.now()}.zip`);
+    stopFactsRotation();
     loadingCard.style.display = "none";
 });
 
@@ -575,6 +679,7 @@ clearBtn.addEventListener("click", () => {
     resultsCard.style.display = "none";
     foldersCard.style.display = "none";
     loadingCard.style.display = "none";
+    stopFactsRotation();
 });
 
 fileInput.addEventListener("change", e => processFiles(e.target.files));  
