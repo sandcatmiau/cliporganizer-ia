@@ -161,7 +161,26 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
   box-sizing: border-box;
 }
 
-footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-height:1.6; }  
+/* SECCIÓN LEGAL */
+.legal-links {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.legal-links a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.legal-links a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-height:1.6; }  
 </style>  
 </head>  
 
@@ -344,6 +363,13 @@ window.addEventListener('load', () => {
     <p style="margin: 0; font-size: 11px; color: #888;">Saludos de Yarin de Sandcatfilms by ClipOrganizer AI 👋</p>
   </div>
 </section>
+
+<!-- ENLACES LEGALES (PRIVACIDAD Y TÉRMINOS DE USO) -->
+<div class="legal-links">
+  <a href="/terms.html" target="_blank">Términos de Uso</a>
+  <span>•</span>
+  <a href="/privacy.html" target="_blank">Política de Privacidad</a>
+</div>
 
 <footer>  
   <span class="footer-brand">SANDCATFILMS</span> · ClipOrganizer AI<br>
