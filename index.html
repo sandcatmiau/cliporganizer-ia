@@ -6,8 +6,26 @@
 <title>SANDCATFILMS — ClipOrganizer AI</title>
 
 <!-- SCRIPTS DE PUBLICIDAD MONETAG -->
-<script>(function(s){s.dataset.zone='11804279',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-<script>(function(s){s.dataset.zone='11803608',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<!-- Banner Monetag 1 Aislado -->
+
+<div style="width: 100%; max-width: 728px; height: 90px; margin: 20px auto; overflow: hidden; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08);">
+    <iframe src="/ad-monetag-1.html" style="width: 100%; height: 100%; border: none;" scrolling="no"></iframe>
+</div>
+
+<!-- Banner Monetag 2 Aislado -->
+
+<div style="width: 100%; max-width: 728px; height: 90px; margin: 20px auto; overflow: hidden; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08);">
+    <iframe src="/ad-monetag-2.html" style="width: 100%; height: 100%; border: none;" scrolling="no"></iframe>
+</div>
+
+<script>
+// Manejador para silenciar errores de conexión a redes publicitarias en consola
+window.addEventListener('error', function(e) {
+  if (e.target && e.target.src && (e.target.src.includes('data527.click') || e.target.src.includes('profitableratecpmnetwork.com'))) {
+    e.preventDefault();
+  }
+}, true);
+</script>
 
 <style>
 :root{  
@@ -17,14 +35,7 @@
 }  
 *{ box-sizing:border-box; }  
 html{ scroll-behavior:smooth; }  
-body{ 
-    margin:0; 
-    background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); 
-    color:var(--text); 
-    font-family: Inter, system-ui, sans-serif; 
-    overflow-x: hidden; /* EVITA EL DESPLAZAMIENTO HORIZONTAL */
-    width: 100%;
-}  
+body{ margin:0; background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); color:var(--text); font-family: Inter, system-ui, sans-serif; }  
 .container{ width:min(1180px,calc(100% - 28px)); margin:0 auto; padding:34px 0 50px; }  
 header{ margin-bottom:20px; text-align:center; } 
 
@@ -54,7 +65,7 @@ header{ margin-bottom:20px; text-align:center; }
 .brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px rgba(102,117,255,.65); } 
 h1{ margin:0 0 8px; font-size:clamp(30px,5vw,46px); letter-spacing:-1.5px; } 
 .subtitle{ margin:0; color:var(--muted); line-height:1.6; }
-.card{ background:linear-gradient(180deg,#17171c,#121216); border:1px solid var(--border); border-radius:18px; padding:20px; margin-bottom:18px; box-shadow:0 12px 35px rgba(0,0,0,.18); width:100%; }  
+.card{ background:linear-gradient(180deg,#17171c,#121216); border:1px solid var(--border); border-radius:18px; padding:20px; margin-bottom:18px; box-shadow:0 12px 35px rgba(0,0,0,.18); }  
 .drop-zone{ position:relative; display:block; min-height:230px; border:2px dashed #3a3a45; border-radius:16px; padding:24px 20px; text-align:center; cursor:pointer; overflow:hidden; transition:.2s ease; }  
 .drop-zone:hover, .drop-zone.dragover{ border-color:var(--accent); background:rgba(102,117,255,.06); }  
 .drop-cat{ display:block; width:min(170px,48vw); max-height:125px; object-fit:contain; margin:0 auto 5px; filter:drop-shadow(0 12px 20px rgba(0,0,0,.35)); }  
@@ -143,11 +154,11 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
 .tutorial-frame video, .tutorial-frame iframe{ width:100%; height:100%; border:0; }
 .tutorial-fallback{ text-align:center; padding:20px; color:var(--muted); }
 
-/* CONTENEDOR ESTABILIZADOR DE ANUNCIOS ADAPTATIVO */
+/* CONTENEDOR ESTABILIZADOR DE ANUNCIOS */
 .ad-slot-container {
   width: 100%;
-  max-width: 100%;
-  min-height: 100px;
+  max-width: 728px;
+  min-height: 250px;
   margin: 25px auto;
   display: flex;
   align-items: center;
@@ -159,6 +170,7 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
   box-sizing: border-box;
 }
 
+/* SECCIÓN LEGAL */
 .legal-links {
   display: flex;
   justify-content: center;
@@ -167,8 +179,15 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
   font-size: 12px;
   color: var(--muted);
 }
-.legal-links a { color: var(--muted); text-decoration: none; }
-.legal-links a:hover { color: var(--accent); text-decoration: underline; }
+.legal-links a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.legal-links a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
 
 footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-height:1.6; }  
 </style>  
@@ -182,9 +201,9 @@ footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-
   <p class="subtitle">Organización inteligente de tus videos según su fecha real de grabación, calidad de toma y audio. Todo se procesa localmente en tu navegador.</p>  
 </header>  
 
-<!-- BANNER TEMU COMPACTO HORIZONTAL -->
+<!-- OFERTA TEMU COMPACTA Y HORIZONTAL SUPERIOR -->
 <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" class="temu-banner-compacto">
-  <img src="/assets/temu-promo.jpg" alt="Oferta Temu" onerror="this.src='https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg'">
+  <img src="https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg?imageView2/2/w/280/q/80/format/avif" crossorigin="anonymous" alt="Oferta Temu">
   <div class="temu-banner-info">
     <div class="temu-banner-title">🔥 Oferta Imposible en Temu 🔥</div>
     <div class="temu-banner-sub">-80% + Envío Gratis Hoy</div>
@@ -201,7 +220,7 @@ footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-
 <input id="fileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple> 
 </section>  
 
-<!-- CARD DE CARGA CON GATITO CORRIENDO Y FRASES ROTATIVAS -->
+<!-- CARD DE CARGA CON GATITO CORRIENDO TRAS PAJARITO Y FRASES ROTATIVAS -->
 <section class="card loading" id="loadingCard">  
   <div class="loading-chase-track">
     <div class="chase-group">
@@ -272,11 +291,68 @@ footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-
   </div>
 </section>
 
-<!-- CONTENEDOR PUBLICITARIO PROTEGIDO CONTRA DESBORDAMIENTO HORIZONTAL -->
-<div class="ad-slot-container">
-  <ins style="display:inline-block; max-width:100%; width:728px; height:90px;" class="v7747945f49" data-domain="https://data527.click" data-affquery="/7e07258aeeed61a4728d/7747945f49/?placementName=ClipOrganizer"></ins>
-  <script src="https://data527.click/js/responsive.js" async></script>
+<!-- BANNER ADVERTICA CON FALLBACK PERSONALIZADO (SERVICIOS Y TEMU CON IMÁGENES DENTRO DE /assets/) -->
+
+<div style="width: 100%; max-width: 728px; height: 90px; margin: 20px auto; overflow: hidden; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08);">
+    <iframe src="/ad-advertica.html" style="width: 100%; height: 100%; border: none;" scrolling="no"></iframe>
 </div>
+
+<script>
+function cargarAnuncioRespaldo() {
+  console.log("Red principal sin inventario. Cargando banner de servicios y Temu...");
+  const container = document.getElementById('ad-advertica-container');
+  if (container) {
+    container.innerHTML = `
+      <div style="padding: 16px; text-align: center; width: 100%; max-width: 650px;">
+        
+        <!-- IMÁGENES PEQUEÑAS LADO A LADO -->
+        <div style="display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 12px;">
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
+            <img src="/assets/planes-sandcatfilms.png" alt="SANDCATFILMS Servicios" style="width: 140px; height: 75px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);">
+          </a>
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow">
+            <img src="/assets/temu-promo.jpg" alt="Temu Ofertas" style="width: 140px; height: 75px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);">
+          </a>
+        </div>
+
+        <!-- TEXTO INFORMATIVO -->
+        <p style="color: #6675ff; font-weight: 800; font-size: 15px; margin: 0 0 4px 0;">
+          🎬 ¿Quieres contratar servicios de edición?
+        </p>
+        <p style="color: #e1e1e6; font-size: 13px; margin: 0 0 12px 0; line-height: 1.4;">
+          Mira los catálogos de <b>SANDCATFILMS</b> y contrata nuestro servicio profesional.
+        </p>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" style="background: #6675ff; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;">
+             Ver Catálogo de Servicios 🎬
+          </a>
+          <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" style="background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid #ff4757; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;">
+            🔥 Oferta Temu
+          </a>
+        </div>
+
+      </div>
+    `;
+  }
+}
+
+// Verificación por temporizador: si pasados 3.5s la subasta no renderiza contenido, activa el respaldo
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const container = document.getElementById('ad-advertica-container');
+    if (container) {
+      const hasIframe = container.querySelector('iframe');
+      const hasImg = container.querySelector('img');
+      const insElement = container.querySelector('ins');
+      if (!hasIframe && !hasImg && insElement && insElement.children.length === 0) {
+        cargarAnuncioRespaldo();
+      }
+    }
+  }, 3500);
+});
+</script>
 
 <!-- SECCIÓN DE DONACIONES -->
 <section class="card">
@@ -294,7 +370,7 @@ footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-
   </div>
 </section>
 
-<!-- ENLACES LEGALES -->
+<!-- ENLACES LEGALES (PRIVACIDAD Y TÉRMINOS DE USO) -->
 <div class="legal-links">
   <a href="/terms.html" target="_blank">Términos de Uso</a>
   <span>•</span>
@@ -555,6 +631,7 @@ downloadVideosBtn.addEventListener("click", async () => {
         const number = String(index + 1).padStart(3, "0");
         const filename = `${number}_${clip.name}`;
         
+        // EMOJIS COMPLETOS EN LOS NOMBRES DE LAS CARPETAS ZIP
         let folderName = "🟣🙀🤏 Revisar";
         if (clip.folder === "good") folderName = "🦜😸👍 Buenas";
         else if (clip.folder === "bad") folderName = "🗑️😿👎 Trashed";
@@ -657,9 +734,9 @@ dropZone.addEventListener("dragover", e => e.preventDefault());
 dropZone.addEventListener("drop", e => { e.preventDefault(); processFiles(e.dataTransfer.files); });  
 </script>  
 
-<!-- SCRIPT ORIGINAL DE ADSTERRA NATIVE (FOOTER) -->
-<script async="async" data-cfasync="false" src="https://pl31347256.profitableratecpmnetwork.com/4bbd9cdc577d153f8b6c2e3e46114cd3/invoke.js"></script>
-<div id="container-4bbd9cdc577d153f8b6c2e3e46114cd3"></div>
-
+<!-- BANNER PUBLICITARIO ADSTERRA NATIVE -->
+<div style="width: 100%; max-width: 728px; height: 90px; margin: 20px auto; overflow: hidden; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08);">
+    <iframe src="/ads-adsterra.html" style="width: 100%; height: 100%; border: none;" scrolling="no"></iframe>
+</div>
 </body>  
 </html>
