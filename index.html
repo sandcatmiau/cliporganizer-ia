@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
 <title>SANDCATFILMS — ClipOrganizer AI</title>
 
-<!-- SCRIPTS DE PUBLICIDAD ORIGINALES MONETAG -->
+<!-- SCRIPTS DE PUBLICIDAD MONETAG -->
 <script>(function(s){s.dataset.zone='11804279',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <script>(function(s){s.dataset.zone='11803608',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 
@@ -17,7 +17,14 @@
 }  
 *{ box-sizing:border-box; }  
 html{ scroll-behavior:smooth; }  
-body{ margin:0; background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); color:var(--text); font-family: Inter, system-ui, sans-serif; }  
+body{ 
+    margin:0; 
+    background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); 
+    color:var(--text); 
+    font-family: Inter, system-ui, sans-serif; 
+    overflow-x: hidden; /* EVITA EL DESPLAZAMIENTO HORIZONTAL */
+    width: 100%;
+}  
 .container{ width:min(1180px,calc(100% - 28px)); margin:0 auto; padding:34px 0 50px; }  
 header{ margin-bottom:20px; text-align:center; } 
 
@@ -47,7 +54,7 @@ header{ margin-bottom:20px; text-align:center; }
 .brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px rgba(102,117,255,.65); } 
 h1{ margin:0 0 8px; font-size:clamp(30px,5vw,46px); letter-spacing:-1.5px; } 
 .subtitle{ margin:0; color:var(--muted); line-height:1.6; }
-.card{ background:linear-gradient(180deg,#17171c,#121216); border:1px solid var(--border); border-radius:18px; padding:20px; margin-bottom:18px; box-shadow:0 12px 35px rgba(0,0,0,.18); }  
+.card{ background:linear-gradient(180deg,#17171c,#121216); border:1px solid var(--border); border-radius:18px; padding:20px; margin-bottom:18px; box-shadow:0 12px 35px rgba(0,0,0,.18); width:100%; }  
 .drop-zone{ position:relative; display:block; min-height:230px; border:2px dashed #3a3a45; border-radius:16px; padding:24px 20px; text-align:center; cursor:pointer; overflow:hidden; transition:.2s ease; }  
 .drop-zone:hover, .drop-zone.dragover{ border-color:var(--accent); background:rgba(102,117,255,.06); }  
 .drop-cat{ display:block; width:min(170px,48vw); max-height:125px; object-fit:contain; margin:0 auto 5px; filter:drop-shadow(0 12px 20px rgba(0,0,0,.35)); }  
@@ -56,7 +63,7 @@ h1{ margin:0 0 8px; font-size:clamp(30px,5vw,46px); letter-spacing:-1.5px; }
 .drop-subtitle{ color:var(--muted); font-size:14px; }  
 #fileInput{ display:none; }  
 
-/* ANIMACIÓN DE CARGA */
+/* ANIMACIÓN Y CARGA CON GATITO PERSIGUIENDO PAJARITO */
 .loading{ display:none; }  
 .loading-chase-track {
   position: relative;
@@ -95,6 +102,7 @@ h1{ margin:0 0 8px; font-size:clamp(30px,5vw,46px); letter-spacing:-1.5px; }
   color: #d9dcff;
   font-size: 13px;
   margin-top: 10px;
+  transition: opacity 0.3s ease;
 }
 
 .progress-track{ width:100%; height:10px; background:#25252c; border-radius:999px; overflow:hidden; margin-top:14px; }  
@@ -125,6 +133,7 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
 .folder-count{ color:var(--muted); font-size:13px; }  
 .folder-cat{ position:absolute; right:5px; bottom:-3px; width:125px; height:105px; object-fit:contain; opacity:.92; }  
 
+/* TUTORIAL CON FALLBACK DE SEGURIDAD */
 .section-heading{ margin:0 0 6px; font-size:20px; }  
 .section-description{ margin:0 0 16px; color:var(--muted); font-size:14px; line-height:1.6; }  
 .tutorial-frame{  
@@ -133,6 +142,22 @@ th{ color:#bdbdc7; font-size:12px; text-transform:uppercase; }
 }  
 .tutorial-frame video, .tutorial-frame iframe{ width:100%; height:100%; border:0; }
 .tutorial-fallback{ text-align:center; padding:20px; color:var(--muted); }
+
+/* CONTENEDOR ESTABILIZADOR DE ANUNCIOS ADAPTATIVO */
+.ad-slot-container {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100px;
+  margin: 25px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
 
 .legal-links {
   display: flex;
@@ -157,7 +182,7 @@ footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-
   <p class="subtitle">Organización inteligente de tus videos según su fecha real de grabación, calidad de toma y audio. Todo se procesa localmente en tu navegador.</p>  
 </header>  
 
-<!-- BANNER TEMU COMPACTO HORIZONTAL CON IMAGEN CORREGIDA -->
+<!-- BANNER TEMU COMPACTO HORIZONTAL -->
 <a href="https://temu.to/k/pe8sklyv1sa" target="_blank" rel="nofollow" class="temu-banner-compacto">
   <img src="/assets/temu-promo.jpg" alt="Oferta Temu" onerror="this.src='https://img.kwcdn.com/product/fancy/c6e3b470-4ba5-4efc-8a09-a0c3d5f80806.jpg'">
   <div class="temu-banner-info">
@@ -247,9 +272,9 @@ footer{ margin-top:15px; color:#777781; text-align:center; font-size:12px; line-
   </div>
 </section>
 
-<!-- CONTENEDOR ORIGINAL DE ADVERTICA (EXACTO COMO AL PRINCIPIO) -->
-<div style="margin: 20px auto; text-align: center;">
-  <ins style="display:inline-block;width:728px;height:90px" class="v7747945f49" data-domain="https://data527.click" data-affquery="/7e07258aeeed61a4728d/7747945f49/?placementName=ClipOrganizer"></ins>
+<!-- CONTENEDOR PUBLICITARIO PROTEGIDO CONTRA DESBORDAMIENTO HORIZONTAL -->
+<div class="ad-slot-container">
+  <ins style="display:inline-block; max-width:100%; width:728px; height:90px;" class="v7747945f49" data-domain="https://data527.click" data-affquery="/7e07258aeeed61a4728d/7747945f49/?placementName=ClipOrganizer"></ins>
   <script src="https://data527.click/js/responsive.js" async></script>
 </div>
 
@@ -530,7 +555,6 @@ downloadVideosBtn.addEventListener("click", async () => {
         const number = String(index + 1).padStart(3, "0");
         const filename = `${number}_${clip.name}`;
         
-        // EMOJIS COMPLETOS EN CARPETAS ZIP
         let folderName = "🟣🙀🤏 Revisar";
         if (clip.folder === "good") folderName = "🦜😸👍 Buenas";
         else if (clip.folder === "bad") folderName = "🗑️😿👎 Trashed";
@@ -627,11 +651,14 @@ clearBtn.addEventListener("click", () => {
     loadingCard.style.display = "none";
     stopFactsRotation();
 });
+
 fileInput.addEventListener("change", e => processFiles(e.target.files));  
 dropZone.addEventListener("dragover", e => e.preventDefault());  
 dropZone.addEventListener("drop", e => { e.preventDefault(); processFiles(e.dataTransfer.files); });  
 </script>  
-<script async="async" data-cfasync="false"src="https://pl31347256.profitableratecpmnetwork.com/4bbd9cdc577d153f8b6c2e3e46114cd3/invoke.js"></script>
+
+<!-- SCRIPT ORIGINAL DE ADSTERRA NATIVE (FOOTER) -->
+<script async="async" data-cfasync="false" src="https://pl31347256.profitableratecpmnetwork.com/4bbd9cdc577d153f8b6c2e3e46114cd3/invoke.js"></script>
 <div id="container-4bbd9cdc577d153f8b6c2e3e46114cd3"></div>
 
 </body>  
