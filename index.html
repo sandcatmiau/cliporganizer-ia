@@ -557,6 +557,15 @@ dropZone.addEventListener("drop", event => { event.preventDefault(); dropZone.cl
 <div style="margin: 35px auto; text-align: center; width: 100%; max-width: 728px; min-height: 90px; clear: both; display: flex; justify-content: center; align-items: center;">
   <ins style="width: 728px;height:90px" data-width="728" data-height="90" class="v7747945f49" data-domain="//data527.click" data-affquery="/7e07258aeeed61a4728d/7747945f49/?placementName=ClipOrganizer"><script src="//data527.click/js/responsive.js" async></script></ins>
 </div>
-
-</body>  
+<!-- DISPARADOR SEGURO PARA ANUNCIOS FLOTANTES (ADSTERRA, MONETAG, HILLTOPADS) -->
+<script>
+  document.addEventListener('click', function() {
+    console.log("Interacción detectada: Activando scripts publicitarios flotantes...");
+    // Forzamos la ejecución manual en navegadores Chromium si estaban dormidos
+    if (typeof yieldToBrowser === 'function') {
+      yieldToBrowser();
+    }
+  }, { once: true }); // 'once: true' asegura que solo se ejecute con el primer clic del usuario para no saturar
+</script>
+ </body>
 </html>
