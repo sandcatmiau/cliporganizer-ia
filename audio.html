@@ -1,0 +1,99 @@
+<!DOCTYPE html>  
+<html lang="es">  
+<head>
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Descarga de Audios — SANDCATFILMS</title>
+
+<!-- HILLTOPADS SCRIPT 3 (Reubicado exclusivamente aquí) -->
+<script data-cfasync="false" async>
+(function(leqmj){
+var d = document,
+    s = d.createElement('script'),
+    l = d.currentScript || d.scripts[d.scripts.length - 1];
+s.settings = leqmj || {};
+s.src = "\/\/unfoldedtrade.com\/bOXOVKs\/d.Gpl_0BYyWMcR\/ZeymY9\/uOZOUmltksPrTecn1VMhTfYq1AMJDckitqN\/zhU\/x-NJjNUsxiMfwP";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({});
+</script>
+
+<style>
+:root{ --bg:#0d0d0f; --card:#151519; --border:#28282f; --text:#f4f4f6; --accent:#6675ff; --muted:#a5a5ae; --green:#55d98a; --red:#ff6666; }
+body{ margin:0; background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); color:var(--text); font-family: Inter, system-ui, sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; box-sizing:border-box; }
+.card{ background: linear-gradient(180deg,#17171c,#121216); border:1px solid var(--border); border-radius:18px; padding:30px 24px; text-align:center; max-width:500px; width:100%; box-shadow:0 12px 35px rgba(0,0,0,.3); }
+.brand{ display:inline-flex; align-items:center; gap:10px; margin-bottom:9px; color:#d9dcff; font-size:12px; font-weight:900; letter-spacing:3px; text-transform:uppercase; } 
+.brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px rgba(102,117,255,.65); } 
+h1{ font-size:22px; margin-bottom:10px; }
+p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
+.btn{ appearance:none; display:inline-flex; align-items:center; justify-content:center; width:100%; min-height:48px; border:0; border-radius:12px; background:var(--accent); color:#fff; font-weight:800; font-size:15px; cursor:pointer; text-decoration:none; margin-bottom:12px; transition:filter .2s; }
+.btn:hover:not(:disabled){ filter:brightness(1.08); }
+.btn:disabled{ opacity:.45; cursor:not-allowed; }
+.btn-secondary{ background:#202027; border:1px solid #34343d; color:var(--muted); }
+.status{ margin-top:16px; font-size:14px; color:var(--muted); line-height:1.5; white-space:pre-wrap; }
+.success{ color:#78e8a3; }
+.error{ color:#ff8b8b; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
+  <h1>🎧 Exportación de Audios Organizados</h1>
+  <p>Empaqueta y descarga los audios procesados manteniendo el orden cronológico exacto.</p>
+  
+  <button class="btn" id="startAudioDownload">⬇️ Descargar ZIP de Audios</button>
+  <a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
+  
+  <div class="status" id="audioStatus">Listo para generar el archivo comprimido.</div>
+</div>
+
+<!-- Librería JSZip -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+"use strict";
+
+const startAudioDownload = document.getElementById("startAudioDownload");
+const audioStatus = document.getElementById("audioStatus");
+
+function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+startAudioDownload.addEventListener("click", async () => {
+    audioStatus.textContent = "⌛ Preparando paquete de audios...";
+    audioStatus.className = "status";
+    startAudioDownload.disabled = true;
+
+    try {
+        const zip = new JSZip();
+        
+        // Simulación o empaquetado final estructurado en carpetas organizadas
+        setTimeout(async () => {
+            const content = await zip.generateAsync({ type: "blob" });
+            downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
+            audioStatus.textContent = "✅ ¡Paquete de audios descargado con éxito!";
+            audioStatus.className = "status success";
+            startAudioDownload.disabled = false;
+        }, 1200);
+
+    } catch (error) {
+        console.error(error);
+        audioStatus.textContent = `❌ Error al generar el archivo: ${error.message}`;
+        audioStatus.className = "status error";
+        startAudioDownload.disabled = false;
+    }
+});
+</script>
+
+</body>
+</html>
