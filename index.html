@@ -207,52 +207,45 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   </div>  
   <div class="actions">  
     <button id="downloadVideosBtn" type="button">⬇️ Descargar ZIP organizado</button>
-    <!-- BOTÓN CONVERTIDO EN ENLACE A audio.html -->
     <a href="audio.html" class="btn-link secondary audio-button">🎧 Ir a Separar y Descargar Audio</a>
     <button class="secondary" id="clearBtn" type="button">🧹 Limpiar análisis</button>
   </div>  
 
-  <div class="action-cat-legend">  
-    <div class="action-cat-item">  
-      <img class="action-cat" src="/assets/sandcat-good.png" alt=""><span class="action-cat-label">Buenas</span><img class="action-cat" src="/assets/sandcat-good.png" alt="">  
-    </div>  
-    <div class="action-cat-item">  
-      <img class="action-cat" src="/assets/sandcat-review.png" alt=""><span class="action-cat-label">Revisar</span><img class="action-cat" src="/assets/sandcat-review.png" alt="">  
-    </div>  
-    <div class="action-cat-item">  
-      <img class="action-cat" src="/assets/sandcat-trash.png" alt=""><span class="action-cat-label">Trashed</span><img class="action-cat" src="/assets/sandcat-trash.png" alt="">  
-    </div>  
-  </div>  
+  <!-- ESPACIO RESERVADO PARA VIDEO HECHO CON IA -->
+  <div style="margin-top: 20px; border: 1px dashed var(--border); border-radius: 14px; background: rgba(17, 17, 22, 0.6); padding: 20px; text-align: center;">
+    <div style="font-size: 32px; margin-bottom: 8px;">🤖🎬</div>
+    <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--text);">Espacio reservado para Video IA</div>
+    <div style="color: var(--muted); font-size: 13px;">Próximamente verás aquí una vista previa en video generada con IA.</div>
+  </div>
+
   <div class="result-message" id="audioResultMessage"></div>  
   <div class="manual-download" id="audioManualDownload"></div>  
 </section>  
 
+<!-- SECCIÓN DE ORGANIZACIÓN (MÁS LIMPIA Y SIN EXCESO DE IMÁGENES) -->
 <section class="card" id="foldersCard" style="display:none">  
   <h2>📁 Organización</h2>  
   <div class="folder-grid">  
-    <div class="folder">  
-      <div class="folder-info">  
-        <div class="folder-title"><img class="folder-title-cat" src="/assets/sandcat-good.png" alt=""><span>😸 🫰Buenas 🟢</span><img class="folder-title-cat" src="/assets/sandcat-good.png" alt=""></div>  
-        <div class="folder-count" id="goodFolderCount">0 clips</div>  
+    <div class="folder" style="min-height: auto; padding: 20px;">  
+      <div class="folder-info" style="max-width: 100%;">  
+        <div class="folder-title" style="font-size: 16px;"><span>😸 Buenas 🟢</span></div>  
+        <div class="folder-count" id="goodFolderCount" style="font-weight: bold; font-size: 15px; margin-top: 6px;">0 clips</div>  
       </div>  
-      <img class="folder-cat" src="/assets/sandcat-good.png" alt="">  
     </div>  
-    <div class="folder">  
-      <div class="folder-info">  
-        <div class="folder-title"><img class="folder-title-cat" src="/assets/sandcat-review.png" alt=""><span>🙀🤏 Revisar🔵</span><img class="folder-title-cat" src="/assets/sandcat-review.png" alt=""></div>  
-        <div class="folder-count" id="reviewFolderCount">0 clips</div>  
+    <div class="folder" style="min-height: auto; padding: 20px;">  
+      <div class="folder-info" style="max-width: 100%;">  
+        <div class="folder-title" style="font-size: 16px;"><span>🙀 Revisar 🔵</span></div>  
+        <div class="folder-count" id="reviewFolderCount" style="font-weight: bold; font-size: 15px; margin-top: 6px;">0 clips</div>  
       </div>  
-      <img class="folder-cat" src="/assets/sandcat-review.png" alt="">  
     </div>  
-    <div class="folder">  
-      <div class="folder-info">  
-        <div class="folder-title"><img class="folder-title-cat" src="/assets/sandcat-trash.png" alt=""><span>😿👎Trashed🗑️🔴</span><img class="folder-title-cat" src="/assets/sandcat-trash.png" alt=""></div>  
-        <div class="folder-count" id="badFolderCount">0 clips</div>  
+    <div class="folder" style="min-height: auto; padding: 20px;">  
+      <div class="folder-info" style="max-width: 100%;">  
+        <div class="folder-title" style="font-size: 16px;"><span>😿 Trashed 🗑️🔴</span></div>  
+        <div class="folder-count" id="badFolderCount" style="font-weight: bold; font-size: 15px; margin-top: 6px;">0 clips</div>  
       </div>  
-      <img class="folder-cat" src="/assets/sandcat-trash.png" alt="">  
     </div>  
   </div>  
-</section>  
+</section>
 
 <section class="card" id="extraCard" style="display:none">  
   <h2>Clips Extra / Borradores</h2>  
