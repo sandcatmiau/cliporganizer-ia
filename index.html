@@ -527,13 +527,29 @@ async function processFiles(files){
 downloadVideosBtn.addEventListener("click", async () => {  
     if (!analyzedClips.length) return;  
     const zip = new JSZip();  
+    
+    // Creamos las subcarpetas dentro del ZIP con tus nombres personalizados y emojis
+    const folderBuenas = zip.folder(" 🟢 buenas 😸👍");
+    const folderRevisar = zip.folder("🟠 revisar 🙀🤏");
+    const folderTrashed = zip.folder("🔴 trashed 🗑️😿👎");
+
     analyzedClips.forEach((clip, index) => {  
         const number = String(index + 1).padStart(3, "0");  
-        zip.file(`${number}_${clip.name}`, clip.file, { compression: "STORE" });  
+        const fileName = `${number}_${clip.name}`;
+
+        // Clasificamos cada video en su respectiva carpeta según su estado
+        if (clip.folder === "good") {
+            folderBuenas.file(fileName, clip.file, { compression: "STORE" });
+        } else if (clip.folder === "review") {
+            folderRevisar.file(fileName, clip.file, { compression: "STORE" });
+        } else {
+            folderTrashed.file(fileName, clip.file, { compression: "STORE" });
+        }
     });  
+
     const blob = await zip.generateAsync({ type: "blob", compression: "STORE" });  
     downloadBlob(blob, `SANDCATFILMS_ClipOrganizer_${Date.now()}.zip`);  
-});  
+});
 
 clearBtn.addEventListener("click", () => {  
     analyzedClips = [];  
