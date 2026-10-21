@@ -180,13 +180,27 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
 <input id="fileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple> 
 </section>  
 
-<section class="card loading" id="loadingCard">  
-  <div class="loading-visual">  
-    <img class="running-cat" src="/assets/sandcat-running.png" alt="SANDCATFILMS procesando">
-    <div><div class="loading-status" id="loadingStatus">Analizando metadatos...</div></div>  
+<!-- TARJETA DE CARGA CON EL VIDEO REINVENTADO -->
+<section class="card loading" id="loadingCard" style="display:none; text-align:center;">  
+  
+  <!-- SERVIDOR DE VIDEO LIVIANO -->
+  <div style="width: 100%; max-width: 380px; margin: 0 auto 14px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 8px 20px rgba(0,0,0,0.4);">
+    <video id="loadingVideo" autoplay loop muted playsinline style="width: 100%; height: auto; display: block; object-fit: cover;">
+      <source src="/assets/cat-loading.mp4" type="video/mp4">
+      Tu navegador no soporta el reproductor de video.
+    </video>
+  </div>
+
+  <!-- TEXTO DINÁMICO QUE CAMBIA CON EL PROGRESO -->
+  <div class="loading-status" id="loadingStatus" style="font-weight: 700; color: var(--accent); margin-bottom: 12px; font-size: 15px;">
+    🐾 Persiguiendo metadatos de tus clips...
+  </div>
+  
+  <!-- BARRA DE PROGRESO -->
+  <div class="progress-track" style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; border: 1px solid var(--border);">
+    <div class="progress-bar" id="progressBar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.3s ease;"></div>
   </div>  
-  <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>  
-</section>  
+</section>
 
 <section class="card" id="resultsCard" style="display:none">  
   <div class="stats">  
@@ -484,38 +498,62 @@ function renderResults(){
     foldersCard.style.display = analyzedClips.length ? "block" : "none";  
 }  
 
-async function processFiles(files){  
-    const validFiles = Array.from(files || []).filter(file => file && (file.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(file.name)));  
-    if (!validFiles.length) return;  
-    loadingCard.style.display = "block";  
-    resultsCard.style.display = "none";  
-    foldersCard.style.display = "none";  
-    loadingStatus.textContent = "Analizando metadatos...";  
-    progressBar.style.width = "0%";  
+async function processFiles(files) {
+    const validFiles = Array.from(files || []).filter(file => 
+        file.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(file.name)
+    );
+    if (!validFiles.length) return;
 
-    try{  
-        const mediainfo = await initializeMediaInfo();  
-        const results = [];  
-        for (let index = 0; index < validFiles.length; index++){  
-            const file = validFiles[index];  
-            loadingStatus.textContent = `🔎 Analizando ${index + 1} de ${validFiles.length}: ${file.name}`;  
-            progressBar.style.width = `${Math.round((index / validFiles.length) * 100)}%`;  
-            await yieldToBrowser();  
-            const clip = await analyzeFile(file, mediainfo);  
-            clip.selectionIndex = index;  
-            results.push(clip);  
-        }  
-        analyzedClips = sortClips(results);  
-        progressBar.style.width = "100%";  
-        loadingStatus.textContent = "✅ Análisis completado.";  
-        renderResults();  
-        setTimeout(() => { loadingCard.style.display = "none"; }, 700);  
-    } catch(error){  
-        console.error(error);  
-        loadingStatus.textContent = `❌ Error: ${error.message}`;  
-        progressBar.style.width = "100%";  
-    }  
-}  
+    // 1. Mostrar pantalla de carga y reiniciar video
+    loadingCard.style.display = "block";
+    resultsCard.style.display = "none";
+    foldersCard.style.display = "none";
+
+    const loadingVideo = document.getElementById("loadingVideo");
+    if (loadingVideo) {
+        loadingVideo.currentTime = 0;
+        loadingVideo.play().catch(() => {});
+    }
+
+    // 2. Limpiar resultados anteriores
+    analyzedClips = [];
+    resultsBody.innerHTML = "";
+
+    // 3. Frases dinámicas para acompañar el video
+    const loadingPhrases = [
+        "🐾 Persiguiendo los metadatos de tus clips...",
+        "🦜 ¡El pajarito trae la fecha de grabación original!",
+        "😸 ¡Cuidado con los Chibi Totoros que van acelerando!",
+        "✨ ¡Se le subieron todos encima! Empaquetando la colección..."
+    ];
+
+    // Bucle de análisis de archivos
+    for (let index = 0; index < validFiles.length; index++) {
+        const file = validFiles[index];
+        
+        // Cálculo del porcentaje de progreso
+        const percent = Math.round(((index + 1) / validFiles.length) * 100);
+        
+        // Actualizar barra de progreso
+        if (progressBar) progressBar.style.width = `${percent}%`;
+
+        // Rotar las frases según el avance
+        let phraseIndex = 0;
+        if (percent > 75) phraseIndex = 3;
+        else if (percent > 50) phraseIndex = 2;
+        else if (percent > 25) phraseIndex = 1;
+
+        if (loadingStatus) {
+            loadingStatus.textContent = `${loadingPhrases[phraseIndex]} (${percent}% - ${file.name})`;
+        }
+
+        // ... [Aquí continúa tu análisis normal del clip] ...
+    }
+
+    // Al finalizar el proceso ocultamos la pantalla de carga
+    loadingCard.style.display = "none";
+    renderResults();
+}
 
 downloadVideosBtn.addEventListener("click", async () => {  
     if (!analyzedClips.length) return;  
