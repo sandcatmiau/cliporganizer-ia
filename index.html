@@ -500,7 +500,7 @@ function renderResults(){
 
 async function processFiles(files) {
     const validFiles = Array.from(files || []).filter(file => 
-        file.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(file.name)
+        file && (file.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(file.name))
     );
     if (!validFiles.length) return;
 
@@ -527,34 +527,50 @@ async function processFiles(files) {
         "✨ ¡Se le subieron todos encima! Empaquetando la colección..."
     ];
 
-    // Bucle de análisis de archivos
-    for (let index = 0; index < validFiles.length; index++) {
-        const file = validFiles[index];
-        
-        // Cálculo del porcentaje de progreso
-        const percent = Math.round(((index + 1) / validFiles.length) * 100);
-        
-        // Actualizar barra de progreso
-        if (progressBar) progressBar.style.width = `${percent}%`;
+    try {
+        const mediainfo = await initializeMediaInfo();
+        const results = [];
 
-        // Rotar las frases según el avance
-        let phraseIndex = 0;
-        if (percent > 75) phraseIndex = 3;
-        else if (percent > 50) phraseIndex = 2;
-        else if (percent > 25) phraseIndex = 1;
+        for (let index = 0; index < validFiles.length; index++) {
+            const file = validFiles[index];
+            
+            // Cálculo del porcentaje de progreso
+            const percent = Math.round(((index + 1) / validFiles.length) * 100);
+            if (progressBar) progressBar.style.width = `${percent}%`;
 
-        if (loadingStatus) {
-            loadingStatus.textContent = `${loadingPhrases[phraseIndex]} (${percent}% - ${file.name})`;
+            // Rotar las frases según el avance
+            let phraseIndex = 0;
+            if (percent > 75) phraseIndex = 3;
+            else if (percent > 50) phraseIndex = 2;
+            else if (percent > 25) phraseIndex = 1;
+
+            if (loadingStatus) {
+                loadingStatus.textContent = `${loadingPhrases[phraseIndex]} (${percent}% - ${file.name})`;
+            }
+
+            // Permitir que la interfaz respire y analice el archivo real
+            await yieldToBrowser();
+            const clip = await analyzeFile(file, mediainfo);
+            clip.selectionIndex = index;
+            results.push(clip);
         }
 
-        // ... [Aquí continúa tu análisis normal del clip] ...
+        analyzedClips = sortClips(results);
+        if (progressBar) progressBar.style.width = "100%";
+        if (loadingStatus) loadingStatus.textContent = "✅ ¡Análisis completado con éxito!";
+        
+        renderResults();
+        
+        setTimeout(() => { 
+            loadingCard.style.display = "none"; 
+        }, 800);
+
+    } catch (error) {
+        console.error("Error analizando archivos:", error);
+        if (loadingStatus) loadingStatus.textContent = `❌ Error: ${error.message}`;
+        if (progressBar) progressBar.style.width = "100%";
     }
-
-    // Al finalizar el proceso ocultamos la pantalla de carga
-    loadingCard.style.display = "none";
-    renderResults();
 }
-
 downloadVideosBtn.addEventListener("click", async () => {  
     if (!analyzedClips.length) return;  
     const zip = new JSZip();  
