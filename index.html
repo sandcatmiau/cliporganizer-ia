@@ -192,9 +192,9 @@ footer{ margin-top:24px; color:#777781; text-align:center; font-size:12px; line-
   </div>
 
   <!-- TEXTO DINÁMICO QUE CAMBIA CON EL PROGRESO -->
-  <div class="loading-status" id="loadingStatus" style="font-weight: 700; color: var(--accent); margin-bottom: 12px; font-size: 15px;">
-    🐾 Persiguiendo metadatos de tus clips...
-  </div>
+<div class="loading-status" id="loadingStatus" style="font-weight: 700; color: #ffffff; margin-bottom: 12px; font-size: 15px;">
+  🐾 Persiguiendo metadatos de tus clips...
+</div>
   
   <!-- BARRA DE PROGRESO -->
   <div class="progress-track" style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; border: 1px solid var(--border);">
@@ -509,6 +509,8 @@ async function processFiles(files) {
     resultsCard.style.display = "none";
     foldersCard.style.display = "none";
 
+    // Establecer color blanco inicial
+    if (loadingStatus) loadingStatus.style.color = "#ffffff";
     const loadingVideo = document.getElementById("loadingVideo");
     if (loadingVideo) {
         loadingVideo.currentTime = 0;
@@ -556,9 +558,11 @@ async function processFiles(files) {
         }
 
         analyzedClips = sortClips(results);
-        if (progressBar) progressBar.style.width = "100%";
-        if (loadingStatus) loadingStatus.textContent = "✅ ¡Análisis completado con éxito!";
-        
+    if (progressBar) progressBar.style.width = "100%";
+    if (loadingStatus) {
+        loadingStatus.style.color = "#2ecc71"; // Verde al terminar
+        loadingStatus.textContent = "✅ ¡Análisis completado con éxito!";
+    }
         renderResults();
         
         setTimeout(() => { 
