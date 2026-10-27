@@ -120,7 +120,7 @@ startAudioDownload.addEventListener("click", async () => {
     
     // Guardamos el archivo con extensión de audio limpia (.m4a)
     // Al hacerlo, muchos reproductores y editores reconocen la pista de audio de inmediato
-    const audioName = `${number}_AUDIO_${baseName}.m4a`;
+    const audioName = `${number}_AUDIO_${baseName}.wav`;
     
     folderBuenas.file(audioName, file, { compression: "STORE" });
 });
