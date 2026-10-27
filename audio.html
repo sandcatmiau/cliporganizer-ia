@@ -19,8 +19,8 @@ l.parentNode.insertBefore(s, l);
 })({});
 </script>
 
-<!-- Librería FFmpeg.wasm local -->
-<script src="/ffmpeg/ffmpeg.min.js"></script>
+<!-- Librería FFmpeg.wasm desde CDN oficial para evitar errores de ruta -->
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
 <style>
 :root{ --bg:#0d0d0f; --card:#151519; --border:#28282f; --text:#f4f4f6; --accent:#6675ff; --muted:#a5a5ae; --green:#55d98a; --red:#ff6666; }
@@ -110,9 +110,12 @@ startAudioDownload.addEventListener("click", async () => {
     try {
         audioStatus.textContent = "⌛ Cargando motor de audio FFmpeg...";
         
-        // Inicializamos FFmpeg desde la ruta local del proyecto
+        // Inicializamos FFmpeg apuntando al CDN oficial para evitar errores de red o rutas rotas
         const { createFFmpeg, fetchFile } = FFmpeg;
-        const ffmpeg = createFFmpeg({ corePath: '/ffmpeg/ffmpeg-core.js', log: false });
+        const ffmpeg = createFFmpeg({ 
+            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.6/dist/ffmpeg-core.js',
+            log: false 
+        });
         await ffmpeg.load();
 
         const zip = new JSZip();
@@ -129,20 +132,17 @@ startAudioDownload.addEventListener("click", async () => {
                 const inputFileName = `input_${i}.mp4`;
                 const outputFileName = `output_${i}.mp3`;
                 
-                // Cargamos el archivo en la memoria virtual de FFmpeg
                 ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
 
-                // Ejecutamos FFmpeg para extraer únicamente el audio en formato MP3
+                // Extraemos únicamente el audio en MP3 de alta calidad
                 await ffmpeg.run('-i', inputFileName, '-vn', '-acodec', 'libmp3lame', '-ab', '192k', outputFileName);
 
-                // Leemos el resultado y creamos el blob de audio real
                 const data = ffmpeg.FS('readFile', outputFileName);
                 const audioBlob = new Blob([data.buffer], { type: 'audio/mp3' });
 
                 const audioName = `${number}_${baseName}.mp3`;
                 folderAudios.file(audioName, audioBlob, { compression: "STORE" });
 
-                // Limpiamos los archivos temporales de la memoria virtual
                 ffmpeg.FS('unlink', inputFileName);
                 ffmpeg.FS('unlink', outputFileName);
 
