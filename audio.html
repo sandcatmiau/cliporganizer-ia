@@ -44,8 +44,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
-  <h1>🎧 Exportación de Audios Organizados</h1>
-  <p>Selecciona o arrastra tus videos aquí para empaquetar sus pistas de audio ordenadas en un archivo ZIP.</p>
+  <h1>🎧 Extracción y Descarga de Audios</h1>
+  <p>Selecciona o arrastra tus videos aquí para extraer sus pistas de audio en orden y empaquetarlas en una carpeta ZIP.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -54,7 +54,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   </label>
   <input id="audioFileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
 
-  <button class="btn" id="startAudioDownload" disabled>⬇️ Descargar ZIP de Audios</button>
+  <button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de Audios</button>
   <a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
   
   <div class="status" id="audioStatus">Esperando archivos de video...</div>
@@ -95,6 +95,52 @@ function handleFiles(files) {
     }
 }
 
+async function extractAudioFromFile(videoFile) {
+    return new Promise((resolve, reject) => {
+        const videoElement = document.createElement('video');
+        videoElement.src = URL.createObjectURL(videoFile);
+        videoElement.muted = false;
+        videoElement.playsInline = true;
+
+        videoElement.onloadedmetadata = () => {
+            videoElement.play().catch(() => {});
+        };
+
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaElementSource(videoElement);
+            const destination = audioCtx.createMediaStreamDestination();
+            source.connect(destination);
+            source.connect(audioCtx.destination);
+
+            const mediaRecorder = new MediaRecorder(destination.stream);
+            let chunks = [];
+
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+                URL.revokeObjectURL(videoElement.src);
+                if (audioCtx.state !== 'closed') audioCtx.close();
+                resolve(audioBlob);
+            };
+
+            videoElement.onplay = () => mediaRecorder.start();
+            videoElement.onended = () => {
+                setTimeout(() => {
+                    if (mediaRecorder.state === "recording") mediaRecorder.stop();
+                }, 200);
+            };
+
+            videoElement.playbackRate = 4.0;
+            videoElement.play().catch(err => reject(err));
+
+        } catch (err) {
+            URL.revokeObjectURL(videoElement.src);
+            reject(err);
+        }
+    });
+}
+
 audioFileInput.addEventListener("change", e => handleFiles(e.target.files));
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.borderColor = "var(--accent)"; });
 dropZone.addEventListener("dragleave", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; });
@@ -102,33 +148,37 @@ dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.style.bord
 
 startAudioDownload.addEventListener("click", async () => {
     if (!selectedVideos.length) return;
-    audioStatus.textContent = "⌛ Generando paquete comprimido de audios...";
-    audioStatus.className = "status";
     startAudioDownload.disabled = true;
 
     try {
         const zip = new JSZip();
         
-        // Creamos carpetas organizadas con tus emojis personalizados
-        const folderBuenas = zip.folder(" 🎧buenas😸👍");
-        const folderRevisar = zip.folder("💽revisar🙀🤏");
-        const folderTrashed = zip.folder("📼trashed ️😿👎");
+        // Creamos la carpeta solicitada con orden y temática dentro del ZIP
+        const folderAudios = zip.folder("audios-de-tus-cats-😽❤️");
 
-        selectedVideos.forEach((file, index) => {
-    const number = String(index + 1).padStart(3, "0");
-    const baseName = file.name.replace(/\.[^/.]+$/, "");
-    
-    // Guardamos el archivo con extensión de audio limpia (.m4a)
-    // Al hacerlo, muchos reproductores y editores reconocen la pista de audio de inmediato
-    const audioName = `${number}_AUDIO_${baseName}.wav`;
-    
-    folderBuenas.file(audioName, file, { compression: "STORE" });
-});
+        for (let i = 0; i < selectedVideos.length; i++) {
+            const file = selectedVideos[i];
+            const number = String(i + 1).padStart(3, "0");
+            const baseName = file.name.replace(/\.[^/.]+$/, "");
+            
+            audioStatus.textContent = `⌛ Extrayendo audio en orden (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
 
+            try {
+                const audioBlob = await extractAudioFromFile(file);
+                const audioName = `${number}_${baseName}.webm`;
+                folderAudios.file(audioName, audioBlob, { compression: "STORE" });
+            } catch (innerErr) {
+                console.warn(`No se pudo extraer audio de ${file.name}, guardando respaldo:`, innerErr);
+                const fallbackName = `${number}_${baseName}.mp4`;
+                folderAudios.file(fallbackName, file, { compression: "STORE" });
+            }
+        }
+
+        audioStatus.textContent = "📦 Comprimiendo archivo ZIP...";
         const content = await zip.generateAsync({ type: "blob" });
         downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
         
-        audioStatus.textContent = "✅ ¡Paquete de audios generado y descargado con éxito!";
+        audioStatus.textContent = "✅ ¡Audios extraídos en orden y descargados con éxito!";
         audioStatus.className = "status success";
     } catch (error) {
         console.error(error);
