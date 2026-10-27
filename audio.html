@@ -115,13 +115,15 @@ startAudioDownload.addEventListener("click", async () => {
         const folderTrashed = zip.folder("📼trashed ️😿👎");
 
         selectedVideos.forEach((file, index) => {
-            const number = String(index + 1).padStart(3, "0");
-            // Generamos el nombre limpio para el audio manteniendo la numeración
-            const audioName = `${number}_AUDIO_${file.name.replace(/\.[^/.]+$/, "")}.mp4`;
-            
-            // Empaquetamos el archivo (en esta versión ligera agrupamos en buenas por defecto o según estructura)
-            folderBuenas.file(audioName, file, { compression: "STORE" });
-        });
+    const number = String(index + 1).padStart(3, "0");
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    
+    // Guardamos el archivo con extensión de audio limpia (.m4a)
+    // Al hacerlo, muchos reproductores y editores reconocen la pista de audio de inmediato
+    const audioName = `${number}_AUDIO_${baseName}.m4a`;
+    
+    folderBuenas.file(audioName, file, { compression: "STORE" });
+});
 
         const content = await zip.generateAsync({ type: "blob" });
         downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
