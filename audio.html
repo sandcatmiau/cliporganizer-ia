@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 <title>Extractor y Descarga de Audios — SANDCATFILMS</title>
 
-<!-- HILLTOPADS SCRIPT 3 (Reubicado exclusivamente aquí) -->
+<!-- HILLTOPADS SCRIPT 3 -->
 <script data-cfasync="false" async>
 (function(leqmj){
 var d = document,
@@ -19,7 +19,7 @@ l.parentNode.insertBefore(s, l);
 })({});
 </script>
 
-<!-- Carga local de FFmpeg de tu repositorio -->
+<!-- Carga del script principal de FFmpeg desde tu carpeta local -->
 <script src="/ffmpeg/ffmpeg.min.js"></script>
 
 <style>
@@ -47,8 +47,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
-  <h1>🎧 Extracción de Audios</h1>
-  <p>Selecciona tus videos para extraer sus pistas de audio en orden dentro de tu carpeta ZIP lista para editar.</p>
+  <h1>🎧 Conversión y Extracción a MP3 (FFmpeg)</h1>
+  <p>Selecciona tus videos para extraer sus pistas de audio reales en formato MP3 codificado y empaquetarlas en orden.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -57,7 +57,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   </label>
   <input id="audioFileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
 
-  <button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de Audios</button>
+  <button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de MP3</button>
   <a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
   
   <div class="status" id="audioStatus">Esperando archivos de video...</div>
@@ -98,56 +98,6 @@ function handleFiles(files) {
     }
 }
 
-// Extractor nativo como respaldo ultra rápido
-async function extractAudioNative(videoFile) {
-    return new Promise((resolve, reject) => {
-        const videoElement = document.createElement('video');
-        videoElement.src = URL.createObjectURL(videoFile);
-        videoElement.muted = false;
-        videoElement.playsInline = true;
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        videoElement.onloadedmetadata = () => {
-            try {
-                const source = audioCtx.createMediaElementSource(videoElement);
-                const destination = audioCtx.createMediaStreamDestination();
-                source.connect(destination);
-
-                const mediaRecorder = new MediaRecorder(destination.stream, { mimeType: 'audio/webm' });
-                let chunks = [];
-
-                mediaRecorder.ondataavailable = e => { if (e.data?.size > 0) chunks.push(e.data); };
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-                    URL.revokeObjectURL(videoElement.src);
-                    if (audioCtx.state !== 'closed') audioCtx.close();
-                    resolve(audioBlob);
-                };
-
-                videoElement.onplay = () => mediaRecorder.start();
-                videoElement.onended = () => {
-                    setTimeout(() => {
-                        if (mediaRecorder.state === "recording") mediaRecorder.stop();
-                    }, 100);
-                };
-
-                videoElement.playbackRate = 2.0;
-                videoElement.play().catch(err => reject(err));
-            } catch (err) {
-                URL.revokeObjectURL(videoElement.src);
-                reject(err);
-            }
-        };
-
-        videoElement.onerror = (err) => {
-            URL.revokeObjectURL(videoElement.src);
-            reject(err);
-        };
-    });
-}
-
 audioFileInput.addEventListener("change", e => handleFiles(e.target.files));
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.borderColor = "var(--accent)"; });
 dropZone.addEventListener("dragleave", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; });
@@ -158,71 +108,57 @@ startAudioDownload.addEventListener("click", async () => {
     startAudioDownload.disabled = true;
 
     try {
+        audioStatus.textContent = "⌛ Cargando motor FFmpeg local...";
+        
+        // Inicialización de FFmpeg desde tus archivos del repositorio
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        const ffmpeg = createFFmpeg({ 
+            corePath: '/ffmpeg/ffmpeg-core.js',
+            log: true 
+        });
+        
+        await ffmpeg.load();
+
         const zip = new JSZip();
         const folderAudios = zip.folder("audios-de-tus-cats-😽❤️");
-        let useFFmpeg = false;
-        let ffmpeg = null;
-
-        // Intentamos cargar FFmpeg local con manejo de errores silencioso
-        try {
-            audioStatus.textContent = "⌛ Inicializando motor de extracción...";
-            if (typeof FFmpeg !== 'undefined') {
-                const { createFFmpeg, fetchFile } = FFmpeg;
-                ffmpeg = createFFmpeg({ corePath: '/ffmpeg/ffmpeg-core.js', log: false });
-                await ffmpeg.load();
-                useFFmpeg = true;
-            }
-        } catch (fErr) {
-            console.warn("FFmpeg no pudo iniciarse (usando motor nativo):", fErr);
-            useFFmpeg = false;
-        }
 
         for (let i = 0; i < selectedVideos.length; i++) {
             const file = selectedVideos[i];
             const number = String(i + 1).padStart(3, "0");
             const baseName = file.name.replace(/\.[^/.]+$/, "");
             
-            audioStatus.textContent = `⌛ Extrayendo pista de audio (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
+            audioStatus.textContent = `⌛ Procesando FFmpeg MP3 (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
 
-            if (useFFmpeg && ffmpeg) {
-                try {
-                    const { fetchFile } = FFmpeg;
-                    const inputFileName = `input_${i}.mp4`;
-                    const outputFileName = `output_${i}.mp3`;
-                    
-                    ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
-                    await ffmpeg.run('-i', inputFileName, '-vn', '-acodec', 'libmp3lame', '-ab', '192k', outputFileName);
+            const inputFileName = `input_${i}.mp4`;
+            const outputFileName = `output_${i}.mp3`;
+            
+            // 1. Guardar video en la memoria virtual
+            ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
 
-                    const data = ffmpeg.FS('readFile', outputFileName);
-                    const audioBlob = new Blob([data.buffer], { type: 'audio/mp3' });
+            // 2. Extraer audio sin canal de video (-vn) en MP3 verdadero
+            await ffmpeg.run('-i', inputFileName, '-vn', '-acodec', 'libmp3lame', '-ab', '192k', outputFileName);
 
-                    folderAudios.file(`${number}_${baseName}.mp3`, audioBlob, { compression: "STORE" });
-                    ffmpeg.FS('unlink', inputFileName);
-                    ffmpeg.FS('unlink', outputFileName);
-                    continue;
-                } catch (e) {
-                    console.warn(`Fallback para ${file.name}:`, e);
-                }
-            }
+            // 3. Leer archivo codificado
+            const data = ffmpeg.FS('readFile', outputFileName);
+            const audioBlob = new Blob([data.buffer], { type: 'audio/mp3' });
 
-            // Si FFmpeg falla o no carga, usará el método nativo sin detenerse
-            try {
-                const audioBlob = await extractAudioNative(file);
-                folderAudios.file(`${number}_${baseName}.webm`, audioBlob, { compression: "STORE" });
-            } catch (err) {
-                folderAudios.file(`${number}_${baseName}.mp4`, file, { compression: "STORE" });
-            }
+            const audioName = `${number}_${baseName}.mp3`;
+            folderAudios.file(audioName, audioBlob, { compression: "STORE" });
+
+            // 4. Liberar memoria
+            ffmpeg.FS('unlink', inputFileName);
+            ffmpeg.FS('unlink', outputFileName);
         }
 
         audioStatus.textContent = "📦 Comprimiendo archivo ZIP...";
         const content = await zip.generateAsync({ type: "blob" });
         downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
         
-        audioStatus.textContent = "✅ ¡Audios extraídos en orden y descargados con éxito!";
+        audioStatus.textContent = "✅ ¡Audios MP3 verdaderos extraídos con FFmpeg!";
         audioStatus.className = "status success";
     } catch (error) {
         console.error(error);
-        audioStatus.textContent = `❌ Error: ${error.message}`;
+        audioStatus.textContent = `❌ Error en FFmpeg: ${error.message}`;
         audioStatus.className = "status error";
     } finally {
         startAudioDownload.disabled = false;
