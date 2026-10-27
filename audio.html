@@ -19,7 +19,7 @@ l.parentNode.insertBefore(s, l);
 })({});
 </script>
 
-<!-- Carga del script principal de FFmpeg desde tu carpeta local -->
+<!-- Carga local de FFmpeg -->
 <script src="/ffmpeg/ffmpeg.min.js"></script>
 
 <style>
@@ -47,8 +47,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
-  <h1>🎧 Conversión y Extracción a MP3 (FFmpeg)</h1>
-  <p>Selecciona tus videos para extraer sus pistas de audio reales en formato MP3 codificado y empaquetarlas en orden.</p>
+  <h1>🎧 Extractor y Conversión MP3</h1>
+  <p>Selecciona tus videos para extraer las pistas de audio reales en MP3 y empaquetarlas en orden dentro de tu ZIP.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -57,7 +57,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   </label>
   <input id="audioFileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
 
-  <button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de MP3</button>
+  <button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de Audios</button>
   <a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
   
   <div class="status" id="audioStatus">Esperando archivos de video...</div>
@@ -110,11 +110,10 @@ startAudioDownload.addEventListener("click", async () => {
     try {
         audioStatus.textContent = "⌛ Cargando motor FFmpeg local...";
         
-        // Inicialización de FFmpeg desde tus archivos del repositorio
         const { createFFmpeg, fetchFile } = FFmpeg;
         const ffmpeg = createFFmpeg({ 
             corePath: '/ffmpeg/ffmpeg-core.js',
-            log: true 
+            log: false 
         });
         
         await ffmpeg.load();
@@ -127,25 +126,32 @@ startAudioDownload.addEventListener("click", async () => {
             const number = String(i + 1).padStart(3, "0");
             const baseName = file.name.replace(/\.[^/.]+$/, "");
             
-            audioStatus.textContent = `⌛ Procesando FFmpeg MP3 (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
+            audioStatus.textContent = `⌛ Convirtiendo a MP3 real (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
 
             const inputFileName = `input_${i}.mp4`;
             const outputFileName = `output_${i}.mp3`;
             
-            // 1. Guardar video en la memoria virtual
+            // Escribimos el archivo de video en la memoria virtual de FFmpeg
             ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
 
-            // 2. Extraer audio sin canal de video (-vn) en MP3 verdadero
-            await ffmpeg.run('-i', inputFileName, '-vn', '-acodec', 'libmp3lame', '-ab', '192k', outputFileName);
+            // Comando optimizado para forzar transcodificación directa a MP3 legítimo
+            await ffmpeg.run(
+                '-i', inputFileName,
+                '-vn',
+                '-acodec', 'libmp3lame',
+                '-b:a', '192k',
+                '-f', 'mp3',
+                outputFileName
+            );
 
-            // 3. Leer archivo codificado
+            // Leemos el resultado binario convertido por FFmpeg
             const data = ffmpeg.FS('readFile', outputFileName);
-            const audioBlob = new Blob([data.buffer], { type: 'audio/mp3' });
+            const audioBlob = new Blob([data.buffer], { type: 'audio/mpeg' });
 
             const audioName = `${number}_${baseName}.mp3`;
             folderAudios.file(audioName, audioBlob, { compression: "STORE" });
 
-            // 4. Liberar memoria
+            // Limpiamos los temporales virtuales
             ffmpeg.FS('unlink', inputFileName);
             ffmpeg.FS('unlink', outputFileName);
         }
@@ -154,7 +160,7 @@ startAudioDownload.addEventListener("click", async () => {
         const content = await zip.generateAsync({ type: "blob" });
         downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
         
-        audioStatus.textContent = "✅ ¡Audios MP3 verdaderos extraídos con FFmpeg!";
+        audioStatus.textContent = "✅ ¡Audios en formato MP3 real generados con éxito!";
         audioStatus.className = "status success";
     } catch (error) {
         console.error(error);
