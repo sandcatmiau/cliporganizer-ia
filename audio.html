@@ -19,8 +19,8 @@ l.parentNode.insertBefore(s, l);
 })({});
 </script>
 
-<!-- Enlace directo al script principal de FFmpeg en tu repositorio -->
-<script src="/ffmpeg/ffmpeg.min.js"></script>
+<!-- Cargador oficial de FFmpeg para la web -->
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
 <style>
 :root{ --bg:#0d0d0f; --card:#151519; --border:#28282f; --text:#f4f4f6; --accent:#6675ff; --muted:#a5a5ae; --green:#55d98a; --red:#ff6666; }
@@ -48,7 +48,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
   <h1>🎧 Extracción de Audios MP3 (FFmpeg)</h1>
-  <p>Selecciona tus videos para extraer sus pistas de audio reales en formato MP3 y empaquetarlas en orden dentro de tu ZIP.</p>
+  <p>Selecciona tus videos para extraer sus pistas de audio reales en MP3 y empaquetarlas en orden dentro de tu ZIP.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -108,19 +108,18 @@ startAudioDownload.addEventListener("click", async () => {
     startAudioDownload.disabled = true;
 
     try {
-        audioStatus.textContent = "⌛ Cargando motor FFmpeg desde tu repositorio...";
+        audioStatus.textContent = "⌛ Cargando motor FFmpeg optimizado...";
         
         const { createFFmpeg, fetchFile } = FFmpeg;
-        // Vinculamos de manera explícita el core path con la carpeta local que ya tienes creada
+        // Apuntamos al CDN oficial para evitar cualquier error de red o fetch bloqueado en móviles
         const ffmpeg = createFFmpeg({ 
-            corePath: '/ffmpeg/ffmpeg-core.js',
-            log: true 
+            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.6/dist/ffmpeg-core.js',
+            log: false 
         });
         
         await ffmpeg.load();
 
         const zip = new JSZip();
-        // Carpeta solicitada con la temática y numeración correlativa estricta
         const folderAudios = zip.folder("audios-de-tus-cats-😽❤️");
 
         for (let i = 0; i < selectedVideos.length; i++) {
@@ -128,15 +127,14 @@ startAudioDownload.addEventListener("click", async () => {
             const number = String(i + 1).padStart(3, "0");
             const baseName = file.name.replace(/\.[^/.]+$/, "");
             
-            audioStatus.textContent = `⌛ Extrayendo audio real en MP3 (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
+            audioStatus.textContent = `⌛ Extrayendo MP3 real (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
 
             const inputFileName = `input_${i}.mp4`;
             const outputFileName = `output_${i}.mp3`;
             
-            // Escribimos el archivo en el sistema virtual de FFmpeg
             ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
 
-            // Ejecutamos FFmpeg eliminando el video (-vn) y transcodificando estrictamente a MP3 legítimo
+            // Transcodificación estricta a MP3 legítimo
             await ffmpeg.run(
                 '-i', inputFileName,
                 '-vn',
@@ -145,14 +143,12 @@ startAudioDownload.addEventListener("click", async () => {
                 outputFileName
             );
 
-            // Leemos el resultado binario procesado en formato de audio puro
             const data = ffmpeg.FS('readFile', outputFileName);
             const audioBlob = new Blob([data.buffer], { type: 'audio/mpeg' });
 
             const audioName = `${number}_${baseName}.mp3`;
             folderAudios.file(audioName, audioBlob, { compression: "STORE" });
 
-            // Limpiamos la memoria virtual de FFmpeg para el siguiente clip
             ffmpeg.FS('unlink', inputFileName);
             ffmpeg.FS('unlink', outputFileName);
         }
@@ -161,7 +157,7 @@ startAudioDownload.addEventListener("click", async () => {
         const content = await zip.generateAsync({ type: "blob" });
         downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
         
-        audioStatus.textContent = "✅ ¡Pistas de audio MP3 extraídas con éxito!";
+        audioStatus.textContent = "✅ ¡Pistas MP3 extraídas con éxito!";
         audioStatus.className = "status success";
     } catch (error) {
         console.error(error);
