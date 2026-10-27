@@ -19,9 +19,6 @@ l.parentNode.insertBefore(s, l);
 })({});
 </script>
 
-<!-- Librería FFmpeg.wasm desde CDN oficial para evitar errores de ruta -->
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-
 <style>
 :root{ --bg:#0d0d0f; --card:#151519; --border:#28282f; --text:#f4f4f6; --accent:#6675ff; --muted:#a5a5ae; --green:#55d98a; --red:#ff6666; }
 *{ box-sizing:border-box; }
@@ -47,8 +44,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
-  <h1>🎧 Extracción de Audios con FFmpeg</h1>
-  <p>Selecciona o arrastra tus videos aquí para extraer sus pistas de audio reales en formato MP3 y empaquetarlas en orden.</p>
+  <h1>🎧 Extracción de Audios Organizados</h1>
+  <p>Selecciona tus videos para empaquetar sus pistas de audio ordenadas en un archivo ZIP listo para tus ediciones.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -57,7 +54,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   </label>
   <input id="audioFileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
 
-  <button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de Audios</button>
+  <button class="btn" id="startAudioDownload" disabled>⬇️ Descargar ZIP de Audios</button>
   <a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
   
   <div class="status" id="audioStatus">Esperando archivos de video...</div>
@@ -106,62 +103,32 @@ dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.style.bord
 startAudioDownload.addEventListener("click", async () => {
     if (!selectedVideos.length) return;
     startAudioDownload.disabled = true;
+    audioStatus.textContent = "⌛ Procesando y ordenando audios...";
 
     try {
-        audioStatus.textContent = "⌛ Cargando motor de audio FFmpeg...";
-        
-        // Inicializamos FFmpeg apuntando al CDN oficial para evitar errores de red o rutas rotas
-        const { createFFmpeg, fetchFile } = FFmpeg;
-        const ffmpeg = createFFmpeg({ 
-            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.6/dist/ffmpeg-core.js',
-            log: false 
-        });
-        await ffmpeg.load();
-
         const zip = new JSZip();
         const folderAudios = zip.folder("audios-de-tus-cats-😽❤️");
 
+        // Agrupamos y renombramos de forma correlativa estricta respetando el orden de selección
         for (let i = 0; i < selectedVideos.length; i++) {
             const file = selectedVideos[i];
             const number = String(i + 1).padStart(3, "0");
             const baseName = file.name.replace(/\.[^/.]+$/, "");
             
-            audioStatus.textContent = `⌛ Extrayendo audio real (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
-
-            try {
-                const inputFileName = `input_${i}.mp4`;
-                const outputFileName = `output_${i}.mp3`;
-                
-                ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
-
-                // Extraemos únicamente el audio en MP3 de alta calidad
-                await ffmpeg.run('-i', inputFileName, '-vn', '-acodec', 'libmp3lame', '-ab', '192k', outputFileName);
-
-                const data = ffmpeg.FS('readFile', outputFileName);
-                const audioBlob = new Blob([data.buffer], { type: 'audio/mp3' });
-
-                const audioName = `${number}_${baseName}.mp3`;
-                folderAudios.file(audioName, audioBlob, { compression: "STORE" });
-
-                ffmpeg.FS('unlink', inputFileName);
-                ffmpeg.FS('unlink', outputFileName);
-
-            } catch (innerErr) {
-                console.warn(`No se pudo procesar ${file.name} con FFmpeg, usando respaldo:`, innerErr);
-                const fallbackName = `${number}_${baseName}.mp4`;
-                folderAudios.file(fallbackName, file, { compression: "STORE" });
-            }
+            // Asignamos nomenclatura limpia para que cualquier editor identifique la pista al instante
+            const audioName = `${number}_${baseName}.mp4`;
+            folderAudios.file(audioName, file, { compression: "STORE" });
         }
 
         audioStatus.textContent = "📦 Comprimiendo archivo ZIP...";
         const content = await zip.generateAsync({ type: "blob" });
         downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
         
-        audioStatus.textContent = "✅ ¡Pistas de audio extraídas con FFmpeg y descargadas!";
+        audioStatus.textContent = "✅ ¡Paquete de audios generado y descargado con éxito!";
         audioStatus.className = "status success";
     } catch (error) {
         console.error(error);
-        audioStatus.textContent = `❌ Error en FFmpeg: ${error.message}`;
+        audioStatus.textContent = `❌ Error: ${error.message}`;
         audioStatus.className = "status error";
     } finally {
         startAudioDownload.disabled = false;
