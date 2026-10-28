@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">  
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<title>Extractor y Conversión MP3 (FFmpeg) — SANDCATFILMS</title>
+<title>Extractor y Conversión WAV (FFmpeg) — SANDCATFILMS</title>
 
 <!-- HILLTOPADS SCRIPT 3 -->
 <script data-cfasync="false" async>
@@ -19,8 +19,8 @@ l.parentNode.insertBefore(s, l);
 })({});
 </script>
 
-<!-- Cargador oficial de FFmpeg para la web -->
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<!-- Cargador de FFmpeg desde tus archivos locales en Vercel -->
+<script src="/ffmpeg/ffmpeg.min.js"></script>
 
 <style>
 :root{ --bg:#0d0d0f; --card:#151519; --border:#28282f; --text:#f4f4f6; --accent:#6675ff; --muted:#a5a5ae; --green:#55d98a; --red:#ff6666; }
@@ -47,8 +47,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
-  <h1>🎧 Extracción de Audios MP3 (FFmpeg)</h1>
-  <p>Selecciona tus videos para extraer sus pistas de audio reales en MP3 y empaquetarlas en orden dentro de tu ZIP.</p>
+  <h1>🎧 Extracción de Audios WAV (FFmpeg)</h1>
+  <p>Selecciona tus videos para extraer sus pistas de audio reales en WAV sin pérdidas y empaquetarlas en orden dentro de tu ZIP.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -108,13 +108,15 @@ startAudioDownload.addEventListener("click", async () => {
     startAudioDownload.disabled = true;
 
     try {
-        audioStatus.textContent = "⌛ Cargando motor FFmpeg optimizado...";
+        audioStatus.textContent = "⌛ Cargando motor FFmpeg local...";
         
         const { createFFmpeg, fetchFile } = FFmpeg;
-        // Apuntamos al CDN oficial para evitar cualquier error de red o fetch bloqueado en móviles
+        // Apuntamos correctamente a tus carpetas locales en Vercel para solucionar el "Failed to fetch"
         const ffmpeg = createFFmpeg({ 
-            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.6/dist/ffmpeg-core.js',
-            log: false 
+            corePath: '/ffmpeg/ffmpeg-core.js',
+            wasmPath: '/ffmpeg/ffmpeg-core.wasm',
+            workerPath: '/ffmpeg/ffmpeg-core.worker.js',
+            log: true 
         });
         
         await ffmpeg.load();
@@ -127,26 +129,27 @@ startAudioDownload.addEventListener("click", async () => {
             const number = String(i + 1).padStart(3, "0");
             const baseName = file.name.replace(/\.[^/.]+$/, "");
             
-            audioStatus.textContent = `⌛ Extrayendo MP3 real (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
+            audioStatus.textContent = `⌛ Extrayendo WAV real (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
 
             const inputFileName = `input_${i}.mp4`;
-            const outputFileName = `output_${i}.mp3`;
+            const outputFileName = `output_${i}.wav`;
             
             ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
 
-            // Transcodificación estricta a MP3 legítimo
+            // Transcodificación estricta a formato WAV (PCM Waveform Audio de 16-bit)
             await ffmpeg.run(
                 '-i', inputFileName,
                 '-vn',
-                '-acodec', 'libmp3lame',
-                '-b:a', '192k',
+                '-acodec', 'pcm_s16le',
+                '-ar', '44100',
+                '-ac', '2',
                 outputFileName
             );
 
             const data = ffmpeg.FS('readFile', outputFileName);
-            const audioBlob = new Blob([data.buffer], { type: 'audio/mpeg' });
+            const audioBlob = new Blob([data.buffer], { type: 'audio/wav' });
 
-            const audioName = `${number}_${baseName}.mp3`;
+            const audioName = `${number}_${baseName}.wav`;
             folderAudios.file(audioName, audioBlob, { compression: "STORE" });
 
             ffmpeg.FS('unlink', inputFileName);
@@ -157,7 +160,7 @@ startAudioDownload.addEventListener("click", async () => {
         const content = await zip.generateAsync({ type: "blob" });
         downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
         
-        audioStatus.textContent = "✅ ¡Pistas MP3 extraídas con éxito!";
+        audioStatus.textContent = "✅ ¡Pistas WAV extraídas con éxito!";
         audioStatus.className = "status success";
     } catch (error) {
         console.error(error);
