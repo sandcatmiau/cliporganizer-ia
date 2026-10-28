@@ -113,12 +113,10 @@ startAudioDownload.addEventListener("click", async () => {
         
         const { createFFmpeg, fetchFile } = FFmpeg;
         
-        // Forzamos la creación de URLs absolutas dinámicas para evitar el error 'Failed to fetch' en Vercel
-        const host = window.location.origin;
+        // Usamos una ruta absoluta limpia combinando el origin para evitar fallas del motor antiguo en Vercel
+        const coreUrl = window.location.origin + '/ffmpeg/ffmpeg-core.js';
         const ffmpeg = createFFmpeg({ 
-            corePath: `${host}/ffmpeg/ffmpeg-core.js`,
-            wasmPath: `${host}/ffmpeg/ffmpeg-core.wasm`,
-            workerPath: `${host}/ffmpeg/ffmpeg-core.worker.js`,
+            corePath: coreUrl,
             log: true 
         });
         
