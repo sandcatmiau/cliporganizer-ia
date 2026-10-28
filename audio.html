@@ -19,7 +19,7 @@ l.parentNode.insertBefore(s, l);
 })({});
 </script>
 
-<!-- Cargador de FFmpeg desde tus archivos locales en Vercel -->
+<!-- Cargador oficial de FFmpeg desde tus archivos locales en la raíz -->
 <script src="/ffmpeg/ffmpeg.min.js"></script>
 
 <style>
@@ -48,7 +48,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
   <h1>🎧 Extracción de Audios WAV (FFmpeg)</h1>
-  <p>Selecciona tus videos para extraer sus pistas de audio reales en WAV sin pérdidas y empaquetarlas en orden dentro de tu ZIP.</p>
+  <p>Selecciona tus videos para extraer sus pistas de audio reales en WAV y empaquetarlas en orden dentro de tu ZIP.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -64,7 +64,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 </div>
 
 <!-- Librería JSZip -->
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://jsdelivr.net"></script>
 <script>
 "use strict";
 
@@ -109,13 +109,16 @@ startAudioDownload.addEventListener("click", async () => {
 
     try {
         audioStatus.textContent = "⌛ Cargando motor FFmpeg local...";
+        audioStatus.className = "status";
         
         const { createFFmpeg, fetchFile } = FFmpeg;
-        // Apuntamos correctamente a tus carpetas locales en Vercel para solucionar el "Failed to fetch"
+        
+        // Forzamos la creación de URLs absolutas dinámicas para evitar el error 'Failed to fetch' en Vercel
+        const host = window.location.origin;
         const ffmpeg = createFFmpeg({ 
-            corePath: '/ffmpeg/ffmpeg-core.js',
-            wasmPath: '/ffmpeg/ffmpeg-core.wasm',
-            workerPath: '/ffmpeg/ffmpeg-core.worker.js',
+            corePath: `${host}/ffmpeg/ffmpeg-core.js`,
+            wasmPath: `${host}/ffmpeg/ffmpeg-core.wasm`,
+            workerPath: `${host}/ffmpeg/ffmpeg-core.worker.js`,
             log: true 
         });
         
@@ -129,14 +132,14 @@ startAudioDownload.addEventListener("click", async () => {
             const number = String(i + 1).padStart(3, "0");
             const baseName = file.name.replace(/\.[^/.]+$/, "");
             
-            audioStatus.textContent = `⌛ Extrayendo WAV real (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
+            audioStatus.textContent = `⌛ Extrayendo WAV nativo (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
 
             const inputFileName = `input_${i}.mp4`;
             const outputFileName = `output_${i}.wav`;
             
             ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
 
-            // Transcodificación estricta a formato WAV (PCM Waveform Audio de 16-bit)
+            // Transcodificación estricta a formato WAV (PCM 16-bit lineal) sin pérdidas
             await ffmpeg.run(
                 '-i', inputFileName,
                 '-vn',
