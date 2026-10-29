@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">  
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<title>Extractor y Conversión WAV (FFmpeg) — SANDCATFILMS</title>
+<title>Extractor de Audios WAV Nativo — SANDCATFILMS</title>
 
 <!-- HILLTOPADS SCRIPT 3 -->
 <script data-cfasync="false" async>
@@ -18,9 +18,6 @@ s.referrerPolicy = 'no-referrer-when-downgrade';
 l.parentNode.insertBefore(s, l);
 })({});
 </script>
-
-<!-- Cargador oficial de FFmpeg desde tus archivos locales en la raíz -->
-<script src="/ffmpeg/ffmpeg.min.js"></script>
 
 <style>
 :root{ --bg:#0d0d0f; --card:#151519; --border:#28282f; --text:#f4f4f6; --accent:#6675ff; --muted:#a5a5ae; --green:#55d98a; --red:#ff6666; }
@@ -47,8 +44,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 
 <div class="card">
   <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
-  <h1>🎧 Extracción de Audios WAV (FFmpeg)</h1>
-  <p>Selecciona tus videos para extraer sus pistas de audio reales en WAV y empaquetarlas en orden dentro de tu ZIP.</p>
+  <h1>🎧 Extracción de Audios WAV Nativo</h1>
+  <p>Extrae pistas de audio WAV sin pérdidas usando el motor nativo del navegador, compatible con tus anuncios activos.</p>
   
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
@@ -63,7 +60,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   <div class="status" id="audioStatus">Esperando archivos de video...</div>
 </div>
 
-<!-- Librería JSZip -->
+<!-- Librería JSZip oficial -->
 <script src="https://jsdelivr.net"></script>
 <script>
 "use strict";
@@ -103,25 +100,90 @@ dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.
 dropZone.addEventListener("dragleave", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; });
 dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
 
+function bufferToWav(buffer) {
+    let numOfChan = buffer.numberOfChannels,
+        sampleRate = buffer.sampleRate,
+        format = 1,
+        bitDepth = 16;
+    
+    let resultBuffer;
+    if (numOfChan === 2) {
+        resultBuffer = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
+    } else {
+        resultBuffer = buffer.getChannelData(0);
+    }
+    
+    let bufferLength = resultBuffer.length * (bitDepth / 8);
+    let headerBuffer = new ArrayBuffer(44 + bufferLength);
+    let view = new DataView(headerBuffer);
+    
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + bufferLength, true);
+    writeString(view, 8, 'WAVE');
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numOfChan, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numOfChan * (bitDepth / 8), true);
+    view.setUint16(32, numOfChan * (bitDepth / 8), true);
+    view.setUint16(34, bitDepth, true);
+    writeString(view, 36, 'data');
+    view.setUint32(40, bufferLength, true);
+    
+    let offset = 44;
+    for (let i = 0; i < resultBuffer.length; i++, offset += 2) {
+        let s = Math.max(-1, Math.min(1, resultBuffer[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+    
+    return new Blob([view], { type: 'audio/wav' });
+}
+
+function interleave(inputL, inputR) {
+    let length = inputL.length + inputR.length;
+    let result = new Float32Array(length);
+    let index = 0, inputIndex = 0;
+    while (index < length) {
+        result[index++] = inputL[inputIndex];
+        result[index++] = inputR[inputIndex];
+        inputIndex++;
+    }
+    return result;
+}
+
+function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
+}
+
+function decodificarVideo(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioCtx = new AudioContext({ sampleRate: 44100 });
+            
+            audioCtx.decodeAudioData(e.target.result, (audioBuffer) => {
+                audioCtx.close();
+                resolve(audioBuffer);
+            }, (err) => {
+                audioCtx.close();
+                reject(new Error("Formato no soportado o video sin pista de audio ejecutable."));
+            });
+        };
+        reader.onerror = () => reject(new Error("Error al procesar el archivo físico."));
+        reader.readAsArrayBuffer(file);
+    });
+}
+
 startAudioDownload.addEventListener("click", async () => {
     if (!selectedVideos.length) return;
     startAudioDownload.disabled = true;
+    audioStatus.className = "status";
 
     try {
-        audioStatus.textContent = "⌛ Cargando motor FFmpeg local...";
-        audioStatus.className = "status";
-        
-        const { createFFmpeg, fetchFile } = FFmpeg;
-        
-        // Usamos una ruta absoluta limpia combinando el origin para evitar fallas del motor antiguo en Vercel
-        const coreUrl = window.location.origin + '/ffmpeg/ffmpeg-core.js';
-        const ffmpeg = createFFmpeg({ 
-            corePath: coreUrl,
-            log: true 
-        });
-        
-        await ffmpeg.load();
-
         const zip = new JSZip();
         const folderAudios = zip.folder("audios-de-tus-cats-😽❤️");
 
@@ -130,42 +192,24 @@ startAudioDownload.addEventListener("click", async () => {
             const number = String(i + 1).padStart(3, "0");
             const baseName = file.name.replace(/\.[^/.]+$/, "");
             
-            audioStatus.textContent = `⌛ Extrayendo WAV nativo (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
+            audioStatus.textContent = `⌛ Extrayendo canales WAV (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
 
-            const inputFileName = `input_${i}.mp4`;
-            const outputFileName = `output_${i}.wav`;
-            
-            ffmpeg.FS('writeFile', inputFileName, await fetchFile(file));
-
-            // Transcodificación estricta a formato WAV (PCM 16-bit lineal) sin pérdidas
-            await ffmpeg.run(
-                '-i', inputFileName,
-                '-vn',
-                '-acodec', 'pcm_s16le',
-                '-ar', '44100',
-                '-ac', '2',
-                outputFileName
-            );
-
-            const data = ffmpeg.FS('readFile', outputFileName);
-            const audioBlob = new Blob([data.buffer], { type: 'audio/wav' });
+            const audioBuffer = await decodificarVideo(file);
+            const audioBlob = bufferToWav(audioBuffer);
 
             const audioName = `${number}_${baseName}.wav`;
             folderAudios.file(audioName, audioBlob, { compression: "STORE" });
-
-            ffmpeg.FS('unlink', inputFileName);
-            ffmpeg.FS('unlink', outputFileName);
         }
 
-        audioStatus.textContent = "📦 Comprimiendo archivo ZIP...";
+        audioStatus.textContent = "📦 Comprimiendo pistas en archivo ZIP...";
         const content = await zip.generateAsync({ type: "blob" });
-        downloadBlob(content, `SANDCATFILMS_Audios_${Date.now()}.zip`);
+        downloadBlob(content, `SANDCATFILMS_Audios_WAV_${Date.now()}.zip`);
         
-        audioStatus.textContent = "✅ ¡Pistas WAV extraídas con éxito!";
+        audioStatus.textContent = "✅ ¡Audios extraídos en WAV con éxito y sin afectar tus anuncios!";
         audioStatus.className = "status success";
     } catch (error) {
         console.error(error);
-        audioStatus.textContent = `❌ Error en FFmpeg: ${error.message}`;
+        audioStatus.textContent = `❌ Error en Extracción: ${error.message}`;
         audioStatus.className = "status error";
     } finally {
         startAudioDownload.disabled = false;
