@@ -60,8 +60,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   <div class="status" id="audioStatus">Esperando archivos de video...</div>
 </div>
 
-<!-- Librería JSZip oficial -->
-<script src="https://jsdelivr.net"></script>
+<!-- Usamos un CDN alternativo de Cloudflare que no se bloquea con los scripts publicitarios -->
+<script src="https://cloudflare.com"></script>
 <script>
 "use strict";
 
@@ -106,13 +106,7 @@ function bufferToWav(buffer) {
         format = 1,
         bitDepth = 16;
     
-    let resultBuffer;
-    if (numOfChan === 2) {
-        resultBuffer = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
-    } else {
-        resultBuffer = buffer.getChannelData(0);
-    }
-    
+    let resultBuffer = (numOfChan === 2) ? interleave(buffer.getChannelData(0), buffer.getChannelData(1)) : buffer.getChannelData(0);
     let bufferLength = resultBuffer.length * (bitDepth / 8);
     let headerBuffer = new ArrayBuffer(44 + bufferLength);
     let view = new DataView(headerBuffer);
@@ -136,7 +130,6 @@ function bufferToWav(buffer) {
         let s = Math.max(-1, Math.min(1, resultBuffer[i]));
         view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
     }
-    
     return new Blob([view], { type: 'audio/wav' });
 }
 
@@ -164,16 +157,15 @@ function decodificarVideo(file) {
         reader.onload = function(e) {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             const audioCtx = new AudioContext({ sampleRate: 44100 });
-            
-            audioCtx.decodeAudioData(e.target.result, (audioBuffer) => {
+            audioCtx.decodeAudioData(e.target.result, (buf) => {
                 audioCtx.close();
-                resolve(audioBuffer);
+                resolve(buf);
             }, (err) => {
                 audioCtx.close();
-                reject(new Error("Formato no soportado o video sin pista de audio ejecutable."));
+                reject(new Error("Formato no soportado o video sin pista de audio."));
             });
         };
-        reader.onerror = () => reject(new Error("Error al procesar el archivo físico."));
+        reader.onerror = () => reject(new Error("Error al leer archivo."));
         reader.readAsArrayBuffer(file);
     });
 }
@@ -184,6 +176,10 @@ startAudioDownload.addEventListener("click", async () => {
     audioStatus.className = "status";
 
     try {
+        if (typeof JSZip === "undefined") {
+            throw new Error("La librería de compresión externa está bloqueada. Por favor recarga la página.");
+        }
+        
         const zip = new JSZip();
         const folderAudios = zip.folder("audios-de-tus-cats-😽❤️");
 
