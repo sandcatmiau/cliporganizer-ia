@@ -50,7 +50,7 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   <label class="drop-zone" id="dropZone" for="audioFileInput">
     <div style="font-size:28px; margin-bottom:6px;">🎵</div>
     <div style="font-weight:800; margin-bottom:4px;">Selecciona tus videos</div>
-    <div style="color:var(--muted); font-size:13px;">O arrástralos y suéltalos aquí</div>
+    <div style="color:var(--muted); font-size:13px;">O arrástralos y suéltos aquí</div>
   </label>
   <input id="audioFileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
 
@@ -60,8 +60,8 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
   <div class="status" id="audioStatus">Esperando archivos de video...</div>
 </div>
 
-<!-- Usamos un CDN alternativo de Cloudflare que no se bloquea con los scripts publicitarios -->
-<script src="https://cloudflare.com"></script>
+<!-- CORREGIDO: Enlace directo al CDN oficial de cdnjs de Cloudflare para que cargue JSZip sin bloqueos -->
+<script src="https://cloudflare.com" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 "use strict";
 
@@ -87,9 +87,11 @@ function downloadBlob(blob, filename){
 function handleFiles(files) {
     selectedVideos = Array.from(files || []).filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name));
     if (selectedVideos.length > 0) {
+        audioStatus.className = "status";
         audioStatus.textContent = `✅ ${selectedVideos.length} video(s) cargado(s) correctamente.`;
         startAudioDownload.disabled = false;
     } else {
+        audioStatus.className = "status error";
         audioStatus.textContent = "❌ Por favor selecciona archivos de video válidos.";
         startAudioDownload.disabled = true;
     }
@@ -212,6 +214,5 @@ startAudioDownload.addEventListener("click", async () => {
     }
 });
 </script>
-
 </body>
 </html>
