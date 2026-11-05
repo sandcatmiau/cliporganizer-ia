@@ -59,26 +59,39 @@ function downloadBlob(blob, filename){
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
-// --- ORGANIZACION AUTOMATICA POR FECHA REAL DENTRO DEL VIDEO ---
+// --- CORREGIDO: Fecha real dentro del video ---
 async function getFechaRealGrabacion(file){
   try{
-    const slice = file.slice(0, 300000);
+    const slice = file.slice(0, 500000);
     const buffer = await slice.arrayBuffer();
     const bytes = new Uint8Array(buffer);
-    const texto = new TextDecoder("latin1").decode(bytes);
-    const idx = texto.indexOf("mvhd");
-    if(idx === -1) return file.lastModified || 0;
-    const view = new DataView(buffer);
-    const version = view.getUint8(idx + 4);
-    let creation = 0;
-    if(version === 1){
-      const high = view.getUint32(idx + 5, false);
-      const low = view.getUint32(idx + 9, false);
-      creation = high * 4294967296 + low;
-    } else {
-      creation = view.getUint32(idx + 5, false);
+    // Metodo 1: Buscar creation_time en texto, ej: 2026-11-05T14:20:00
+    let textoCompleto = "";
+    try{ textoCompleto = new TextDecoder("latin1").decode(bytes); }catch(e){}
+    const matchIso = textoCompleto.match(/creation_time.{0,5}?(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/);
+    if(matchIso){
+      const t = Date.parse(matchIso[1] + "Z");
+      if(!isNaN(t) && t > 0) return t;
     }
-    if(creation > 0) return (creation - 2082844800) * 1000;
+    // Metodo 2: mvhd bien leido
+    // Estructura: [4 bytes tamano][4 bytes "mvhd"][1 byte version][3 bytes flags][fecha]
+    const idx = textoCompleto.indexOf("mvhd");
+    if(idx !== -1){
+      const view = new DataView(buffer);
+      const version = view.getUint8(idx + 4);
+      let creation = 0;
+      if(version === 1){
+        const high = view.getUint32(idx + 8, false);
+        const low = view.getUint32(idx + 12, false);
+        creation = high * 4294967296 + low;
+      } else {
+        creation = view.getUint32(idx + 8, false);
+      }
+      if(creation > 0){
+        const ms = (creation - 2082844800) * 1000;
+        if(ms > 0) return ms;
+      }
+    }
     return file.lastModified || 0;
   }catch(e){
     return file.lastModified || 0;
@@ -160,7 +173,6 @@ function decodificarVideo(file) {
     reader.readAsArrayBuffer(file);
   });
 }
-// --- ZIP NATIVO SIN JSZip, SIN ARCHIVOS EXTERNOS ---
 function crc32(buf){
   let table = crc32.table;
   if(!table){
@@ -180,6 +192,9 @@ function crearZipSinLibreria(archivos){
   let partes = [];
   let offset = 0;
   const encoder = new TextEncoder();
+  const ahora = new Date();
+  const dosTime = ((ahora.getHours() & 31) << 11) | ((ahora.getMinutes() & 63) << 5) | ((Math.floor(ahora.getSeconds()/2)) & 31);
+  const dosDate = (((ahora.getFullYear() - 1980) & 127) << 9) | (((ahora.getMonth()+1) & 15) << 5) | (ahora.getDate() & 31);
   for(const f of archivos){
     const nombreBytes = encoder.encode(f.nombre);
     const crc = crc32(f.datos);
@@ -188,8 +203,8 @@ function crearZipSinLibreria(archivos){
     header.setUint16(4, 20, true);
     header.setUint16(6, 0x0800, true);
     header.setUint16(8, 0, true);
-    header.setUint16(10, 0, true);
-    header.setUint16(12, 0, true);
+    header.setUint16(10, dosTime, true);
+    header.setUint16(12, dosDate, true);
     header.setUint32(14, crc, true);
     header.setUint32(18, f.datos.length, true);
     header.setUint32(22, f.datos.length, true);
@@ -202,8 +217,8 @@ function crearZipSinLibreria(archivos){
     centralHeader.setUint16(6, 20, true);
     centralHeader.setUint16(8, 0x0800, true);
     centralHeader.setUint16(10, 0, true);
-    centralHeader.setUint16(12, 0, true);
-    centralHeader.setUint16(14, 0, true);
+    centralHeader.setUint16(12, dosTime, true);
+    centralHeader.setUint16(14, dosDate, true);
     centralHeader.setUint32(16, crc, true);
     centralHeader.setUint32(20, f.datos.length, true);
     centralHeader.setUint32(24, f.datos.length, true);
@@ -235,7 +250,7 @@ startAudioDownload.addEventListener("click", async () => {
       const audioBuffer = await decodificarVideo(file);
       const audioBlob = bufferToWav(audioBuffer);
       const arrayBuffer = await audioBlob.arrayBuffer();
-      archivosParaZip.push({ nombre: `audios-de-tus-cats-😽/${number} - Audio de atun ${i + 1}.wav`, datos: new Uint8Array(arrayBuffer) });
+      archivosParaZip.push({ nombre: `audios-de-tus-cats-❤️‍🔥😽❤️/${number} - Audio de atun 🍣 ${i + 1}.wav`, datos: new Uint8Array(arrayBuffer) });
     }
     audioStatus.textContent = "📦 Creando ZIP sin librería externa...";
     const zipBlob = crearZipSinLibreria(archivosParaZip);
