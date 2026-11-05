@@ -1,31 +1,20 @@
-<!DOCTYPE html>  
-<html lang="es">  
+<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Extractor de Audios WAV Nativo — SANDCATFILMS</title>
-
 <!-- HILLTOPADS SCRIPT 3 -->
 <script data-cfasync="false" async>
-(function(leqmj){
-var d = document,
-    s = d.createElement('script'),
-    l = d.currentScript || d.scripts[d.scripts.length - 1];
-s.settings = leqmj || {};
-s.src = "\/\/unfoldedtrade.com\/bOXOVKs\/d.Gpl_0BYyWMcR\/ZeymY9\/uOZOUmltksPrTecn1VMhTfYq1AMJDckitqN\/zhU\/x-NJjNUsxiMfwP";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({});
+(function(leqmj){ var d = document, s = d.createElement('script'), l = d.currentScript || d.scripts[d.scripts.length - 1]; s.settings = leqmj || {}; s.src = "\/\/unfoldedtrade.com\/bOXOVKs\/d.Gpl_0BYyWMcR\/ZeymY9\/uOZOUmltksPrTecn1VMhTfYq1AMJDckitqN\/zhU\/x-NJjNUsxiMfwP"; s.async = true; s.referrerPolicy = 'no-referrer-when-downgrade'; l.parentNode.insertBefore(s, l); })({});
 </script>
-
 <style>
 :root{ --bg:#0d0d0f; --card:#151519; --border:#28282f; --text:#f4f4f6; --accent:#6675ff; --muted:#a5a5ae; --green:#55d98a; --red:#ff6666; }
 *{ box-sizing:border-box; }
 body{ margin:0; background: radial-gradient(circle at top,#171725 0,#0d0d0f 45%); color:var(--text); font-family: Inter, system-ui, sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
 .card{ background: linear-gradient(180deg,#17171c,#121216); border:1px solid var(--border); border-radius:18px; padding:30px 24px; text-align:center; max-width:500px; width:100%; box-shadow:0 12px 35px rgba(0,0,0,.3); }
-.brand{ display:inline-flex; align-items:center; gap:10px; margin-bottom:9px; color:#d9dcff; font-size:12px; font-weight:900; letter-spacing:3px; text-transform:uppercase; } 
-.brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px rgba(102,117,255,.65); } 
+.brand{ display:inline-flex; align-items:center; gap:10px; margin-bottom:9px; color:#d9dcff; font-size:12px; font-weight:900; letter-spacing:3px; text-transform:uppercase; }
+.brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px rgba(102,117,255,.65); }
 h1{ font-size:22px; margin-bottom:10px; }
 p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 .drop-zone{ position:relative; display:block; min-height:160px; border:2px dashed #3a3a45; border-radius:14px; padding:20px; text-align:center; cursor:pointer; margin-bottom:16px; transition:.2s ease; background:rgba(21,21,25,0.4); }
@@ -41,178 +30,158 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 </style>
 </head>
 <body>
-
 <div class="card">
-  <div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
-  <h1>🎧 Extracción de Audios WAV Nativo</h1>
-  <p>Extrae pistas de audio WAV sin pérdidas usando el motor nativo del navegador, compatible con tus anuncios activos.</p>
-  
-  <label class="drop-zone" id="dropZone" for="audioFileInput">
-    <div style="font-size:28px; margin-bottom:6px;">🎵</div>
-    <div style="font-weight:800; margin-bottom:4px;">Selecciona tus videos</div>
-    <div style="color:var(--muted); font-size:13px;">O arrástralos y suéltos aquí</div>
-  </label>
-  <input id="audioFileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
-
-  <button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de Audios</button>
-  <a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
-  
-  <div class="status" id="audioStatus">Esperando archivos de video...</div>
+<div class="brand"><span class="brand-mark"></span>SANDCATFILMS</div>
+<h1>🎧 Extracción de Audios WAV Nativo</h1>
+<p>Extrae pistas de audio WAV sin pérdidas usando el motor nativo del navegador, compatible con tus anuncios activos.</p>
+<label class="drop-zone" id="dropZone" for="audioFileInput">
+<div style="font-size:28px; margin-bottom:6px;">🎵</div>
+<div style="font-weight:800; margin-bottom:4px;">Selecciona tus videos</div>
+<div style="color:var(--muted); font-size:13px;">O arrástralos y suéltos aquí</div>
+</label>
+<input id="audioFileInput" type="file" accept="video/*,.mp4,.mov,.m4v,.avi,.mkv,.webm" multiple>
+<button class="btn" id="startAudioDownload" disabled>⬇️ Extraer y Descargar ZIP de Audios</button>
+<a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
+<div class="status" id="audioStatus">Esperando archivos de video...</div>
 </div>
 
-<!-- CORREGIDO: Enlace correcto a tu archivo de JSZip local dentro de la carpeta ffmpeg -->
-<script src="ffmpeg/jz.zip.min.js"></script>
+<!-- CORREGIDO: Nombre correcto y carga con respaldo -->
+<script>
+function loadScript(src){
+  return new Promise((resolve, reject)=>{
+    const s=document.createElement('script');
+    s.src=src; s.onload=resolve; s.onerror=reject;
+    document.head.appendChild(s);
+  });
+}
+async function ensureJSZip(){
+  if(window.JSZip) return true;
+  const intentos=[
+    '/jszip.min.js',
+    '/ffmpeg/jszip.min.js',
+    'ffmpeg/jszip.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
+  ];
+  for(const src of intentos){
+    try{ await loadScript(src); if(window.JSZip) return true; }catch(e){}
+  }
+  return false;
+}
+ensureJSZip();
+</script>
 
 <script>
 "use strict";
-
 const audioFileInput = document.getElementById("audioFileInput");
 const dropZone = document.getElementById("dropZone");
 const startAudioDownload = document.getElementById("startAudioDownload");
 const audioStatus = document.getElementById("audioStatus");
-
 let selectedVideos = [];
 
 function downloadBlob(blob, filename){
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
-
 function handleFiles(files) {
-    selectedVideos = Array.from(files || []).filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name));
-    if (selectedVideos.length > 0) {
-        audioStatus.className = "status";
-        audioStatus.textContent = `✅ ${selectedVideos.length} video(s) cargado(s) correctamente.`;
-        startAudioDownload.disabled = false;
-    } else {
-        audioStatus.className = "status error";
-        audioStatus.textContent = "❌ Por favor selecciona archivos de video válidos.";
-        startAudioDownload.disabled = true;
-    }
+  selectedVideos = Array.from(files || []).filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name));
+  if (selectedVideos.length > 0) {
+    audioStatus.className = "status";
+    audioStatus.textContent = `✅ ${selectedVideos.length} video(s) cargado(s) correctamente.`;
+    startAudioDownload.disabled = false;
+  } else {
+    audioStatus.className = "status error";
+    audioStatus.textContent = "❌ Por favor selecciona archivos de video válidos.";
+    startAudioDownload.disabled = true;
+  }
 }
-
 audioFileInput.addEventListener("change", e => handleFiles(e.target.files));
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.borderColor = "var(--accent)"; });
 dropZone.addEventListener("dragleave", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; });
 dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
 
 function bufferToWav(buffer) {
-    let numOfChan = buffer.numberOfChannels,
-        sampleRate = buffer.sampleRate,
-        format = 1,
-        bitDepth = 16;
-    
-    let resultBuffer = (numOfChan === 2) ? interleave(buffer.getChannelData(0), buffer.getChannelData(1)) : buffer.getChannelData(0);
-    let bufferLength = resultBuffer.length * (bitDepth / 8);
-    let headerBuffer = new ArrayBuffer(44 + bufferLength);
-    let view = new DataView(headerBuffer);
-    
-    writeString(view, 0, 'RIFF');
-    view.setUint32(4, 36 + bufferLength, true);
-    writeString(view, 8, 'WAVE');
-    writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, format, true);
-    view.setUint16(22, numOfChan, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numOfChan * (bitDepth / 8), true);
-    view.setUint16(32, numOfChan * (bitDepth / 8), true);
-    view.setUint16(34, bitDepth, true);
-    writeString(view, 36, 'data');
-    view.setUint32(40, bufferLength, true);
-    
-    let offset = 44;
-    for (let i = 0; i < resultBuffer.length; i++, offset += 2) {
-        let s = Math.max(-1, Math.min(1, resultBuffer[i]));
-        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-    }
-    return new Blob([view], { type: 'audio/wav' });
+  let numOfChan = buffer.numberOfChannels, sampleRate = buffer.sampleRate, format = 1, bitDepth = 16;
+  let resultBuffer = (numOfChan === 2) ? interleave(buffer.getChannelData(0), buffer.getChannelData(1)) : buffer.getChannelData(0);
+  let bufferLength = resultBuffer.length * (bitDepth / 8);
+  let headerBuffer = new ArrayBuffer(44 + bufferLength);
+  let view = new DataView(headerBuffer);
+  writeString(view, 0, 'RIFF'); view.setUint32(4, 36 + bufferLength, true);
+  writeString(view, 8, 'WAVE'); writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, format, true);
+  view.setUint16(22, numOfChan, true); view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numOfChan * (bitDepth / 8), true);
+  view.setUint16(32, numOfChan * (bitDepth / 8), true); view.setUint16(34, bitDepth, true);
+  writeString(view, 36, 'data'); view.setUint32(40, bufferLength, true);
+  let offset = 44;
+  for (let i = 0; i < resultBuffer.length; i++, offset += 2) {
+    let s = Math.max(-1, Math.min(1, resultBuffer[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  return new Blob([view], { type: 'audio/wav' });
 }
-
 function interleave(inputL, inputR) {
-    let length = inputL.length + inputR.length;
-    let result = new Float32Array(length);
-    let index = 0, inputIndex = 0;
-    while (index < length) {
-        result[index++] = inputL[inputIndex];
-        result[index++] = inputR[inputIndex];
-        inputIndex++;
-    }
-    return result;
+  let length = inputL.length + inputR.length;
+  let result = new Float32Array(length);
+  let index = 0, inputIndex = 0;
+  while (index < length) { result[index++] = inputL[inputIndex]; result[index++] = inputR[inputIndex]; inputIndex++; }
+  return result;
 }
-
-function writeString(view, offset, string) {
-    for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-    }
-}
+function writeString(view, offset, string) { for (let i = 0; i < string.length; i++) { view.setUint8(offset + i, string.charCodeAt(i)); } }
 
 function decodificarVideo(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const audioCtx = new AudioContext({ sampleRate: 44100 });
-            audioCtx.decodeAudioData(e.target.result, (buf) => {
-                audioCtx.close();
-                resolve(buf);
-            }, (err) => {
-                audioCtx.close();
-                reject(new Error("Formato no soportado o video sin pista de audio."));
-            });
-        };
-        reader.onerror = () => reject(new Error("Error al leer archivo."));
-        reader.readAsArrayBuffer(file);
-    });
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try{
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext({ sampleRate: 44100 });
+        await audioCtx.resume();
+        const buf = await audioCtx.decodeAudioData(e.target.result);
+        await audioCtx.close();
+        resolve(buf);
+      }catch(err){
+        reject(new Error("Formato no soportado o video sin pista de audio. Prueba con MP4 / WEBM."));
+      }
+    };
+    reader.onerror = () => reject(new Error("Error al leer archivo."));
+    reader.readAsArrayBuffer(file);
+  });
 }
 
 startAudioDownload.addEventListener("click", async () => {
-    if (!selectedVideos.length) return;
-    startAudioDownload.disabled = true;
-    audioStatus.className = "status";
-
-    try {
-        if (typeof JSZip === "undefined") {
-            throw new Error("La librería de compresión externa está bloqueada. Por favor recarga la página.");
-        }
-        
-        const zip = new JSZip();
-        const folderAudios = zip.folder("audios-de-tus-cats-😽❤️");
-
-        for (let i = 0; i < selectedVideos.length; i++) {
-            const file = selectedVideos[i];
-            const number = String(i + 1).padStart(3, "0");
-            const baseName = file.name.replace(/\.[^/.]+$/, "");
-            
-            audioStatus.textContent = `⌛ Extrayendo canales WAV (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
-
-            const audioBuffer = await decodificarVideo(file);
-            const audioBlob = bufferToWav(audioBuffer);
-
-            const audioName = `${number}_${baseName}.wav`;
-            folderAudios.file(audioName, audioBlob, { compression: "STORE" });
-        }
-
-        audioStatus.textContent = "📦 Comprimiendo pistas en archivo ZIP...";
-        const content = await zip.generateAsync({ type: "blob" });
-        downloadBlob(content, `SANDCATFILMS_Audios_WAV_${Date.now()}.zip`);
-        
-        audioStatus.textContent = "✅ ¡Audios extraídos en WAV con éxito y sin afectar tus anuncios!";
-        audioStatus.className = "status success";
-    } catch (error) {
-        console.error(error);
-        audioStatus.textContent = `❌ Error en Extracción: ${error.message}`;
-        audioStatus.className = "status error";
-    } finally {
-        startAudioDownload.disabled = false;
+  if (!selectedVideos.length) return;
+  startAudioDownload.disabled = true;
+  audioStatus.className = "status";
+  try {
+    const ok = await ensureJSZip();
+    if (!ok || typeof JSZip === "undefined") {
+      throw new Error("No se pudo cargar JSZip. Verifica que /jszip.min.js exista en Vercel y recarga.");
     }
+    const zip = new JSZip();
+    const folderAudios = zip.folder("audios-de-tus-cats");
+    for (let i = 0; i < selectedVideos.length; i++) {
+      const file = selectedVideos[i];
+      const number = String(i + 1).padStart(3, "0");
+      const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^\w\-]+/g, "_");
+      audioStatus.textContent = `⌛ Extrayendo canales WAV (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
+      const audioBuffer = await decodificarVideo(file);
+      const audioBlob = bufferToWav(audioBuffer);
+      const audioName = `${number}_${baseName}.wav`;
+      folderAudios.file(audioName, audioBlob, { compression: "STORE" });
+    }
+    audioStatus.textContent = "📦 Comprimiendo pistas en archivo ZIP...";
+    const content = await zip.generateAsync({ type: "blob" });
+    downloadBlob(content, `SANDCATFILMS_Audios_WAV_${Date.now()}.zip`);
+    audioStatus.textContent = "✅ ¡Audios extraídos en WAV con éxito y sin afectar tus anuncios!";
+    audioStatus.className = "status success";
+  } catch (error) {
+    console.error(error);
+    audioStatus.textContent = `❌ Error en Extracción: ${error.message}`;
+    audioStatus.className = "status error";
+  } finally { startAudioDownload.disabled = false; }
 });
 </script>
 </body>
