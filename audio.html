@@ -58,20 +58,56 @@ function downloadBlob(blob, filename){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
-function handleFiles(files) {
-  selectedVideos = Array.from(files || [])
-    .filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name))
-    // CORREGIDO: Orden por fecha de grabacion, del mas viejo al mas nuevo
-    .sort((a, b) => (a.lastModified || 0) - (b.lastModified || 0));
-  if (selectedVideos.length > 0) {
-    audioStatus.className = "status";
-    audioStatus.textContent = `✅ ${selectedVideos.length} video(s) cargado(s) correctamente.`;
-    startAudioDownload.disabled = false;
-  } else {
+
+// --- ORGANIZACION AUTOMATICA POR FECHA REAL DENTRO DEL VIDEO ---
+async function getFechaRealGrabacion(file){
+  try{
+    const slice = file.slice(0, 300000);
+    const buffer = await slice.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    const texto = new TextDecoder("latin1").decode(bytes);
+    const idx = texto.indexOf("mvhd");
+    if(idx === -1) return file.lastModified || 0;
+    const view = new DataView(buffer);
+    const version = view.getUint8(idx + 4);
+    let creation = 0;
+    if(version === 1){
+      const high = view.getUint32(idx + 5, false);
+      const low = view.getUint32(idx + 9, false);
+      creation = high * 4294967296 + low;
+    } else {
+      creation = view.getUint32(idx + 5, false);
+    }
+    if(creation > 0) return (creation - 2082844800) * 1000;
+    return file.lastModified || 0;
+  }catch(e){
+    return file.lastModified || 0;
+  }
+}
+
+async function handleFiles(files) {
+  let lista = Array.from(files || [])
+    .filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name));
+  if (lista.length === 0) {
     audioStatus.className = "status error";
     audioStatus.textContent = "❌ Por favor selecciona archivos de video válidos.";
     startAudioDownload.disabled = true;
+    selectedVideos = [];
+    return;
   }
+  audioStatus.className = "status";
+  audioStatus.textContent = `⌛ Organizando ${lista.length} clips por fecha real de grabación...`;
+  startAudioDownload.disabled = true;
+  let conFecha = [];
+  for(const f of lista){
+    const fecha = await getFechaRealGrabacion(f);
+    conFecha.push({ file: f, fecha });
+  }
+  conFecha.sort((a, b) => a.fecha - b.fecha);
+  selectedVideos = conFecha.map(x => x.file);
+  audioStatus.className = "status";
+  audioStatus.textContent = `✅ ${selectedVideos.length} video(s) organizados solos del primero al último que grabaste.`;
+  startAudioDownload.disabled = false;
 }
 audioFileInput.addEventListener("change", e => handleFiles(e.target.files));
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.borderColor = "var(--accent)"; });
@@ -194,13 +230,11 @@ startAudioDownload.addEventListener("click", async () => {
     let archivosParaZip = [];
     for (let i = 0; i < selectedVideos.length; i++) {
       const file = selectedVideos[i];
-      // CORREGIDO: Numero con 2 digitos para que ordene bien 01, 02, 03...
       const number = String(i + 1).padStart(2, "0");
       audioStatus.textContent = `⌛ Extrayendo WAV (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
       const audioBuffer = await decodificarVideo(file);
       const audioBlob = bufferToWav(audioBuffer);
       const arrayBuffer = await audioBlob.arrayBuffer();
-      // CORREGIDO: Carpeta con emoji y nombre Audio de atun
       archivosParaZip.push({ nombre: `audios-de-tus-cats-😽/${number} - Audio de atun ${i + 1}.wav`, datos: new Uint8Array(arrayBuffer) });
     }
     audioStatus.textContent = "📦 Creando ZIP sin librería externa...";
