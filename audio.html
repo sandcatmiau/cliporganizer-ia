@@ -44,7 +44,6 @@ p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
 <a href="/" class="btn btn-secondary">⬅️ Volver a ClipOrganizer AI</a>
 <div class="status" id="audioStatus">Esperando archivos de video...</div>
 </div>
-
 <script>
 "use strict";
 const audioFileInput = document.getElementById("audioFileInput");
@@ -52,7 +51,6 @@ const dropZone = document.getElementById("dropZone");
 const startAudioDownload = document.getElementById("startAudioDownload");
 const audioStatus = document.getElementById("audioStatus");
 let selectedVideos = [];
-
 function downloadBlob(blob, filename){
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -61,7 +59,10 @@ function downloadBlob(blob, filename){
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 function handleFiles(files) {
-  selectedVideos = Array.from(files || []).filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name));
+  selectedVideos = Array.from(files || [])
+    .filter(f => f.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(f.name))
+    // CORREGIDO: Orden por fecha de grabacion, del mas viejo al mas nuevo
+    .sort((a, b) => (a.lastModified || 0) - (b.lastModified || 0));
   if (selectedVideos.length > 0) {
     audioStatus.className = "status";
     audioStatus.textContent = `✅ ${selectedVideos.length} video(s) cargado(s) correctamente.`;
@@ -76,7 +77,6 @@ audioFileInput.addEventListener("change", e => handleFiles(e.target.files));
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.borderColor = "var(--accent)"; });
 dropZone.addEventListener("dragleave", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; });
 dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.style.borderColor = "#3a3a45"; if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
-
 function bufferToWav(buffer) {
   let numOfChan = buffer.numberOfChannels, sampleRate = buffer.sampleRate, format = 1, bitDepth = 16;
   let resultBuffer = (numOfChan === 2) ? interleave(buffer.getChannelData(0), buffer.getChannelData(1)) : buffer.getChannelData(0);
@@ -105,7 +105,6 @@ function interleave(inputL, inputR) {
   return result;
 }
 function writeString(view, offset, string) { for (let i = 0; i < string.length; i++) { view.setUint8(offset + i, string.charCodeAt(i)); } }
-
 function decodificarVideo(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -125,7 +124,6 @@ function decodificarVideo(file) {
     reader.readAsArrayBuffer(file);
   });
 }
-
 // --- ZIP NATIVO SIN JSZip, SIN ARCHIVOS EXTERNOS ---
 function crc32(buf){
   let table = crc32.table;
@@ -188,7 +186,6 @@ function crearZipSinLibreria(archivos){
   end.setUint32(16, offset, true);
   return new Blob([...partes, ...central, end.buffer], {type: 'application/zip'});
 }
-
 startAudioDownload.addEventListener("click", async () => {
   if (!selectedVideos.length) return;
   startAudioDownload.disabled = true;
@@ -197,13 +194,14 @@ startAudioDownload.addEventListener("click", async () => {
     let archivosParaZip = [];
     for (let i = 0; i < selectedVideos.length; i++) {
       const file = selectedVideos[i];
-      const number = String(i + 1).padStart(3, "0");
-      const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^\w\-]+/g, "_");
+      // CORREGIDO: Numero con 2 digitos para que ordene bien 01, 02, 03...
+      const number = String(i + 1).padStart(2, "0");
       audioStatus.textContent = `⌛ Extrayendo WAV (${i + 1} de ${selectedVideos.length}): ${file.name}...`;
       const audioBuffer = await decodificarVideo(file);
       const audioBlob = bufferToWav(audioBuffer);
       const arrayBuffer = await audioBlob.arrayBuffer();
-      archivosParaZip.push({ nombre: `audios-de-tus-cats/${number}_${baseName}.wav`, datos: new Uint8Array(arrayBuffer) });
+      // CORREGIDO: Carpeta con emoji y nombre Audio de atun
+      archivosParaZip.push({ nombre: `audios-de-tus-cats-😽/${number} - Audio de atun ${i + 1}.wav`, datos: new Uint8Array(arrayBuffer) });
     }
     audioStatus.textContent = "📦 Creando ZIP sin librería externa...";
     const zipBlob = crearZipSinLibreria(archivosParaZip);
