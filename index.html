@@ -413,14 +413,42 @@ function collectDateFields(value, path = "", output = []){
     return output;  
 }  
 
-function chooseOriginalDate(info){  
-    const fields = collectDateFields(info);  
-    const apple = fields.find(field => /apple.*creationdate|creationdate.*apple/i.test(field.path));  
-    if (apple) return { date: apple.date, source: "🍎 QuickTime / Apple CreationDate", confidence: "🟢 Alta" };  
-    const creation = fields.find(field => /creationdate|created_date|createddate|creation_date/i.test(field.path));  
-    if (creation) return { date: creation.date, source: "📅 CreationDate", confidence: "🟢 Alta" };  
-    return { date: null, source: "—", confidence: "⚪ Sin fecha" };  
-}  
+function chooseOriginalDate(info, file){
+  const fields = collectDateFields(info);
+  const apple = fields.find(field => /apple.*creationdate|creationdate.*apple/i.test(field.path));
+  if (apple) return { date: apple.date, source: "🍎 QuickTime / Apple CreationDate", confidence: "🟢 Alta" };
+  const creation = fields.find(field => /creationdate|created_date|createddate|creation_date/i.test(field.path));
+  if (creation) return { date: creation.date, source: "📅 CreationDate", confidence: "🟢 Alta" };
+
+  // PROCESO 2 - NUEVO, AMIGUITA: Busca en el NOMBRE
+  // Para TCL, Samsung 2017, Windows, OBS
+  // VID_20261118_183932_176.mp4 -> 18 Nov 2026, 18:39:32
+  if (file && file.name) {
+    const nombre = file.name;
+
+    // 1. VID_20261118_183932
+    let m = nombre.match(/(\d{8})_(\d{6})/);
+    if (m) {
+      const f = m[1], h = m[2];
+      return { date: new Date(`${f.slice(0,4)}-${f.slice(4,6)}-${f.slice(6,8)}T${h.slice(0,2)}:${h.slice(2,4)}:${h.slice(4,6)}`), source: "📛 Fecha en nombre", confidence: "🟢 Alta" };
+    }
+
+    // 2. WIN_20261118_18_39_32
+    m = nombre.match(/(\d{8})_(\d{2})_(\d{2})_(\d{2})/);
+    if (m) {
+      const f = m[1];
+      return { date: new Date(`${f.slice(0,4)}-${f.slice(4,6)}-${f.slice(6,8)}T${m[2]}:${m[3]}:${m[4]}`), source: "📛 Fecha en nombre", confidence: "🟢 Alta" };
+    }
+
+    // 3. 2026-11-18 18-39-32 / 2026-11-18 18.39.32
+    m = nombre.match(/(\d{4})-(\d{2})-(\d{2})[ _-](\d{2})[-._](\d{2})[-._](\d{2})/);
+    if (m) {
+      return { date: new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`), source: "📛 Fecha en nombre", confidence: "🟢 Alta" };
+    }
+  }
+
+  return { date: null, source: "-", confidence: "⚪ Sin fecha" };
+}
 
 function findDevice(info){  
     const text = JSON.stringify(info);  
@@ -444,7 +472,7 @@ async function analyzeFile(file, mediainfo){
     const general = info?.media?.track?.find(track => track["@type"] === "General") || {};  
     const video = info?.media?.track?.find(track => track["@type"] === "Video") || {};  
     const duration = Number(general.Duration ?? video.Duration);  
-    const original = chooseOriginalDate(info);  
+    const original = chooseOriginalDate(info, file);  
     const quality = classifyClip(duration);  
     return {  
         file, name: file.name, size: file.size,  
