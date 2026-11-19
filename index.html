@@ -447,7 +447,16 @@ function chooseOriginalDate(info, file){
     }
   }
 
-  return { date: null, source: "-", confidence: "⚪ Sin fecha" };
+// PROCESO 3 - NUEVO, AMIGUITA: Plan C - Respaldo por archivo
+if (file && file.lastModified) {
+  const d = new Date(file.lastModified);
+  if (!isNaN(d.getTime())) {
+    return { date: d, source: "📁 Fecha del archivo", confidence: "🟡 Media" };
+  }
+}
+
+// PROCESO 4 - NUEVO, AMIGUITA: Plan D - Sin fecha para corregir a mano
+return { date: null, source: "❓ Sin fecha", confidence: "🔴 Corregir" };
 }
 
 function findDevice(info){  
@@ -505,7 +514,7 @@ function renderResults(){
         row.innerHTML = `  
             <td>${index + 1}</td>  
             <td class="filename" title="${escapeHtml(clip.name)}">${escapeHtml(clip.name)}</td>  
-            <td>${clip.originalDateText || "No disponible"}</td>  
+           <td>${clip.originalDate ? escapeHtml(clip.originalDateText) : '<input type="datetime-local" onchange="corregirFechaManual('+index+', this.value)" style="padding:4px;border-radius:6px;border:1px solid #ccc;"><br><small style="color:#e11d48;">✏️ Elige la fecha real</small>'}</td> 
             <td><span class="badge ${clip.statusClass}">${escapeHtml(clip.status)}</span></td>  
             <td>${escapeHtml(clip.source)}</td>  
             <td>${escapeHtml(clip.confidence)}</td>  
@@ -525,7 +534,17 @@ function renderResults(){
     resultsCard.style.display = analyzedClips.length ? "block" : "none";  
     foldersCard.style.display = analyzedClips.length ? "block" : "none";  
 }  
-
+// Plan D - Corregir fecha a mano
+function corregirFechaManual(index, valor){
+  if(!valor) return;
+  const nuevaFecha = new Date(valor);
+  if(isNaN(nuevaFecha.getTime())) return;
+  analyzedClips[index].originalDate = nuevaFecha;
+  analyzedClips[index].originalDateText = formatDate(nuevaFecha);
+  analyzedClips[index].source = "✏️ Corregida a mano";
+  analyzedClips[index].confidence = "🟢 Alta";
+  renderResults();
+}
 async function processFiles(files) {
     const validFiles = Array.from(files || []).filter(file => 
         file && (file.type.startsWith("video/") || /\.(mp4|mov|m4v|avi|mkv|webm)$/i.test(file.name))
