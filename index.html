@@ -514,7 +514,7 @@ function renderResults(){
         row.innerHTML = `  
             <td>${index + 1}</td>  
             <td class="filename" title="${escapeHtml(clip.name)}">${escapeHtml(clip.name)}</td>  
-           <td>${clip.originalDate ? escapeHtml(clip.originalDateText) : '<input type="datetime-local" onchange="corregirFechaManual('+index+', this.value)" style="padding:4px;border-radius:6px;border:1px solid #ccc;"><br><small style="color:#e11d48;">✏️ Elige la fecha real</small>'}</td> 
+           <td>${clip.originalDate ? escapeHtml(clip.originalDateText) : 'Sin fecha'}<br><input type="datetime-local" onchange="corregirFechaManual(${index}, this.value)" style="padding:4px; border-radius:6px; border:1px solid #ccc;"><br><small style="color:#e11d48;">✏️ Corregir fecha</small></td>
             <td><span class="badge ${clip.statusClass}">${escapeHtml(clip.status)}</span></td>  
             <td>${escapeHtml(clip.source)}</td>  
             <td>${escapeHtml(clip.confidence)}</td>  
